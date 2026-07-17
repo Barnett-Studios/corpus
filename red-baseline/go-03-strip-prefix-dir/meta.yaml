@@ -1,0 +1,8 @@
+id: go-03-strip-prefix-dir
+language: go
+files: ["util.go"]
+accept: "go test -run '^TestStripPrefixDir$' . 2>&1 | grep -qE '^ok'"
+forbid: ["new_deps"]
+change: "Implement ONLY the body of StripPrefixDir in util.go. Strip a leading 'prefix/' directory from path; if path does not start with 'prefix/' (note the trailing slash) return it unchanged. Do not touch any other function."
+signal: "regression-guard"
+band: "trivial"

@@ -1,0 +1,11 @@
+id: "go-paasio"
+language: "go"
+files: ["paasio.go"]
+accept: "go test ./... 2>&1 | grep -qE '^ok'"
+forbid: ["new_deps"]
+requires: ["go"]
+change: "Implement the solution in paasio.go so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nReport network IO statistics.\n\nYou are writing a [PaaS][paas], and you need a way to bill customers based on network and filesystem usage.\n\nCreate a wrapper for network connections and files that can report IO statistics.\nThe wrapper must report:\n\n- The total number of bytes read/written.\n- The total number of read/write operations.\n\n[paas]: https://en.wikipedia.org/wiki/Platform_as_a_service"
+created: "2026-07-07T21:50:37Z"
+tier: "A"
+band: ""
+change_kind: "adaptive"

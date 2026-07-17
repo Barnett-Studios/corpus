@@ -1,0 +1,6 @@
+id: java-01-compact-path
+language: java
+files: ["Util.java"]
+accept: "javac -encoding UTF-8 Util.java TestRunner.java 2>&1 && java TestRunner compactPath 2>&1 | grep -qx PASS"
+forbid: ["new_deps"]
+change: "Implement ONLY the body of compactPath in Util.java (replace its throw). Return the path unchanged when it has at most max slash-separated parts; otherwise keep the first and last parts joined with the middle elided as the single character \u2026 e.g. compactPath('a/b/c/d',3)=='a/\u2026/d'. Do not touch any other method."

@@ -1,0 +1,8 @@
+id: go-06-visible-count
+language: go
+files: ["util.go"]
+accept: "go test -run '^TestVisibleCount$' . 2>&1 | grep -qE '^ok'"
+forbid: ["new_deps"]
+change: "TWO-REGION change: implement BOTH IsHidden and VisibleCount in util.go. IsHidden returns true when name starts with '.'. VisibleCount returns how many names are NOT hidden and must call IsHidden. Do not touch any other function."
+signal: "regression-guard"
+band: "trivial"

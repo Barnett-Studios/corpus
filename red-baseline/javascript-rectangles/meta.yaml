@@ -1,0 +1,11 @@
+id: "javascript-rectangles"
+language: "javascript"
+files: ["rectangles.js"]
+accept: "npm install --silent >/dev/null 2>&1 && npm test 2>&1 | grep -qiE '[1-9][0-9]* (passing|passed)'"
+forbid: ["new_deps"]
+requires: ["npm"]
+change: "Implement the solution in rectangles.js so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nCount the rectangles in an ASCII diagram like the one below.\n\n```text\n   +--+\n  ++  |\n+-++--+\n|  |  |\n+--+--+\n```\n\nThe above diagram contains these 6 rectangles:\n\n```text\n\n\n+-----+\n|     |\n+-----+\n```\n\n```text\n   +--+\n   |  |\n   |  |\n   |  |\n   +--+\n```\n\n```text\n   +--+\n   |  |\n   +--+\n\n\n```\n\n```text\n\n\n   +--+\n   |  |\n   +--+\n```\n\n```text\n\n\n+--+\n|  |\n+--+\n```\n\n```text\n\n  ++\n  ++\n\n\n```\n\nYou may assume that the input is always a proper rectangle (i.e. the length of every line equals the length of the first line)."
+created: "2026-07-07T21:50:37Z"
+tier: "A"
+band: ""
+change_kind: "adaptive"

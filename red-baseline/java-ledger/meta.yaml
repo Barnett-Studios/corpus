@@ -1,0 +1,11 @@
+id: "java-ledger"
+language: "java"
+files: ["src/main/java/Ledger.java"]
+accept: "gradle test --console=plain 2>&1 | grep -qE 'BUILD SUCCESSFUL'"
+forbid: ["new_deps"]
+requires: ["gradle"]
+change: "Implement the solution in src/main/java/Ledger.java so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nRefactor a ledger printer.\n\nThe ledger exercise is a refactoring exercise.\nThere is code that prints a nicely formatted ledger, given a locale (American or Dutch) and a currency (US dollar or euro).\nThe code however is rather badly written, though (somewhat surprisingly) it consistently passes the test suite.\n\nRewrite this code.\nRemember that in refactoring the trick is to make small steps that keep the tests passing.\nThat way you can always quickly go back to a working version.\nVersion control tools like git can help here as well.\n\nPlease keep a log of what changes you've made and make a comment on the exercise containing that log, this will help reviewers."
+created: "2026-07-07T21:50:37Z"
+tier: "A"
+band: ""
+change_kind: "adaptive"

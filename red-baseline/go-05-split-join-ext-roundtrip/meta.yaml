@@ -1,0 +1,8 @@
+id: go-05-split-join-ext-roundtrip
+language: go
+files: ["util.go"]
+accept: "go test -run '^TestSplitJoinExtRoundtrip$' . 2>&1 | grep -qE '^ok'"
+forbid: ["new_deps"]
+change: "TWO-REGION change: implement BOTH SplitExt and JoinExt in util.go. SplitExt returns (stem, ext) where ext is the text after the LAST '.' without the dot, or '' when there is no '.'. JoinExt is the exact inverse: join with '.', or return just stem when ext is ''. Both must agree. Do not touch any other function."
+signal: "regression-guard"
+band: "trivial"

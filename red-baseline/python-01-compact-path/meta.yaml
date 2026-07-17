@@ -1,0 +1,6 @@
+id: python-01-compact-path
+language: python
+files: ["util.py"]
+accept: "python3 -m unittest -q test_util.TestUtil.test_compact_path 2>&1 | grep -qE '^OK'"
+forbid: ["new_deps"]
+change: "Implement ONLY the body of compact_path in util.py (replace its NotImplementedError). Return the path unchanged when it has at most max_components slash-separated parts; otherwise keep the first and last parts joined with the middle elided as the single character \u2026 e.g. compact_path('a/b/c/d',3)=='a/\u2026/d'. Do not touch any other function."

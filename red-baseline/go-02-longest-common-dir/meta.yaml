@@ -1,0 +1,8 @@
+id: go-02-longest-common-dir
+language: go
+files: ["util.go"]
+accept: "go test -run '^TestLongestCommonDir$' . 2>&1 | grep -qE '^ok'"
+forbid: ["new_deps"]
+change: "Implement ONLY the body of LongestCommonDir in util.go. Take each path's parent directory (all slash-separated parts except the last), then return the longest shared leading run of those parts joined by '/'. Return '' if there is no shared run or paths is empty. Do not touch any other function."
+signal: "discrimination"
+band: "hard"

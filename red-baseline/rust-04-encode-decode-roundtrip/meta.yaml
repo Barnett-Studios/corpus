@@ -1,0 +1,6 @@
+id: rust-04-encode-decode-roundtrip
+language: rust
+files: ["src/lib.rs"]
+accept: "cargo test test_encode_decode_roundtrip --quiet 2>&1 | grep -qE 'test result: ok\\. [1-9]'"
+forbid: ["new_deps"]
+change: "This is a TWO-REGION change: implement BOTH `encode_seg` and `decode_seg` (replace both `todo!()` bodies) so that `decode_seg(encode_seg(s)) == s` for any input. `encode_seg` must replace every '/' with the literal \"%2F\"; `decode_seg` must reverse that exactly. Implementing only one of the two will leave the other panicking. Do not touch any other function."

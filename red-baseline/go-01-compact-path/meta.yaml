@@ -1,0 +1,8 @@
+id: go-01-compact-path
+language: go
+files: ["util.go"]
+accept: "go test -run '^TestCompactPath$' . 2>&1 | grep -qE '^ok'"
+forbid: ["new_deps"]
+change: "Implement ONLY the body of CompactPath in util.go (replace its panic). Return the path unchanged when it has at most max slash-separated parts; otherwise keep the first and last parts joined with the middle elided as the single character \u2026 e.g. CompactPath('a/b/c/d',3)=='a/\u2026/d'. Do not touch any other function."
+signal: "regression-guard"
+band: "trivial"

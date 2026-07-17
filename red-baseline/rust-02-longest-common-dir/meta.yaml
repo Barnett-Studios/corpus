@@ -1,0 +1,6 @@
+id: rust-02-longest-common-dir
+language: rust
+files: ["src/lib.rs"]
+accept: "cargo test test_longest_common_dir --quiet 2>&1 | grep -qE 'test result: ok\\. [1-9]'"
+forbid: ["new_deps"]
+change: "Implement ONLY the `longest_common_dir` function body (replace its `todo!()`). Take each path's parent directory (all '/'-separated components except the last), then return the longest shared leading run of those components joined by '/'. Return an empty string if there is no shared run or `paths` is empty. Do not touch any other function."
