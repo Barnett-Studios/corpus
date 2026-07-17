@@ -5,12 +5,12 @@
 [![License](https://img.shields.io/badge/license-MIT%20(Exercism--derived)-green.svg)](LICENSE)
 
 **The RED-baseline measurement corpus — 250 failing seed projects across 6 languages, the fixed
-substrate the Proving Ground A/Bs a harness change against.**
+substrate an A/B eval harness scores a change against.**
 
 Each node is a failing exercise (`{meta, seed, RED}`): a stub that doesn't yet pass its acceptance
 test. A harness change is scored by how reliably it turns RED into GREEN over the battery. Keeping the
 corpus a separate, versioned component — not baked into the harness that measures it — is what makes a
-measurement reproducible and the Proving Ground/Corpus separation clean.
+measurement reproducible and the eval-harness/corpus separation clean.
 
 > Part of the Barnett Studios agentic-harness toolkit → cxpak · commitward · abproof · cascadr ·
 > cordon · **corpus** · …
@@ -34,7 +34,7 @@ measurement reproducible and the Proving Ground/Corpus separation clean.
 # verify attribution still matches the shipped data
 ./verify-attribution.sh --check
 
-# point the Proving Ground at the corpus
+# point your A/B harness (e.g. abproof) at the corpus
 ABPROOF_CORPUS=/path/to/red-baseline abproof run experiment.yaml --dry-run
 ```
 

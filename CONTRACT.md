@@ -1,7 +1,7 @@
 # corpus — Contract
 
-The **Corpus** component: a collection of RED-baseline tasks that the Proving Ground (abproof)
-A/Bs a harness change against. Each task is a **failing seed project** plus the metadata to run and
+The **corpus**: a collection of RED-baseline tasks that an A/B eval harness (such as abproof)
+scores a harness change against. Each task is a **failing seed project** plus the metadata to run and
 score it — the fixed measurement substrate, kept separate from the harness that measures it.
 
 ## Per-node shape: `{meta, seed, RED}`
@@ -46,7 +46,7 @@ JavaScript nodes carry `requires: []`.
 
 ## Consumption
 
-- **abproof** (Proving Ground) reads the corpus via `$ABPROOF_CORPUS` pointing at `red-baseline/`,
+- **abproof** reads the corpus via `$ABPROOF_CORPUS` pointing at `red-baseline/`,
   loads a battery by id/glob, and materializes each node's seed into a clean git work tree per rep.
 - The `{meta, seed, RED}` shape is the stable contract; adding nodes or languages is additive, not a
   breaking change. `MANIFEST.tsv` is the machine-readable index; `verify-attribution.sh --check`
