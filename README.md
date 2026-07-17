@@ -15,10 +15,10 @@ measurement reproducible and the Proving Ground/Corpus separation clean.
 > Part of the Barnett Studios agentic-harness toolkit → cxpak · commitward · abproof · cascadr ·
 > cordon · **corpus** · …
 
-## What's here (and what isn't, yet)
+## What's here
 
-This directory is the corpus component's **license clearance + contract**:
-
+- [`red-baseline/`](red-baseline/) — the **250 node projects** (`{meta, seed, RED}`), ~23 MB across 6
+  languages. This is the corpus data itself.
 - [`LICENSE`](LICENSE) · [`ATTRIBUTION.md`](ATTRIBUTION.md) — full provenance (Exercism MIT + bundled
   Catch2 BSL-1.0 + Gradle-wrapper Apache-2.0).
 - [`CONTRACT.md`](CONTRACT.md) — the `{meta, seed, RED}` per-node contract, the RED invariant, and the
@@ -26,13 +26,7 @@ This directory is the corpus component's **license clearance + contract**:
 - [`MANIFEST.tsv`](MANIFEST.tsv) — machine-readable index of all 250 nodes (id, language, accept tool,
   seed license, third-party bundle).
 - [`verify-attribution.sh`](verify-attribution.sh) — regenerate or (`--check`) drift-check the manifest
-  against the node data.
-
-The **23 MB of node data** still lives at `measurement/corpus/red-baseline/` in the source monorepo.
-It is deliberately **not copied here** — duplicating 23 MB into git history would be permanent bloat.
-At repo-creation time the data is `git mv`'d into this component's repo (a move, not a copy); see
-`docs/module-extraction/corpus-consume-back.md`. Until then, the scripts resolve the data via
-`$CORPUS_ROOT` (default: `../../measurement/corpus/red-baseline`).
+  against the node data. Defaults to the bundled `red-baseline/`; override with `$CORPUS_ROOT`.
 
 ## Use
 

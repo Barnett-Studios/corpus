@@ -5,8 +5,8 @@
 #
 # Usage:
 #   verify-attribution.sh [--check] [<corpus-root>]
-# <corpus-root> defaults to $CORPUS_ROOT, else ../../measurement/corpus/red-baseline
-# relative to this script (the in-monorepo location before the data is git-mv'd).
+# <corpus-root> defaults to $CORPUS_ROOT, else the repo's own red-baseline/ dir
+# (resolved relative to this script).
 
 set -euo pipefail
 
@@ -21,7 +21,7 @@ for arg in "$@"; do
   esac
 done
 if [[ -z "$CORPUS_ROOT" ]]; then
-  CORPUS_ROOT="$HERE/../../measurement/corpus/red-baseline"
+  CORPUS_ROOT="$HERE/red-baseline"
 fi
 if [[ ! -d "$CORPUS_ROOT" ]]; then
   echo "corpus root not found: $CORPUS_ROOT (set \$CORPUS_ROOT or pass it as an arg)" >&2
