@@ -1,5 +1,9 @@
 # corpus
 
+[![Nodes](https://img.shields.io/badge/nodes-250-blue.svg)](MANIFEST.tsv)
+[![Languages](https://img.shields.io/badge/languages-6-blue.svg)](MANIFEST.tsv)
+[![License](https://img.shields.io/badge/license-MIT%20(Exercism--derived)-green.svg)](LICENSE)
+
 **The RED-baseline measurement corpus — 250 failing seed projects across 6 languages, the fixed
 substrate the Proving Ground A/Bs a harness change against.**
 
@@ -44,3 +48,20 @@ ABPROOF_CORPUS=/path/to/red-baseline abproof run experiment.yaml --dry-run
 
 Drop a `red-baseline/<id>/` with `meta.yaml` + `seed/` (must ship **failing** — the RED invariant),
 then `./verify-attribution.sh` to refresh the manifest. Additive; never a breaking change.
+
+## License
+
+The adaptation layer (manifest, contract, scripts) is [MIT](LICENSE). The exercise
+specifications, test suites, and starter files are Exercism-derived and remain under their
+upstream licenses — see [`LICENSE`](LICENSE) and [`ATTRIBUTION.md`](ATTRIBUTION.md) for full
+per-node provenance.
+
+---
+
+Built by [Barnett Studios](https://barnett-studios.com/) — part of the agentic-harness
+toolkit: [cxpak](https://github.com/Barnett-Studios/cxpak) ·
+[commitward](https://github.com/Barnett-Studios/commitward) ·
+[abproof](https://github.com/Barnett-Studios/abproof) ·
+[cascadr](https://github.com/Barnett-Studios/cascadr) ·
+[cordon](https://github.com/Barnett-Studios/cordon) · **corpus** ·
+[planner](https://github.com/Barnett-Studios/planner).

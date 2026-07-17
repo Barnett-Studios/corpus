@@ -9,14 +9,17 @@ concurrency:
   cancel-in-progress: true
 jobs:
   attribution:
-    name: attribution-drift-check
+    name: attribution
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # Actions pinned to commit SHAs (never @vN — tags are mutable). No Dependabot.
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
-      - name: shellcheck
+      - name: shellcheck the manifest tool
         run: shellcheck verify-attribution.sh
-      - name: MANIFEST.tsv matches the corpus data
-        run: ./verify-attribution.sh --check
+      # In the standalone repo the node data lives at red-baseline/; --check fails
+      # (non-zero) if MANIFEST.tsv has drifted from what is actually shipped.
+      - name: attribution manifest matches the data
+        run: CORPUS_ROOT=red-baseline ./verify-attribution.sh --check

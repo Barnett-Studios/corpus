@@ -21,7 +21,7 @@ for arg in "$@"; do
   esac
 done
 if [[ -z "$CORPUS_ROOT" ]]; then
-  CORPUS_ROOT="$HERE/red-baseline"
+  CORPUS_ROOT="$HERE/../../measurement/corpus/red-baseline"
 fi
 if [[ ! -d "$CORPUS_ROOT" ]]; then
   echo "corpus root not found: $CORPUS_ROOT (set \$CORPUS_ROOT or pass it as an arg)" >&2
