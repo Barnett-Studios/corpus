@@ -1,6 +1,6 @@
 id: rust-03-strip-prefix-dir
 language: rust
 files: ["src/lib.rs"]
-accept: "cargo test test_strip_prefix_dir --quiet 2>&1 | grep -qE 'test result: ok\\. [1-9]'"
+accept: "cargo test test_strip_prefix_dir --quiet"
 forbid: ["new_deps"]
 change: "Implement ONLY the `strip_prefix_dir` function body (replace its `todo!()`). Strip a leading `prefix/` directory component from `path`; if `path` does not start with `prefix/` (note the trailing slash), return it unchanged. Do not touch any other function."

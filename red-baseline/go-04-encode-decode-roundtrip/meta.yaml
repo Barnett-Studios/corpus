@@ -1,7 +1,7 @@
 id: go-04-encode-decode-roundtrip
 language: go
 files: ["util.go"]
-accept: "go test -run '^TestEncodeDecodeRoundtrip$' . 2>&1 | grep -qE '^ok'"
+accept: "go test -run '^TestEncodeDecodeRoundtrip$' ."
 forbid: ["new_deps"]
 change: "TWO-REGION change: implement BOTH EncodeSeg and DecodeSeg in util.go so DecodeSeg(EncodeSeg(s))==s for any input. EncodeSeg replaces every '/' with the literal '%2F'; DecodeSeg reverses it exactly. Implementing only one leaves the other panicking. Do not touch any other function."
 signal: "discrimination"

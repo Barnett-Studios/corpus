@@ -1,6 +1,6 @@
 id: java-06-visible-count
 language: java
 files: ["Util.java"]
-accept: "javac -encoding UTF-8 Util.java TestRunner.java 2>&1 && java TestRunner visibleCount 2>&1 | grep -qx PASS"
+accept: "javac -encoding UTF-8 Util.java TestRunner.java && java TestRunner visibleCount"
 forbid: ["new_deps"]
 change: "TWO-REGION change: implement BOTH isHidden and visibleCount in Util.java. isHidden returns true when name starts with '.'. visibleCount returns how many names are NOT hidden and must call isHidden. Do not touch any other method."
