@@ -45,8 +45,10 @@ This redefines what GREEN means, so it is a CONTRACT-level decision.
 | go | `go test -run '^<Test>$' . 2>&1 \| grep -qE '^ok'` | `go test -run '^<Test>$' .` |
 | java | `javac … 2>&1 && java TestRunner <name> 2>&1 \| grep -qx PASS` | `javac … && java TestRunner <name>` |
 
-Each runner exits non-zero on any test failure and on a compile/collection error: pytest exits 1
-on failure / 5 on "no tests collected"; `cargo test` exits non-zero if any run test fails or the
+Each runner exits non-zero on any test failure and on a compile/collection error: the clean
+subset's `python3 -m unittest -q <method>` exits non-zero on a failure or a missing test method
+(and pytest, used by the out-of-scope Exercism nodes, exits 1 on failure / 5 on "no tests
+collected"); `cargo test` exits non-zero if any run test fails or the
 crate fails to compile; `go test` exits non-zero on failure or build error; the java harness
 `TestRunner` prints `PASS`/exits 0 on success and `System.exit(1)`/`exit(2)` on failure/bad-arg
 (verified in `seed/TestRunner.java`), so the `&&`-chained `javac && java` yields the correct code.
@@ -61,9 +63,15 @@ un-deletable, so `cargo test <filter>` always finds its (present) test. Empirica
 file (`util_test.go` / `TestRunner.java` / `test_util.py`); only rust needed relocating.
 
 **The structural invariant that guards this:** *no file listed in a node's `files:` may contain a
-test-definition marker* (rust `#[test]`/`#[cfg(test)]`, go `func Test`, python `def test`/
-`unittest`, java `@Test`/`TestRunner`). A CI check enforces it (fails for the rust katas until
-relocation, passes for the other three languages already).
+test-definition marker* (rust `#[test]`/`#[cfg(test)]`, go `func Test`/`Example`/`Benchmark`,
+python `def test`/`unittest`, java `@Test`/`TestRunner`). A CI check enforces it (fails for the rust
+katas until relocation, passes for the other three languages already).
+
+`ci/verify-accept-oracle.sh`'s static check (A) forbids **any** pipe in an accept, not just `grep`
+— a pipe into `rg`/`awk`/`perl`/`sed` discards the runner's exit code the same way. The clean-subset
+accepts are bare runners or `&&`-chains, so any `|` is the anti-pattern. The script also asserts the
+clean subset's node count (a drift tripwire against a renamed/dropped node scoring the gate
+vacuously green) and the CI job requires every toolchain to be present (so no check silently skips).
 
 ## Why drop the pipe rather than `set -o pipefail`
 

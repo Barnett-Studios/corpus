@@ -42,6 +42,16 @@ toolchain_ok() {
   esac
 }
 
+# Drift tripwire: exactly 24 katas expected. A node-less/renamed CORPUS_ROOT would otherwise make
+# this whole spot-check vacuously PASS. Bump when the kata set deliberately grows.
+EXPECTED_KATAS=24
+found_katas=0
+for node in "${CLEAN_GLOB[@]}"; do [[ -d "$node" ]] && found_katas=$((found_katas + 1)); done
+if [[ $found_katas -ne $EXPECTED_KATAS ]]; then
+  echo "kata drift: found $found_katas katas, expected $EXPECTED_KATAS (renamed/dropped/added, or wrong CORPUS_ROOT)" >&2
+  exit 2
+fi
+
 for node in "${CLEAN_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   lang="$(language_of "$node")"
@@ -55,6 +65,7 @@ for node in "${CLEAN_GLOB[@]}"; do
   # Overlay the language's reference solution over each editable file.
   read_files "$node"
   missing=0
+  [[ ${#FILES[@]} -eq 0 ]] && { note "FAIL $(basename "$node"): node has no files: to solve"; fail=1; rm -rf "$work"; continue; }
   for rel in "${FILES[@]}"; do
     [[ -z "$rel" ]] && continue
     if [[ -f "$SOL_ROOT/$lang/$rel" ]]; then
@@ -66,7 +77,7 @@ for node in "${CLEAN_GLOB[@]}"; do
   if [[ $missing -eq 0 ]]; then
     ec=0; ( set +o pipefail; cd "$work" && eval "$acc" >/dev/null 2>&1 ) || ec=$?
     if [[ $ec -ne 0 ]]; then
-      note "FAIL $(basename "$node"): solution scored RED (exit $ec) — accept is vacuously-RED"; fail=1
+      note "FAIL $(basename "$node"): solution scored RED (exit $ec) — wrong reference solution or a vacuously-RED accept"; fail=1
     else
       note "ok $(basename "$node"): solution -> GREEN"
     fi

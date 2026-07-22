@@ -35,11 +35,19 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
-      - name: toolchain presence (scripts fail-open per absent tool)
+      # The scripts fail-open per absent tool (so they run anywhere), but in CI we REQUIRE the full
+      # set — otherwise checks B/C would silently skip and the integrity gate would weaken to green.
+      - name: require all toolchains (fail the build if any is missing)
         run: |
+          missing=0
           for t in go cargo javac java python3 shellcheck; do
-            printf '%s: %s\n' "$t" "$(command -v "$t" || echo absent)"
+            if command -v "$t" >/dev/null 2>&1; then
+              printf '%s: %s\n' "$t" "$(command -v "$t")"
+            else
+              printf '%s: MISSING\n' "$t"; missing=1
+            fi
           done
+          [ "$missing" -eq 0 ] || { echo "a required toolchain is absent on the runner" >&2; exit 1; }
       - name: shellcheck the oracle scripts
         run: shellcheck ci/verify-accept-oracle.sh ci/prove-solvable.sh
       - name: accept-oracle invariant (exit-code oracle + no editable test)

@@ -21,7 +21,9 @@ of the rust katas.
 `ci/verify-accept-oracle.sh` (shellcheck-clean), four checks; any failure → non-zero exit.
 B/C skip a language whose toolchain is absent (fail-open, mirroring `requires`).
 - **A — static (RED-first #1):** every clean-subset node's `accept` (24 katas + `py-add`) must
-  NOT contain `grep`. **Fails now** (24 do), passes after N3.
+  NOT pipe its runner into another command (any `|` — grep/rg/awk/… all discard the exit code).
+  **Fails now** (24 pipe into grep), passes after N3. The script also asserts the clean-subset node
+  count as a drift tripwire (a renamed/dropped node can't silently pass the gate vacuously).
 - **D — structural (RED-first #2):** no file listed in a node's `files:` may contain a
   test-definition marker (rust `#[test]`/`#[cfg(test)]`, go `func Test`, python `def test`/
   `unittest`, java `@Test`/`TestRunner`). **Fails now** (6 rust katas keep the test in the editable
@@ -62,9 +64,10 @@ never in an editable (`files:`) file. Flip spec/ADR status at merge.
 `accept`: CONTRACT.md `accept` row reads exit-code; a note forbids tests in editable files.
 
 ### N5 — wire the invariant into CI  ·  local: true
-Add an `accept-oracle` job to `.github/workflows/ci.yml` running `ci/verify-accept-oracle.sh`
-(shellcheck it too), with the language toolchains installed (or the per-tool skip keeping it green
-where a toolchain is absent).
+Add an `accept-oracle` job to `.github/workflows/ci.yml` running **both** `ci/verify-accept-oracle.sh`
+and `ci/prove-solvable.sh` (shellcheck both). The job asserts every language toolchain is present on
+the runner (a missing toolchain fails the build rather than letting a check silently skip); the
+scripts themselves stay fail-open per-tool so they run in any local environment.
 `accept`: CI green on the PR.
 
 ### N6 — pilot: discordant-pair rate  ·  BLOCKED-aware

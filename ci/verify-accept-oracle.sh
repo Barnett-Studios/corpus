@@ -54,11 +54,12 @@ resolve_file() {
   fi
 }
 # A test-definition marker for the given language, or empty if we don't gate that language here.
+# Whitespace-tolerant (`#[ test ]` is a valid rust test); [[:space:]] not \s, for BSD+GNU grep -E.
 test_marker() {
   case "$1" in
-    rust)   printf '%s' '#\[test\]|#\[cfg\(test\)\]' ;;
-    go)     printf '%s' 'func Test' ;;
-    python) printf '%s' 'def test|import unittest|import pytest' ;;
+    rust)   printf '%s' '#\[[[:space:]]*test[[:space:]]*\]|#\[[[:space:]]*cfg[[:space:]]*\([[:space:]]*test' ;;
+    go)     printf '%s' 'func (Test|Example|Benchmark)' ;;
+    python) printf '%s' 'def test|import unittest|from unittest|import pytest' ;;
     java)   printf '%s' '@Test|class TestRunner' ;;
     *)      printf '%s' '' ;;
   esac
@@ -73,16 +74,30 @@ toolchain_ok() {
   esac
 }
 
-echo "== check A: no clean-subset accept pipes into grep =="
+# Drift tripwire: the clean subset is a fixed size (24 katas + py-add). A renamed/dropped node or a
+# node-less CORPUS_ROOT would otherwise let every corpus check pass vacuously. Bump when the subset
+# deliberately grows (a visible, deliberate change).
+EXPECTED_CLEAN=25
+found_clean=0
+for node in "${CLEAN_GLOB[@]}"; do [[ -d "$node" ]] && found_clean=$((found_clean + 1)); done
+if [[ $found_clean -ne $EXPECTED_CLEAN ]]; then
+  echo "clean-subset drift: found $found_clean nodes, expected $EXPECTED_CLEAN (renamed/dropped/added node, or wrong CORPUS_ROOT)" >&2
+  exit 2
+fi
+
+echo "== check A: no clean-subset accept pipes its runner (a pipe discards its exit code) =="
 a_fail=0
 for node in "${CLEAN_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   acc="$(accept_of "$node")"
-  if [[ "$acc" == *grep* ]]; then
-    note "FAIL $(basename "$node"): accept contains grep -> $acc"; fail=1; a_fail=1
+  # A pipe makes the pipeline's status the LAST command's, not the runner's — the exact defect,
+  # for grep OR rg/awk/perl/sed/etc. The clean-subset accepts are bare runners or `&&`-chains,
+  # never piped, so any `|` is the anti-pattern.
+  if [[ "$acc" == *"|"* ]]; then
+    note "FAIL $(basename "$node"): accept pipes its runner (exit code discarded) -> $acc"; fail=1; a_fail=1
   fi
 done
-[[ $a_fail -eq 0 ]] && note "ok: no accept pipes into grep"
+[[ $a_fail -eq 0 ]] && note "ok: no accept pipes its runner"
 
 echo "== check D: no editable (files:) file contains its acceptance test =="
 d_fail=0
@@ -92,6 +107,7 @@ for node in "${CLEAN_GLOB[@]}"; do
   marker="$(test_marker "$lang")"
   [[ -z "$marker" ]] && continue
   read_files "$node"
+  [[ ${#FILES[@]} -eq 0 ]] && continue  # bash-3.2 set -u: never expand an empty array
   for rel in "${FILES[@]}"; do
     [[ -z "$rel" ]] && continue
     path="$(resolve_file "$node" "$rel")"
@@ -151,7 +167,7 @@ for node in "${CLEAN_GLOB[@]}"; do
   fi
   if [[ "$lang" == rust ]]; then
     read_files "$node"
-    for rel in "${FILES[@]}"; do
+    [[ ${#FILES[@]} -eq 0 ]] || for rel in "${FILES[@]}"; do
       [[ -n "$rel" && -f "$work/$rel" ]] && : > "$work/$rel"
     done
     ec2=0; ( set +o pipefail; cd "$work" && eval "$acc" >/dev/null 2>&1 ) || ec2=$?

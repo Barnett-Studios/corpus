@@ -66,7 +66,8 @@ editable-test hole. De-contaminating the ~145 Exercism nodes is **out of scope**
 
 ## Acceptance
 
-- **Static (RED-first #1):** a check asserting no clean-subset `accept` pipes into `grep` —
+- **Static (RED-first #1):** a check asserting no clean-subset `accept` pipes its runner into
+  another command (any `|` — grep, rg, awk, … — discards the runner's exit code) —
   **fails against the current grep-based katas**, passes after the fix.
 - **Structural (RED-first #2):** a check asserting no editable (`files:`) file contains a
   test-definition marker — **fails against the 6 current rust katas** (test in `src/lib.rs`),
