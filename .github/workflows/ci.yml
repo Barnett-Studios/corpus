@@ -23,3 +23,23 @@ jobs:
       # (non-zero) if MANIFEST.tsv has drifted from what is actually shipped.
       - name: attribution manifest matches the data
         run: CORPUS_ROOT=red-baseline ./verify-attribution.sh --check
+
+  accept-oracle:
+    name: accept-oracle
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Actions pinned to commit SHAs (never @vN — tags are mutable). ubuntu-latest ships
+      # go/cargo/javac/java/python3 on PATH; the scripts fail-open per missing tool (checks A and D
+      # — the CONTRACT invariants — need no toolchain at all).
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - name: toolchain presence (scripts fail-open per absent tool)
+        run: for t in go cargo javac java python3 shellcheck; do printf '%s: %s\n' "$t" "$(command -v "$t" || echo absent)"; done
+      - name: shellcheck the oracle scripts
+        run: shellcheck ci/verify-accept-oracle.sh ci/prove-solvable.sh
+      - name: accept-oracle invariant (exit-code oracle + no editable test)
+        run: CORPUS_ROOT=red-baseline bash ci/verify-accept-oracle.sh
+      - name: GREEN spot-check (reference solutions stay solvable)
+        run: CORPUS_ROOT=red-baseline bash ci/prove-solvable.sh

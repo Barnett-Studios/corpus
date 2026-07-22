@@ -26,8 +26,8 @@ synthesize the seed from that pair.
 |---|---|
 | `id` | node id (matches the directory name) |
 | `language` | `cpp` \| `go` \| `java` \| `javascript` \| `python` \| `rust` |
-| `files` | editable files (relative to the node work dir) the model may change |
-| `accept` | shell command run in the work dir; **exit 0 ⇔ the task is solved** (the RED test's oracle) |
+| `files` | editable files (relative to the node work dir) the model may change; the acceptance test is **never** among them (see below) |
+| `accept` | shell command run in the work dir; **exit 0 ⇔ the task is solved** — the test runner's own exit status, **not** a `grep` of its output (a success-substring filter discards the runner's exit code and scores partial passes GREEN) |
 | `forbid` | constraints (e.g. `new_deps`) the change must not violate |
 | `requires` | toolchain executables that must be on PATH; **absent ⇒ node SKIPPED, never failed** |
 | `change` | the task description shown to the model |
@@ -37,6 +37,15 @@ synthesize the seed from that pair.
 Every node ships **failing** (`accept` returns non-zero against the seed): the stub is unimplemented.
 That is the point — a harness change is scored by how often it turns RED into GREEN. A node whose seed
 already passes is a corpus bug, not a task.
+
+## The acceptance test is not editable
+
+The acceptance test must live **outside** the node's `files:` set (e.g. go's `util_test.go`, rust's
+`tests/`, java's `TestRunner.java`, python's `test_util.py`) — never inside an editable file. If the
+test co-lives with the impl the model may edit, a model can score an *unsolved* node GREEN by
+deleting or renaming the test (some runners, e.g. `cargo test <filter>`, exit 0 when the filter
+matches zero tests). `ci/verify-accept-oracle.sh` enforces both this and the exit-code rule above,
+and is wired into CI for the clean subset (the 24 hand-authored katas + `py-add`).
 
 ## Toolchain gating (fail-open)
 
