@@ -1,6 +1,6 @@
 id: python-03-strip-prefix-dir
 language: python
 files: ["util.py"]
-accept: "python3 -m unittest -q test_util.TestUtil.test_strip_prefix_dir 2>&1 | grep -qE '^OK'"
+accept: "python3 -m unittest -q test_util.TestUtil.test_strip_prefix_dir"
 forbid: ["new_deps"]
 change: "Implement ONLY the body of strip_prefix_dir in util.py. Strip a leading 'prefix/' directory from path; if path does not start with 'prefix/' (note the trailing slash) return it unchanged. Do not touch any other function."

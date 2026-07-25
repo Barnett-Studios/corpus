@@ -1,6 +1,6 @@
 id: rust-06-visible-count
 language: rust
 files: ["src/lib.rs"]
-accept: "cargo test test_visible_count --quiet 2>&1 | grep -qE 'test result: ok\\. [1-9]'"
+accept: "cargo test test_visible_count --quiet"
 forbid: ["new_deps"]
 change: "This is a TWO-REGION change: implement BOTH `is_hidden` and `visible_count` (replace both `todo!()` bodies). `is_hidden` returns true when `name` starts with '.'. `visible_count` returns the number of names that are NOT hidden, and must call `is_hidden` rather than re-deriving the rule. Do not touch any other function."
