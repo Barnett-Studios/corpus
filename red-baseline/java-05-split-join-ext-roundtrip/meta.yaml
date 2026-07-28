@@ -1,6 +1,6 @@
 id: java-05-split-join-ext-roundtrip
 language: java
 files: ["Util.java"]
-accept: "javac -encoding UTF-8 Util.java TestRunner.java && java TestRunner splitJoinExt"
+accept: "javac -encoding UTF-8 Util.java UtilProbe.java TestRunner.java && java TestRunner splitJoinExt"
 forbid: ["new_deps"]
 change: "TWO-REGION change: implement BOTH splitExt and joinExt in Util.java. splitExt returns a String[]{stem, ext} where ext is the text after the LAST '.' without the dot, or '' when there is no '.'. joinExt is the exact inverse: join with '.', or return just stem when ext is ''. Both must agree. Do not touch any other method."

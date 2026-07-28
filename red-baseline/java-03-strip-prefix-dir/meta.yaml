@@ -1,6 +1,6 @@
 id: java-03-strip-prefix-dir
 language: java
 files: ["Util.java"]
-accept: "javac -encoding UTF-8 Util.java TestRunner.java && java TestRunner stripPrefixDir"
+accept: "javac -encoding UTF-8 Util.java UtilProbe.java TestRunner.java && java TestRunner stripPrefixDir"
 forbid: ["new_deps"]
 change: "Implement ONLY the body of stripPrefixDir in Util.java. Strip a leading 'prefix/' directory from path; if path does not start with 'prefix/' (note the trailing slash) return it unchanged. Do not touch any other method."

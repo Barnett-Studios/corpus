@@ -49,8 +49,10 @@ jobs:
           done
           [ "$missing" -eq 0 ] || { echo "a required toolchain is absent on the runner" >&2; exit 1; }
       - name: shellcheck the oracle scripts
-        run: shellcheck ci/verify-accept-oracle.sh ci/prove-solvable.sh
+        run: shellcheck ci/verify-accept-oracle.sh ci/prove-solvable.sh ci/verify-oracle-sabotage.sh
       - name: accept-oracle invariant (exit-code oracle + no editable test)
         run: CORPUS_ROOT=red-baseline bash ci/verify-accept-oracle.sh
+      - name: oracle-sabotage invariant (in-process sabotage cannot score GREEN)
+        run: CORPUS_ROOT=red-baseline bash ci/verify-oracle-sabotage.sh
       - name: GREEN spot-check (reference solutions stay solvable)
         run: CORPUS_ROOT=red-baseline bash ci/prove-solvable.sh

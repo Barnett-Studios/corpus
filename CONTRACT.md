@@ -47,6 +47,35 @@ deleting or renaming the test (some runners, e.g. `cargo test <filter>`, exit 0 
 matches zero tests). `ci/verify-accept-oracle.sh` enforces both this and the exit-code rule above,
 and is wired into CI for the clean subset (the 24 hand-authored katas + `py-add`).
 
+## The acceptance test does not share a process with the model's code
+
+Not editing the test is not enough. Where the model's code and the assertions run in **one
+process**, the model can score an unsolved node GREEN without touching the test at all — it need
+only edit the file every node already lets it edit:
+
+- **exit-zero** — end the process with status 0 before the assertions run (`os._exit(0)`,
+  `std::process::exit(0)`, which returns `!` and so type-checks anywhere, `System.exit(0)`).
+- **neuter** — replace the assertion machinery with no-ops (`unittest.TestCase.assert*`).
+
+So every clean-subset acceptance test is a **supervising parent**. A fixed, non-editable probe
+(`probe.py`, `src/main.rs`, `UtilProbe.java`) is the only caller of the model's code; it computes
+observations, prints them, and asserts nothing. The test runs that probe as a **subprocess** and
+judges its output, requiring **positive evidence** — a complete, matching observation — rather than
+merely a zero exit. A child that dies early prints nothing, and a neutered assertion library in the
+child is irrelevant to a parent that does its own asserting.
+
+Go already had this shape: `go test` supervises a child test binary and requires evidence of
+completion. The other three languages now match it. `ci/verify-oracle-sabotage.sh` enforces it in
+CI, replaying both vectors against every clean-subset node.
+
+**The limit, stated plainly.** This does not make the oracle adversarially sound. The probe is still
+a process the model's code runs inside, so it can *forge* the expected observations on stdout and
+exit 0 — and that works against **go too**, so it is a property of the execution model, not of any
+one language's runner. What changed is the cost: exit-zero and neuter are one-line, task-independent
+sabotage that works on every node in the corpus; forging requires producing the exact expected
+output for one specific kata. Closing the remainder needs the harness to run `accept` under process
+isolation (see `cordon`), which is outside what corpus data can express.
+
 ## Toolchain gating (fail-open)
 
 `requires` is a hard gate: if any listed tool is missing, the node is **skipped**, never scored as a
