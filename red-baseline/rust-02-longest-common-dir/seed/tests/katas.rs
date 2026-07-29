@@ -11,22 +11,56 @@
 //! single assertion ran. `observe` closes that by requiring *positive evidence* — a child
 //! that exits early prints nothing and cannot match.
 
-use std::process::Command;
+use std::io::Read;
+use std::process::{Command, Stdio};
+use std::sync::mpsc;
+use std::time::Duration;
+
+/// A hung child must score RED, not stall the battery. An unbounded `output()` would
+/// wait forever on an implementation that blocks (a `loop {}`, a read from stdin), and a
+/// measurement harness that hangs is worse than one that fails.
+const PROBE_TIMEOUT: Duration = Duration::from_secs(60);
 
 /// Run one case out-of-process and return its observed lines.
 fn observe(case: &str) -> Vec<String> {
-    let out = Command::new(env!("CARGO_BIN_EXE_eval_rust"))
+    let mut child = Command::new(env!("CARGO_BIN_EXE_eval_rust"))
         .arg(case)
-        .output()
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
         .unwrap_or_else(|e| panic!("could not run the probe binary for {case}: {e}"));
 
-    let stdout = String::from_utf8_lossy(&out.stdout).into_owned();
-    let stderr = String::from_utf8_lossy(&out.stderr).into_owned();
+    // Read both pipes on a worker thread so the timeout below cannot be defeated by a
+    // child that fills a pipe buffer and blocks instead of exiting.
+    let mut out_pipe = child.stdout.take().expect("piped stdout");
+    let mut err_pipe = child.stderr.take().expect("piped stderr");
+    let (tx, rx) = mpsc::channel();
+    std::thread::spawn(move || {
+        let mut o = String::new();
+        let mut e = String::new();
+        let _ = out_pipe.read_to_string(&mut o);
+        let _ = err_pipe.read_to_string(&mut e);
+        let _ = tx.send((o, e));
+    });
+
+    let (stdout, stderr) = rx
+        .recv_timeout(PROBE_TIMEOUT)
+        .unwrap_or_else(|_| {
+            let _ = child.kill();
+            let _ = child.wait();
+            panic!(
+                "probe for {case} produced no complete output within {PROBE_TIMEOUT:?} — \
+                 killed. A hung implementation is a failure, not a pass."
+            )
+        });
+    let out = child
+        .wait()
+        .unwrap_or_else(|e| panic!("could not reap the probe for {case}: {e}"));
 
     assert!(
-        out.status.success(),
+        out.success(),
         "probe for {case} exited {:?} without producing observations; stderr:\n{}",
-        out.status.code(),
+        out.code(),
         stderr.trim()
     );
     assert!(

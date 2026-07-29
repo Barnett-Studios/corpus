@@ -12,6 +12,7 @@ because the child does not assert.
 """
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -22,11 +23,17 @@ PROBE = Path(__file__).resolve().parent / "probe.py"
 
 def _observe(case):
     """Run one probe case out-of-process and return its observations."""
+    # encoding is pinned rather than inherited: `text=True` alone decodes with the
+    # locale's preferred encoding, so the same seed would pass under UTF-8 and fail
+    # under a C/POSIX locale. PYTHONIOENCODING pins the child's side of the pipe.
+    env = dict(os.environ, PYTHONIOENCODING="utf-8")
     proc = subprocess.run(
         [sys.executable, str(PROBE), case],
         cwd=str(PROBE.parent),
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        env=env,
         timeout=60,
     )
     if proc.returncode != 0:

@@ -68,6 +68,12 @@ Go already had this shape: `go test` supervises a child test binary and requires
 completion. The other three languages now match it. `ci/verify-oracle-sabotage.sh` enforces it in
 CI, replaying both vectors against every clean-subset node.
 
+Both probes are bounded: a child that has not produced complete output within 60s is killed and
+scores RED. A measurement harness that hangs is worse than one that fails, and a hung
+implementation is not a pass. The observation channel is pinned to UTF-8 on both sides rather
+than inherited from the locale, so a correct answer containing `…` cannot be turned into an
+encode error by a C/POSIX environment.
+
 **The limit, stated plainly.** This does not make the oracle adversarially sound. The probe is still
 a process the model's code runs inside, so it can *forge* the expected observations on stdout and
 exit 0 — and that works against **go too**, so it is a property of the execution model, not of any

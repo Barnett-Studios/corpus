@@ -4,7 +4,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 // Fixed harness — nodes never edit this file, nor UtilProbe.java. Usage: java TestRunner <name>.
 // Prints exactly "PASS" on success, otherwise "FAIL" (and exits non-zero).
@@ -18,6 +20,9 @@ import java.util.List;
 // complete, matching observation. A child that dies early prints nothing.
 public class TestRunner {
 
+    // A hung child scores RED rather than stalling the battery.
+    static final long PROBE_TIMEOUT_SECONDS = 60;
+
     static List<String> observe(String caseName) throws Exception {
         // Reuse the JVM running this class, so nothing depends on `java` being on PATH.
         String java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
@@ -25,15 +30,31 @@ public class TestRunner {
         pb.directory(new File("."));
         Process p = pb.start();
 
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader r = new BufferedReader(
-                new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = r.readLine()) != null) {
-                lines.add(line);
+        // Slurp stdout on a worker thread. A blocking read on the main thread would let a
+        // hung implementation stall the battery forever, and a harness that hangs is worse
+        // than one that fails — a hung child must score RED.
+        List<String> lines = Collections.synchronizedList(new ArrayList<>());
+        Thread reader = new Thread(() -> {
+            try (BufferedReader r = new BufferedReader(
+                    new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    lines.add(line);
+                }
+            } catch (Exception ignored) {
+                // A closed pipe just means no more observations; the checks below decide.
             }
+        });
+        reader.setDaemon(true);
+        reader.start();
+
+        if (!p.waitFor(PROBE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            p.destroyForcibly();
+            throw new AssertionError("probe for " + caseName + " produced no complete output within "
+                    + PROBE_TIMEOUT_SECONDS + "s — killed. A hung implementation is a failure, not a pass.");
         }
-        int rc = p.waitFor();
+        reader.join(5000);
+        int rc = p.exitValue();
         if (rc != 0) {
             throw new AssertionError(
                     "probe for " + caseName + " exited " + rc + " without producing observations");

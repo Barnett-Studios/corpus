@@ -17,6 +17,7 @@ observation — rather than merely a zero exit.
 Usage: python3 probe.py <case-name>   ->  JSON on stdout, exit 0
 """
 
+import io
 import json
 import sys
 
@@ -71,7 +72,12 @@ def main():
     if case not in cases:
         print("unknown case: " + case, file=sys.stderr)
         return 2
-    json.dump(cases[case](), sys.stdout)
+    # Write UTF-8 explicitly. The observations contain "…", and a C/POSIX locale
+    # would otherwise make stdout ASCII and turn a correct answer into an encode
+    # error — a RED that says nothing about the implementation.
+    out = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", newline="")
+    json.dump(cases[case](), out, ensure_ascii=False)
+    out.flush()
     return 0
 
 
