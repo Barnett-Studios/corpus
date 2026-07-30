@@ -5,3 +5,10 @@ edition = "2021"
 
 [lib]
 path = "src/lib.rs"
+
+# The acceptance tests drive this binary as a subprocess rather than linking the
+# library into the test process (issue #7). Cargo exposes its path to integration
+# tests as CARGO_BIN_EXE_eval_rust.
+[[bin]]
+name = "eval_rust"
+path = "src/main.rs"
