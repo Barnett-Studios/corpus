@@ -7,5 +7,5 @@ requires: ["gradle"]
 change: "Implement the solution in src/main/java/Poker.java so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nPick the best hand(s) from a list of poker hands.\n\nSee [Wikipedia][poker-hands] for an overview of poker hands.\n\n[poker-hands]: https://en.wikipedia.org/wiki/List_of_poker_hands"
 created: "2026-07-07T21:50:37Z"
 tier: "A"
-band: ""
 change_kind: "adaptive"
+provenance: "exercism"

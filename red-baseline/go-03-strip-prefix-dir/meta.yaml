@@ -5,4 +5,4 @@ accept: "go test -run '^TestStripPrefixDir$' ."
 forbid: ["new_deps"]
 change: "Implement ONLY the body of StripPrefixDir in util.go. Strip a leading 'prefix/' directory from path; if path does not start with 'prefix/' (note the trailing slash) return it unchanged. Do not touch any other function."
 signal: "regression-guard"
-band: "trivial"
+provenance: "hand-authored"
