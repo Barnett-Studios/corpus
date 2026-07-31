@@ -7,5 +7,5 @@ requires: ["go"]
 change: "Implement the solution in markdown.go so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nRefactor a Markdown parser.\n\nThe markdown exercise is a refactoring exercise.\nThere is code that parses a given string with [Markdown syntax][markdown] and returns the associated HTML for that string.\nEven though this code is confusingly written and hard to follow, somehow it works and all the tests are passing!\nYour challenge is to re-write this code to make it easier to read and maintain while still making sure that all the tests keep passing.\n\nIt would be helpful if you made notes of what you did in your refactoring in comments so reviewers can see that, but it isn't strictly necessary.\nThe most important thing is to make the code better!\n\n[markdown]: https://guides.github.com/features/mastering-markdown/"
 created: "2026-07-07T21:50:37Z"
 tier: "A"
-band: ""
 change_kind: "adaptive"
+provenance: "exercism"

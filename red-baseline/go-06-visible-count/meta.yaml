@@ -5,4 +5,4 @@ accept: "go test -run '^TestVisibleCount$' ."
 forbid: ["new_deps"]
 change: "TWO-REGION change: implement BOTH IsHidden and VisibleCount in util.go. IsHidden returns true when name starts with '.'. VisibleCount returns how many names are NOT hidden and must call IsHidden. Do not touch any other function."
 signal: "regression-guard"
-band: "trivial"
+provenance: "hand-authored"

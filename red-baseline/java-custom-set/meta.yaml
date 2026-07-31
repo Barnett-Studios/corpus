@@ -7,5 +7,5 @@ requires: ["gradle"]
 change: "Implement the solution in src/main/java/CustomSet.java so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nCreate a custom set type.\n\nSometimes it is necessary to define a custom data structure of some type, like a set.\nIn this exercise you will define your own set.\nHow it works internally doesn't matter, as long as it behaves like a set of unique elements."
 created: "2026-07-07T21:50:37Z"
 tier: "A"
-band: ""
 change_kind: "adaptive"
+provenance: "exercism"

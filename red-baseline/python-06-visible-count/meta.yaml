@@ -4,3 +4,4 @@ files: ["util.py"]
 accept: "python3 -m unittest -q test_util.TestUtil.test_visible_count"
 forbid: ["new_deps"]
 change: "TWO-REGION change: implement BOTH is_hidden and visible_count in util.py. is_hidden returns True when name starts with '.'. visible_count returns how many names are NOT hidden and must call is_hidden. Do not touch any other function."
+provenance: "hand-authored"

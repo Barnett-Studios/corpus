@@ -7,5 +7,5 @@ requires: ["cargo"]
 change: "Implement the solution in src/lib.rs, Cargo.toml so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nYour task is to determine the date and time one gigasecond after a certain date.\n\nA gigasecond is one thousand million seconds.\nThat is a one with nine zeros after it.\n\nIf you were born on _January 24th, 2015 at 22:00 (10:00:00pm)_, then you would be a gigasecond old on _October 2nd, 2046 at 23:46:40 (11:46:40pm)_.\n\n# Instructions append\n\nIf you're unsure what operations you can perform on `PrimitiveDateTime` take a look at the [time crate](https://docs.rs/time) which is listed as a dependency in the `Cargo.toml` file for this exercise."
 created: "2026-07-07T21:50:37Z"
 tier: "A"
-band: ""
 change_kind: "adaptive"
+provenance: "exercism"

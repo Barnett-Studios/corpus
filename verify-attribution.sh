@@ -29,7 +29,7 @@ if [[ ! -d "$CORPUS_ROOT" ]]; then
 fi
 
 generate() {
-  printf 'node_id\tlanguage\taccept_tool\tseed_license\tthird_party\n'
+  printf 'node_id\tlanguage\taccept_tool\tseed_license\tthird_party\tprovenance\n'
   for d in "$CORPUS_ROOT"/*/; do
     local id lang req lic tp
     id=$(basename "$d")
@@ -50,7 +50,16 @@ generate() {
     [[ -n "$(find "$d" -name catch.hpp 2>/dev/null)" ]] && tp="Catch2/BSL-1.0"
     [[ -n "$(find "$d" -name gradlew 2>/dev/null)" ]] && tp="${tp:+$tp,}Gradle-wrapper/Apache-2.0"
     [[ -z "$tp" ]] && tp="-"
-    printf '%s\t%s\t%s\t%s\t%s\n' "$id" "$lang" "$req" "$lic" "$tp"
+    # provenance is READ from the node's own declaration, never inferred. `seed_license`
+    # above is derived from LICENSE-file presence and is wrong for that reason (#1); a
+    # contamination marker inferred from a filename pattern would repeat the mistake on a
+    # field where being wrong is worse — it decides which nodes count as held-out.
+    prov=$(sed -n 's/^provenance: *"\{0,1\}\([a-z-]*\)"\{0,1\}/\1/p' "$d/meta.yaml" 2>/dev/null | head -1)
+    if [[ -z "$prov" ]]; then
+      echo "error: $id declares no provenance: (expected \"exercism\" or \"hand-authored\")" >&2
+      exit 1
+    fi
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$id" "$lang" "$req" "$lic" "$tp" "$prov"
   done
 }
 
