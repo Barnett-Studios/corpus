@@ -14,6 +14,15 @@
 # or the node count has drifted, exit non-zero rather than report a green sweep over
 # nothing.
 #
+# WHAT A PASS HERE DOES NOT MEAN. This checks only that `accept` exits non-zero on the
+# seed. It cannot tell "RED because the stub is unimplemented" (the invariant) from "RED
+# because the toolchain never reached the tests" — a cmake configure that fails, a missing
+# compiler, an npm install with no network. A node that is broken-unsolvable passes this
+# check. Solvability is `prove-solvable.sh`'s job, and that covers only the 25-node clean
+# subset, so the 225 Exercism nodes have their RED verified and their GREEN-reachability
+# NOT. Observed evidence that this is not hypothetical: in CI the 26 cpp nodes each report
+# RED in ~0.17s, below the floor for a real cmake configure+build+ctest. Tracked in #14.
+#
 # Usage:
 #   verify-red-invariant.sh [<corpus-root>]      check every node (or $CORPUS_LANG only)
 #   verify-red-invariant.sh --self-test          prove the checker catches a GREEN node

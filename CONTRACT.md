@@ -49,6 +49,12 @@ Fail-open per node on toolchain (an absent `requires:` executable SKIPs, per the
 fail-loud on vacuity (a sweep that checked nothing exits non-zero rather than reporting green over an
 empty set).
 
+**What a passing RED sweep does not establish.** It shows `accept` exits non-zero on the seed. It
+cannot distinguish "RED because the stub is unimplemented" from "RED because the toolchain never
+reached the tests". A broken-unsolvable node passes it. GREEN-reachability is `prove-solvable.sh`'s
+job and that covers only the 25-node clean subset, so the 225 Exercism nodes have their RED verified
+and their solvability unverified.
+
 ## The acceptance test is not editable
 
 The acceptance test must live **outside** the node's `files:` set (e.g. go's `util_test.go`, rust's
