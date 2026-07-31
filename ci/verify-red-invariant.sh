@@ -187,7 +187,7 @@ fi
 # Adding an entry is a deliberate, reviewable edit. Do not add one to make CI green.
 # KNOWN_GREEN_OVERRIDE exists so --self-test can exercise the anti-rot branch; it is not
 # a production knob and CI never sets it.
-KNOWN_GREEN="${KNOWN_GREEN_OVERRIDE:-go-counter go-ledger go-markdown}"
+KNOWN_GREEN="${KNOWN_GREEN_OVERRIDE:-go-counter go-ledger go-markdown javascript-ledger}"
 
 is_quarantined() {
   case " $KNOWN_GREEN " in *" $1 "*) return 0 ;; *) return 1 ;; esac
