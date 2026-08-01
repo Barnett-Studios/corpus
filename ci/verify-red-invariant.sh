@@ -177,13 +177,26 @@ if [[ $found -ne $EXPECTED_NODES ]]; then
   exit 2
 fi
 
-# Known-GREEN quarantine (corpus#11). Content defects that need a node authored or
-# removed, not an oracle fix — out of scope for the check that found them.
+# Known-GREEN quarantine. Defects that need a node authored, removed, or excluded — not
+# an oracle fix, so out of scope for the check that found them. Two tickets, two kinds:
+#
+#   corpus#11  go-counter, go-ledger, go-markdown — CONTENT. go-counter ships no test at
+#              all; the other two ship complete implementations never reduced to a stub.
+#              Repairable: author the missing test, re-stub the two.
+#   corpus#16  javascript-ledger — COMPOSITION, and not repairable. It is an upstream
+#              *refactoring* exercise whose prompt states the code "consistently passes
+#              the test suite". There is no RED state to start from and no accept oracle
+#              recovers one, because the exercise guarantees the seed passes. Awaiting a
+#              drop-or-exclude decision, not a fix.
 #
 # Two properties keep this from becoming a rug to sweep under:
 #   1. every entry is PRINTED on every run, so the gate's true coverage is never hidden;
 #   2. a quarantined node that turns out to be RED FAILS the build, so the list cannot
 #      rot silently once these are repaired — removing the entry is forced.
+#
+# Note that property 2 assumes entries are TEMPORARY. corpus#16 is the first that may not
+# be; if it is kept rather than dropped, this list needs a second category with different
+# semantics rather than a permanent resident in this one.
 # Adding an entry is a deliberate, reviewable edit. Do not add one to make CI green.
 # KNOWN_GREEN_OVERRIDE exists so --self-test can exercise the anti-rot branch; it is not
 # a production knob and CI never sets it.
