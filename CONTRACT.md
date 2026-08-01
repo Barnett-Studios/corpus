@@ -155,6 +155,41 @@ one either. **Report the two strata separately** — `provenance` in `MANIFEST.t
 `meta.yaml` exists to make that mechanical — and report the discordant-pair count alongside any
 null.
 
+### Contamination is not the worst thing wrong with this stratum
+
+This section would mislead if it stopped here, because it documents the *lesser* risk in detail.
+The same nodes carry two further defects, and by this project's own analysis the first outranks
+contamination:
+
+- **The accept oracle is unsound (#15) — 222 of the 225.** They score by `grep` on runner output
+  instead of on the runner's exit status, the practice this contract forbids two sections up. The
+  demonstration case was `python-react`: it ships **2 passed, 12 failed** and scored GREEN, because
+  `grep -qE '[1-9][0-9]* passed'` matches the "2 passed". Three such nodes are repaired in #3;
+  222 remain.
+
+  This is not a memorisation effect and it does not cancel in a paired delta. It is a *mislabelled
+  outcome*: a partial pass counted as a full one moves a node from discordant to concordant, the
+  same way a memorised node does, while also corrupting the absolute rate for reasons that have
+  nothing to do with what any model learned. Until #15 is repaired the power these nodes appear to
+  offer is not reachable, so growing a battery with more of them buys less than the count suggests.
+
+- **GREEN-reachability is unverified across all 225 (#14).** `ci/verify-red-invariant.sh` proves
+  each accept is RED on the seed; `prove-solvable.sh` proves a reference solution reaches GREEN and
+  covers only the 25 hand-authored nodes. From outside, a node that is RED because its toolchain
+  never reached the tests is indistinguishable from one that is RED because the stub is
+  unimplemented — and in CI the 26 cpp nodes each report RED in ~0.17s, below the floor for a real
+  cmake configure and build.
+
+**The splits coincide, and that is the point.** Contaminated: 225. Unsound oracle: 222 of those
+same 225, and **0 of the 25** hand-authored. Unverified solvability: the same 225. These are not
+three overlapping populations, they are one population with three defects. A reader who accepts
+the paired-comparison argument above and uses the Exercism stratum anyway inherits all three, not
+the one this section is named after.
+
+The 25 hand-authored nodes are clean on every count — which is why they are the held-out stratum
+in more than the leakage sense, and why their small size (below) is this corpus's binding
+constraint rather than a footnote to it.
+
 ### The held-out stratum is small
 
 25 nodes is enough to be honest with and not enough to be conclusive with. A paired experiment
