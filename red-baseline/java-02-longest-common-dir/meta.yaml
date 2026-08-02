@@ -4,3 +4,4 @@ files: ["Util.java"]
 accept: "javac -encoding UTF-8 Util.java UtilProbe.java TestRunner.java && java TestRunner longestCommonDir"
 forbid: ["new_deps"]
 change: "Implement ONLY the body of longestCommonDir in Util.java. Take each path's parent directory (all slash-separated parts except the last), then return the longest shared leading run of those parts joined by '/'. Return '' if there is no shared run or paths is empty. Do not touch any other method."
+provenance: "hand-authored"

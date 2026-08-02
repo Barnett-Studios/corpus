@@ -4,3 +4,4 @@ files: ["src/lib.rs"]
 accept: "cargo test test_split_join_ext_roundtrip --quiet"
 forbid: ["new_deps"]
 change: "This is a TWO-REGION change: implement BOTH `split_ext` and `join_ext` (replace both `todo!()` bodies). `split_ext` splits a filename into (stem, ext) where ext is the text after the LAST '.' without the dot, or empty when there is no '.'. `join_ext` is the exact inverse: rejoin with a '.', or return just the stem when ext is empty. Both must agree so a split followed by a join reproduces the original. Do not touch any other function."
+provenance: "hand-authored"

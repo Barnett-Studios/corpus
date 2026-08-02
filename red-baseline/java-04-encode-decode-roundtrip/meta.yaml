@@ -4,3 +4,4 @@ files: ["Util.java"]
 accept: "javac -encoding UTF-8 Util.java UtilProbe.java TestRunner.java && java TestRunner encodeDecode"
 forbid: ["new_deps"]
 change: "TWO-REGION change: implement BOTH encodeSeg and decodeSeg in Util.java so decodeSeg(encodeSeg(s)).equals(s) for any input. encodeSeg replaces every '/' with the literal '%2F'; decodeSeg reverses it exactly. Implementing only one leaves the other throwing. Do not touch any other method."
+provenance: "hand-authored"

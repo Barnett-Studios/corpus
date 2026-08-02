@@ -4,3 +4,4 @@ files: ["util.py"]
 accept: "python3 -m unittest -q test_util.TestUtil.test_longest_common_dir"
 forbid: ["new_deps"]
 change: "Implement ONLY the body of longest_common_dir in util.py. Take each path's parent directory (all slash-separated parts except the last), then return the longest shared leading run of those parts joined by '/'. Return '' if there is no shared run or paths is empty. Do not touch any other function."
+provenance: "hand-authored"

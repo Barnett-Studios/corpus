@@ -4,3 +4,4 @@ files: ["Util.java"]
 accept: "javac -encoding UTF-8 Util.java UtilProbe.java TestRunner.java && java TestRunner compactPath"
 forbid: ["new_deps"]
 change: "Implement ONLY the body of compactPath in Util.java (replace its throw). Return the path unchanged when it has at most max slash-separated parts; otherwise keep the first and last parts joined with the middle elided as the single character \u2026 e.g. compactPath('a/b/c/d',3)=='a/\u2026/d'. Do not touch any other method."
+provenance: "hand-authored"
