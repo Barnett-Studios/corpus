@@ -36,7 +36,24 @@ synthesize the seed from that pair.
 
 Every node ships **failing** (`accept` returns non-zero against the seed): the stub is unimplemented.
 That is the point — a harness change is scored by how often it turns RED into GREEN. A node whose seed
-already passes is a corpus bug, not a task.
+already passes is a corpus bug, not a task: it is a free point for *both* arms of every A/B, so it
+inflates solve-rate while contributing no discriminating signal.
+
+`ci/verify-red-invariant.sh` enforces this in CI over **every** node, sharded by language, materialising
+each seed and asserting `accept` exits non-zero. A node that is GREEN at HEAD fails the build and is
+named. It is the complement of `ci/prove-solvable.sh`: together they bracket the oracle — RED on the
+seed, GREEN on a reference solution. Neither alone suffices, since an accept that *always* fails passes
+the first and an accept that *always* succeeds passes the second.
+
+Fail-open per node on toolchain (an absent `requires:` executable SKIPs, per the table above);
+fail-loud on vacuity (a sweep that checked nothing exits non-zero rather than reporting green over an
+empty set).
+
+**What a passing RED sweep does not establish.** It shows `accept` exits non-zero on the seed. It
+cannot distinguish "RED because the stub is unimplemented" from "RED because the toolchain never
+reached the tests". A broken-unsolvable node passes it. GREEN-reachability is `prove-solvable.sh`'s
+job and that covers only the 25-node clean subset, so the 225 Exercism nodes have their RED verified
+and their solvability unverified.
 
 ## The acceptance test is not editable
 
