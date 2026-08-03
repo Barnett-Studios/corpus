@@ -1,0 +1,251 @@
+node_id	lang	provenance	oracle_sound	red_for_right_reason	green_reachable	tests_total	tests_enabled	verdict	reason
+cpp-all-your-base	cpp	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+cpp-allergies	cpp	exercism	yes	TASK	PROVEN	50	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 50 tests
+cpp-bank-account	cpp	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+cpp-binary-search-tree	cpp	exercism	yes	TASK	PROVEN	12	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 12 tests
+cpp-circular-buffer	cpp	exercism	yes	TASK	PROVEN	16	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 16 tests
+cpp-clock	cpp	exercism	yes	TASK	PROVEN	3	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 3 tests
+cpp-complex-numbers	cpp	exercism	yes	TASK	UNPROVEN	40	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 2
+cpp-crypto-square	cpp	exercism	yes	TASK	PROVEN	8	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 8 tests
+cpp-diamond	cpp	exercism	yes	TASK	PROVEN	5	5	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+cpp-dnd-character	cpp	exercism	yes	TASK	PROVEN	18	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 18 tests
+cpp-gigasecond	cpp	exercism	yes	ENV	UNPROVEN	5	1	BROKEN	corpus#14: RED for an environmental reason — Boost absent and not declared in requires:
+cpp-grade-school	cpp	exercism	yes	TASK	PROVEN	8	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 8 tests
+cpp-kindergarten-garden	cpp	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+cpp-knapsack	cpp	exercism	yes	TASK	PROVEN	7	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 7 tests
+cpp-linked-list	cpp	exercism	yes	TASK	PROVEN	19	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 19 tests
+cpp-meetup	cpp	exercism	yes	ENV	UNPROVEN	90	1	BROKEN	corpus#14: RED for an environmental reason — Boost absent and not declared in requires:
+cpp-parallel-letter-frequency	cpp	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+cpp-perfect-numbers	cpp	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+cpp-phone-number	cpp	exercism	yes	TASK	PROVEN	18	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 18 tests
+cpp-queen-attack	cpp	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+cpp-robot-name	cpp	exercism	yes	TASK	PROVEN	5	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 5 tests
+cpp-space-age	cpp	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+cpp-spiral-matrix	cpp	exercism	yes	TASK	PROVEN	6	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 6 tests
+cpp-sublist	cpp	exercism	yes	TASK	PROVEN	18	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 18 tests
+cpp-yacht	cpp	exercism	yes	TASK	PROVEN	29	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 29 tests
+cpp-zebra-puzzle	cpp	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-01-compact-path	go	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-02-longest-common-dir	go	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-03-strip-prefix-dir	go	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-04-encode-decode-roundtrip	go	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-05-split-join-ext-roundtrip	go	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-06-visible-count	go	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-alphametics	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-beer-song	go	exercism	yes	TASK	PROVEN	3	3	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-book-store	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-bottle-song	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-bowling	go	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-connect	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-counter	go	exercism	yes	NOT_RED	PROVEN	0	0	BROKEN	corpus#11: accept exits 0 on the untouched seed — no RED state
+go-crypto-square	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-dnd-character	go	exercism	yes	TASK	PROVEN	3	3	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-dominoes	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-error-handling	go	exercism	yes	TASK	PROVEN	5	5	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-food-chain	go	exercism	yes	TASK	PROVEN	3	3	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-forth	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-hexadecimal	go	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-kindergarten-garden	go	exercism	yes	TASK	PROVEN	3	3	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-ledger	go	exercism	yes	NOT_RED	UNPROVEN	3	3	BROKEN	corpus#11: accept exits 0 on the untouched seed — no RED state
+go-markdown	go	exercism	yes	NOT_RED	PROVEN	1	1	BROKEN	corpus#11: accept exits 0 on the untouched seed — no RED state
+go-matrix	go	exercism	yes	TASK	PROVEN	4	4	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-octal	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-paasio	go	exercism	yes	TASK	PROVEN	13	13	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-palindrome-products	go	exercism	yes	TASK	UNPROVEN	1	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 1
+go-pig-latin	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-poker	go	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-pov	go	exercism	yes	TASK	PROVEN	5	5	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-protein-translation	go	exercism	yes	TASK	PROVEN	3	3	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-react	go	exercism	yes	TASK	PROVEN	13	13	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-robot-simulator	go	exercism	yes	TASK	PROVEN	11	11	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-say	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-scale-generator	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-simple-linked-list	go	exercism	yes	TASK	PROVEN	14	14	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-sublist	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-transpose	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-tree-building	go	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-trinary	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-two-bucket	go	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-variable-length-quantity	go	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-word-search	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-wordy	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+go-zebra-puzzle	go	exercism	yes	TASK	PROVEN	1	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-01-compact-path	java	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-02-longest-common-dir	java	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-03-strip-prefix-dir	java	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-04-encode-decode-roundtrip	java	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-05-split-join-ext-roundtrip	java	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-06-visible-count	java	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+java-affine-cipher	java	exercism	yes	TASK	PROVEN	16	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 16 tests
+java-all-your-base	java	exercism	yes	TASK	PROVEN	20	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 20 tests
+java-alphametics	java	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+java-bank-account	java	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+java-book-store	java	exercism	yes	TASK	PROVEN	18	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 18 tests
+java-bottle-song	java	exercism	yes	TASK	PROVEN	7	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 7 tests
+java-bowling	java	exercism	yes	TASK	PROVEN	31	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 31 tests
+java-change	java	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+java-circular-buffer	java	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+java-connect	java	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+java-custom-set	java	exercism	yes	TASK	PROVEN	40	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 40 tests
+java-dominoes	java	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+java-food-chain	java	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+java-forth	java	exercism	yes	TASK	PROVEN	55	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 55 tests
+java-go-counting	java	exercism	yes	TASK	PROVEN	11	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 11 tests
+java-hangman	java	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+java-house	java	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+java-kindergarten-garden	java	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+java-ledger	java	exercism	yes	NOT_RED	PROVEN	11	0	BROKEN	corpus#11: accept exits 0 on the untouched seed — no RED state
+java-mazy-mice	java	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+java-ocr-numbers	java	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+java-palindrome-products	java	exercism	yes	TASK	PROVEN	12	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 12 tests
+java-phone-number	java	exercism	yes	TASK	PROVEN	18	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 18 tests
+java-pig-latin	java	exercism	yes	TASK	PROVEN	22	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 22 tests
+java-poker	java	exercism	yes	TASK	PROVEN	28	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 28 tests
+java-pov	java	exercism	yes	TASK	PROVEN	15	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 15 tests
+java-protein-translation	java	exercism	yes	TASK	PROVEN	31	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 31 tests
+java-pythagorean-triplet	java	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+java-queen-attack	java	exercism	yes	TASK	PROVEN	15	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 15 tests
+java-rational-numbers	java	exercism	yes	TASK	PROVEN	41	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 41 tests
+java-react	java	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+java-resistor-color-trio	java	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+java-rest-api	java	exercism	yes	TASK	PROVEN	9	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 2 of 9 tests
+java-satellite	java	exercism	yes	TASK	PROVEN	9	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 2 of 9 tests
+java-series	java	exercism	yes	TASK	PROVEN	11	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 11 tests
+java-sgf-parsing	java	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+java-simple-linked-list	java	exercism	yes	TASK	UNPROVEN	7	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 1
+java-state-of-tic-tac-toe	java	exercism	yes	TASK	PROVEN	27	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 27 tests
+java-transpose	java	exercism	yes	TASK	PROVEN	12	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 12 tests
+java-tree-building	java	exercism	yes	NOT_RED	PROVEN	11	1	BROKEN	corpus#11: accept exits 0 on the untouched seed — no RED state
+java-twelve-days	java	exercism	yes	TASK	PROVEN	15	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 15 tests
+java-two-bucket	java	exercism	yes	TASK	UNPROVEN	6	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 1
+java-variable-length-quantity	java	exercism	yes	TASK	PROVEN	26	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 26 tests
+java-word-search	java	exercism	yes	TASK	PROVEN	24	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 24 tests
+java-wordy	java	exercism	yes	TASK	PROVEN	23	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 23 tests
+java-zebra-puzzle	java	exercism	yes	TASK	PROVEN	2	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 2 tests
+java-zipper	java	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+javascript-affine-cipher	javascript	exercism	yes	TASK	PROVEN	16	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 2 of 16 tests
+javascript-alphametics	javascript	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+javascript-beer-song	javascript	exercism	yes	TASK	PROVEN	8	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 8 tests
+javascript-binary	javascript	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+javascript-book-store	javascript	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+javascript-bottle-song	javascript	exercism	yes	TASK	PROVEN	7	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 7 tests
+javascript-bowling	javascript	exercism	yes	TASK	PROVEN	30	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 30 tests
+javascript-complex-numbers	javascript	exercism	yes	TASK	PROVEN	31	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 31 tests
+javascript-connect	javascript	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+javascript-food-chain	javascript	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+javascript-forth	javascript	exercism	yes	TASK	PROVEN	49	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 49 tests
+javascript-go-counting	javascript	exercism	yes	TASK	PROVEN	11	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 11 tests
+javascript-grade-school	javascript	exercism	yes	TASK	UNPROVEN	10	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 1
+javascript-grep	javascript	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+javascript-house	javascript	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+javascript-killer-sudoku-helper	javascript	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+javascript-ledger	javascript	exercism	yes	NOT_RED	PROVEN	11	1	UNUSABLE_BY_DESIGN	corpus#16: upstream refactoring exercise whose premise is that the seed passes; no accept oracle recovers a RED state
+javascript-list-ops	javascript	exercism	yes	TASK	PROVEN	20	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 20 tests
+javascript-meetup	javascript	exercism	yes	TASK	PROVEN	95	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 95 tests
+javascript-ocr-numbers	javascript	exercism	yes	TASK	PROVEN	16	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 16 tests
+javascript-palindrome-products	javascript	exercism	yes	TASK	PROVEN	12	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 12 tests
+javascript-parallel-letter-frequency	javascript	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+javascript-phone-number	javascript	exercism	yes	TASK	PROVEN	18	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 18 tests
+javascript-pig-latin	javascript	exercism	yes	TASK	PROVEN	22	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 22 tests
+javascript-poker	javascript	exercism	yes	TASK	PROVEN	28	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 28 tests
+javascript-promises	javascript	exercism	yes	TASK	PROVEN	27	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 27 tests
+javascript-queen-attack	javascript	exercism	yes	TASK	PROVEN	19	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 19 tests
+javascript-rational-numbers	javascript	exercism	yes	TASK	PROVEN	36	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 36 tests
+javascript-react	javascript	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+javascript-rectangles	javascript	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+javascript-resistor-color-trio	javascript	exercism	yes	TASK	PROVEN	6	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 6 tests
+javascript-rest-api	javascript	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+javascript-robot-name	javascript	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+javascript-say	javascript	exercism	yes	TASK	PROVEN	16	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 16 tests
+javascript-scale-generator	javascript	exercism	yes	TASK	PROVEN	19	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 19 tests
+javascript-simple-linked-list	javascript	exercism	yes	TASK	PROVEN	23	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 23 tests
+javascript-space-age	javascript	exercism	yes	TASK	PROVEN	8	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 8 tests
+javascript-state-of-tic-tac-toe	javascript	exercism	yes	TASK	PROVEN	27	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 27 tests
+javascript-sum-of-multiples	javascript	exercism	yes	TASK	PROVEN	16	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 16 tests
+javascript-tournament	javascript	exercism	yes	TASK	PROVEN	12	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 12 tests
+javascript-transpose	javascript	exercism	yes	TASK	PROVEN	13	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 13 tests
+javascript-triangle	javascript	exercism	yes	TASK	PROVEN	19	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 19 tests
+javascript-twelve-days	javascript	exercism	yes	TASK	PROVEN	15	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 15 tests
+javascript-two-bucket	javascript	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+javascript-variable-length-quantity	javascript	exercism	yes	TASK	PROVEN	26	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 26 tests
+javascript-word-search	javascript	exercism	yes	TASK	PROVEN	22	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 22 tests
+javascript-wordy	javascript	exercism	yes	TASK	PROVEN	23	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 23 tests
+javascript-zebra-puzzle	javascript	exercism	yes	TASK	PROVEN	2	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 2 tests
+javascript-zipper	javascript	exercism	yes	TASK	PROVEN	19	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 19 tests
+py-add	python	hand-authored	yes	TASK	PROVEN	0	0	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-01-compact-path	python	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-02-longest-common-dir	python	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-03-strip-prefix-dir	python	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-04-encode-decode-roundtrip	python	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-05-split-join-ext-roundtrip	python	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-06-visible-count	python	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-affine-cipher	python	exercism	yes	TASK	PROVEN	16	16	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-beer-song	python	exercism	yes	TASK	PROVEN	8	8	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-book-store	python	exercism	yes	TASK	PROVEN	20	20	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-bottle-song	python	exercism	yes	TASK	PROVEN	7	7	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-bowling	python	exercism	yes	TASK	PROVEN	31	31	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-connect	python	exercism	yes	TASK	PROVEN	10	10	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-dominoes	python	exercism	yes	TASK	PROVEN	13	13	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-dot-dsl	python	exercism	yes	TASK	PROVEN	12	12	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-food-chain	python	exercism	yes	TASK	PROVEN	10	10	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-forth	python	exercism	yes	TASK	PROVEN	54	54	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-go-counting	python	exercism	yes	TASK	PROVEN	11	11	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-grade-school	python	exercism	yes	TASK	PROVEN	20	20	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-grep	python	exercism	yes	TASK	PROVEN	25	25	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-hangman	python	exercism	yes	TASK	PROVEN	7	7	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-list-ops	python	exercism	yes	TASK	PROVEN	24	24	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-paasio	python	exercism	yes	TASK	PROVEN	25	25	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-phone-number	python	exercism	yes	TASK	PROVEN	21	21	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-pig-latin	python	exercism	yes	TASK	PROVEN	22	22	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-poker	python	exercism	yes	TASK	PROVEN	37	37	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-pov	python	exercism	yes	TASK	PROVEN	15	15	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-proverb	python	exercism	yes	TASK	PROVEN	8	8	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-react	python	exercism	yes	TASK	PROVEN	14	14	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-rest-api	python	exercism	yes	TASK	PROVEN	9	9	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-robot-name	python	exercism	yes	TASK	PROVEN	4	4	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-scale-generator	python	exercism	yes	TASK	PROVEN	17	17	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-sgf-parsing	python	exercism	yes	TASK	PROVEN	23	23	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-simple-linked-list	python	exercism	yes	TASK	PROVEN	20	20	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-transpose	python	exercism	yes	TASK	PROVEN	12	12	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-tree-building	python	exercism	yes	TASK	UNPROVEN	13	13	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 1
+python-two-bucket	python	exercism	yes	TASK	PROVEN	9	9	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-variable-length-quantity	python	exercism	yes	TASK	PROVEN	26	26	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-wordy	python	exercism	yes	TASK	PROVEN	25	25	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-zebra-puzzle	python	exercism	yes	TASK	PROVEN	2	2	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+python-zipper	python	exercism	yes	TASK	PROVEN	14	14	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-01-compact-path	rust	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-02-longest-common-dir	rust	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-03-strip-prefix-dir	rust	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-04-encode-decode-roundtrip	rust	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-05-split-join-ext-roundtrip	rust	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-06-visible-count	rust	hand-authored	yes	TASK	PROVEN	6	6	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle
+rust-accumulate	rust	exercism	yes	TASK	PROVEN	12	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 12 tests
+rust-acronym	rust	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+rust-alphametics	rust	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+rust-book-store	rust	exercism	yes	TASK	UNPROVEN	18	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 101
+rust-bowling	rust	exercism	yes	TASK	PROVEN	31	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 31 tests
+rust-decimal	rust	exercism	yes	TASK	PROVEN	44	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 44 tests
+rust-dot-dsl	rust	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+rust-doubly-linked-list	rust	exercism	yes	TASK	PROVEN	21	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 21 tests
+rust-fizzy	rust	exercism	yes	TASK	PROVEN	7	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 7 tests
+rust-forth	rust	exercism	yes	TASK	PROVEN	50	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 50 tests
+rust-gigasecond	rust	exercism	yes	TASK	PROVEN	5	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 5 tests
+rust-grade-school	rust	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+rust-grep	rust	exercism	yes	TASK	PROVEN	27	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 27 tests
+rust-luhn-from	rust	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+rust-macros	rust	exercism	yes	TASK	UNPROVEN	18	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 101
+rust-nucleotide-codons	rust	exercism	yes	TASK	PROVEN	11	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 11 tests
+rust-ocr-numbers	rust	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+rust-parallel-letter-frequency	rust	exercism	yes	TASK	PROVEN	10	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 10 tests
+rust-pig-latin	rust	exercism	yes	TASK	PROVEN	22	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 22 tests
+rust-poker	rust	exercism	yes	TASK	PROVEN	37	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 37 tests
+rust-react	rust	exercism	yes	TASK	PROVEN	20	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 20 tests
+rust-robot-name	rust	exercism	yes	TASK	UNPROVEN	5	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 101
+rust-say	rust	exercism	yes	TASK	PROVEN	19	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 19 tests
+rust-scale-generator	rust	exercism	yes	TASK	PROVEN	17	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 17 tests
+rust-simple-cipher	rust	exercism	yes	TASK	UNPROVEN	23	1	BROKEN	corpus#14: reference solution did NOT reach GREEN: upstream example -> exit 101
+rust-two-bucket	rust	exercism	yes	TASK	PROVEN	9	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 9 tests
+rust-variable-length-quantity	rust	exercism	yes	TASK	PROVEN	26	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 26 tests
+rust-word-count	rust	exercism	yes	TASK	PROVEN	14	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 14 tests
+rust-wordy	rust	exercism	yes	TASK	PROVEN	25	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 25 tests
+rust-xorcism	rust	exercism	yes	TASK	PROVEN	109	1	INSTRUMENT	RED on seed (runner ran), GREEN with a reference solution, exit-status oracle; corpus#21: grades on 1 of 109 tests
