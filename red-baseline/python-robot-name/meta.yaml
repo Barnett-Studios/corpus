@@ -1,7 +1,7 @@
 id: "python-robot-name"
 language: "python"
 files: ["robot_name.py"]
-accept: "python3 -m pytest -q robot_name_test.py 2>&1 | grep -qE '[1-9][0-9]* passed'"
+accept: "python3 -m pytest -q robot_name_test.py"
 forbid: ["new_deps"]
 requires: []
 change: "Implement the solution in robot_name.py so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nManage robot factory settings.\n\nWhen a robot comes off the factory floor, it has no name.\n\nThe first time you turn on a robot, a random name is generated in the format of two uppercase letters followed by three digits, such as RX837 or BC811.\n\nEvery once in a while we need to reset a robot to its factory settings, which means that its name gets wiped.\nThe next time you ask, that robot will respond with a new random name.\n\nThe names must be random: they should not follow a predictable sequence.\nUsing random names means a risk of collisions.\nYour solution must ensure that every existing robot has a unique name."

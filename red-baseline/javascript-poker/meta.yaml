@@ -1,7 +1,7 @@
 id: "javascript-poker"
 language: "javascript"
 files: ["poker.js"]
-accept: "npm install --silent >/dev/null 2>&1 && npm test 2>&1 | grep -qiE '[1-9][0-9]* (passing|passed)'"
+accept: "npm install --silent >/dev/null 2>&1 && npm test"
 forbid: ["new_deps"]
 requires: ["npm"]
 change: "Implement the solution in poker.js so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nPick the best hand(s) from a list of poker hands.\n\nSee [Wikipedia][poker-hands] for an overview of poker hands.\n\n[poker-hands]: https://en.wikipedia.org/wiki/List_of_poker_hands"

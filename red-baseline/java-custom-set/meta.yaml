@@ -1,7 +1,7 @@
 id: "java-custom-set"
 language: "java"
 files: ["src/main/java/CustomSet.java"]
-accept: "gradle test --console=plain 2>&1 | grep -qE 'BUILD SUCCESSFUL'"
+accept: "gradle test --console=plain"
 forbid: ["new_deps"]
 requires: ["gradle"]
 change: "Implement the solution in src/main/java/CustomSet.java so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nCreate a custom set type.\n\nSometimes it is necessary to define a custom data structure of some type, like a set.\nIn this exercise you will define your own set.\nHow it works internally doesn't matter, as long as it behaves like a set of unique elements."

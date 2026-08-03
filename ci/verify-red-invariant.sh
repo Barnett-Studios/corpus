@@ -20,8 +20,15 @@
 # compiler, an npm install with no network. A node that is broken-unsolvable passes this
 # check. Solvability is `prove-solvable.sh`'s job, and that covers only the 25-node clean
 # subset, so the 225 Exercism nodes have their RED verified and their GREEN-reachability
-# NOT. Observed evidence that this is not hypothetical: in CI the 26 cpp nodes each report
-# RED in ~0.17s, below the floor for a real cmake configure+build+ctest. Tracked in #14.
+# NOT. Tracked in #14.
+#
+# That gap was not hypothetical, and it has now been paid out once. All 26 cpp nodes were
+# reporting RED in ~0.17s in CI — below the floor for a real cmake configure. The cause was
+# a CMakeLists that derived its source filenames from the work directory, so cmake never
+# configured in any scratch dir and no submission could ever have turned the node GREEN.
+# The check reported `ok ... RED (exit 1)` for all 26, every run, for as long as they have
+# existed. #15 repairs the seeds; this comment stays because the LIMIT is unchanged — the
+# next unsolvable node will pass this check just as quietly.
 #
 # Usage:
 #   verify-red-invariant.sh [<corpus-root>]      check every node (or $CORPUS_LANG only)
