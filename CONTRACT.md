@@ -4,6 +4,28 @@ The **corpus**: a collection of RED-baseline tasks that an A/B eval harness (suc
 scores a harness change against. Each task is a **failing seed project** plus the metadata to run and
 score it — the fixed measurement substrate, kept separate from the harness that measures it.
 
+## Versioning
+
+The corpus is versioned. `VERSION` holds the current number and every release carries a matching
+`v<version>` tag, so a consumer can pin a **version** rather than a commit SHA.
+
+That distinction is not bookkeeping. This repo had no version at all until 0.1.0, so the only way to
+depend on it was a raw SHA — and dotclaude's submodule pointer sat five commits behind for twelve
+days, through two oracle *soundness* fixes, with nothing able to describe the gap as a version skew
+(dotclaude#66). A SHA pin cannot be compared; a version pin can.
+
+Semantics under the 0.x rule, where the **minor** is the breaking position:
+
+| Change | Bump |
+|---|---|
+| a node's `accept`, oracle mechanism, or seed layout changes | **minor** — a consumer's loader may no longer materialize it |
+| nodes added or removed | **minor** — battery composition moves, so scores are not comparable across it |
+| metadata-only fields, prose, CI | patch |
+
+Composition changes are deliberately breaking: a battery whose membership shifted produces numbers
+that must not be compared to the previous one, and a version that says so is the cheapest way to
+stop someone doing it by accident.
+
 ## Per-node shape: `{meta, seed, RED}`
 
 Each node is a directory `red-baseline/<id>/`:
