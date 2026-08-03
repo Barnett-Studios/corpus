@@ -249,6 +249,14 @@ Quote it at two bars, because they answer different questions:
 | …and the node grades on its **full** suite (see #21 below) | **96** |
 | …and the node is also uncontaminated | **25** |
 
+**Do not mix the bars across a power calculation.** The discordant rate `d = 0.375`
+(dotclaude#34) was measured on the clean 25, which are 25/25 full-suite. Applying it to N=232 —
+59% of which grade on a single test — takes `N` from one population and `d` from another, and the
+error has a direction: an easier pass bar produces concordance, concordance suppresses the
+*measured* `d`, and a low `d` is exactly what would justify an expensive authoring program. Fix
+#23 (toolchain pinning, which decides whether N is 232 or 185) and #21 (the pass bar) before
+estimating `d`. See [`docs/census/README.md`](docs/census/README.md).
+
 GREEN-reachability across the 225 needed no authoring: each maps 1:1 onto an upstream Exercism
 exercise shipping a canonical example, and slug coverage was 225 of 225.
 

@@ -148,10 +148,31 @@ effect at N=232 — without authoring a single node.** #34 computed that prize c
 ("power at N=250 would be … 0.97 (π=0.70)") and could not claim it, because the stratum was
 unsound. The census is what makes it claimable.
 
-The binding constraint has therefore moved again: **it is no longer N, it is whether `d` survives
-on this stratum.** Two reasons it might not — contamination (a memorised node lands first try in
-both arms) and corpus#21 (a one-assertion bar does the same) — both push in the same direction,
-toward concordance. Sensitivity:
+### Read the 0.96 with its confound, not just its condition
+
+**That row takes `N` from one population and `d` from another.** `d = 0.375` was measured on the
+clean 25, which are **25 of 25 full-suite**. It is applied above to 232 nodes, of which **136
+(59%) grade on a single test**. The second bar in the same table is the proof: hold the full-suite
+line and it is N=96 at power **0.62**, not 232 at 0.96.
+
+The confound has a **direction**, and that is what makes it a sequencing constraint rather than a
+caveat. A one-assertion bar makes a node easier → both arms pass → the node is concordant → Pratt
+drops it → the *measured* `d` comes out low. On the sensitivity table below, a low `d` maps
+directly onto "author ~113 katas". So **measuring `d` before #21 lands biases the org toward the
+most expensive outcome on the board**, on the strength of a rate estimated over a population that
+is 59% one-assertion nodes.
+
+`d` should be measured on a population whose pass bar matches the one `d` was calibrated on. That
+makes **#21 a prerequisite, not parallel hygiene** — and it is mechanical (strip `#[ignore]` /
+`@Disabled` / `xtest`, define `EXERCISM_RUN_ALL_TESTS`), not an authoring program.
+
+**#23 is a prerequisite for a different reason.** The 47 gradle nodes are instruments *conditional
+on Gradle 8.7*, the wrapper that would pin it is missing its `.jar`, and a runner resolving Gradle
+9 silently drops N from **232 to 185** with nothing announcing it.
+
+**Order: #23 → #21 → measure `d` → then decide #17.** Both prerequisites are mechanical.
+
+Sensitivity, since the whole answer turns on `d`:
 
 | d | power at N=232, π=0.70 | N needed for 80% |
 |---|---|---|
@@ -162,6 +183,8 @@ toward concordance. Sensitivity:
 
 Even at the pessimistic end of `d`'s own CI (0.212), N=232 gives 0.78.
 
-So the next act is the cheap one #34 already named: **measure `d` on the repaired stratum before
-committing to an authoring program**, because `d` is a rate and needs far fewer runs to pin than a
-difference does. See corpus#17 for the derivation and the decision it gates.
+So the next act is the cheap one #34 already named — **measure `d` before committing to an
+authoring program**, because `d` is a rate and needs far fewer runs to pin than a difference does
+— but only *after* #23 and #21, so that the population `d` is measured on has a stable size and a
+pass bar comparable to the one `d` was calibrated on. See corpus#17 for the derivation and the
+decision it gates.
