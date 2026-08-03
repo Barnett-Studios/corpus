@@ -279,17 +279,29 @@ scores it GREEN. **A sound oracle does not repair this** — `cargo test` exits 
 tests. It is a third mechanism producing concordance, alongside contamination and the permanently
 GREEN/RED nodes, and it is the reason the census reports a full-suite bar separately.
 
-### Toolchain versions are not pinned, and it matters
+### Toolchain versions: java is pinned, the rest are not
 
-`accept` invokes ambient tools (`gradle`, `cmake`, `go`, `npm`). Nothing pins a version, so a
-node's verdict can depend on the host. This is not theoretical: on **Gradle 9.x** every one of the
-47 gradle-java nodes fails with *"Failed to load JUnit Platform"* — RED for an environmental
-reason and unsolvable, exactly cpp's class. The seeds carry a wrapper pinned to 8.7 but omit
-`gradle-wrapper.jar`, so `./gradlew` cannot run either. Under a real 8.7 the stratum is healthy —
-and two nodes CI has always reported RED are in fact **GREEN on the untouched seed**
-(`java-ledger`, `java-tree-building`), a #11-class defect invisible until the tests ran.
+`accept` invokes ambient tools, so a node's verdict can depend on the host. This is not
+theoretical. On **Gradle 9.x** every one of the 47 gradle-java nodes failed with *"Failed to load
+JUnit Platform"* — RED for an environmental reason and unsolvable, exactly cpp's class. The seeds
+carried a wrapper pinned to 8.7 but omitted `gradle-wrapper.jar`, so `./gradlew` could not run
+either: the corpus declared a version it could not enforce and did not use.
 
-Report the toolchain versions alongside any result taken from this corpus.
+**Repaired for java (#23).** The wrapper jar ships (8.7, sha256 verified against Gradle's published
+digest), `gradlew` is executable, and the accept is `./gradlew test --console=plain`. Verified with
+Gradle 9.5.1 deliberately on `PATH`: `./gradlew --version` reports 8.7 and the tests run.
+`ci/verify-accept-oracle.sh` check F asserts the wrapper is complete, digest-correct, and actually
+invoked — so a node cannot silently drift back to an ambient toolchain.
+
+Pinning made two nodes visible that CI had always reported RED: **`java-ledger` and
+`java-tree-building` are GREEN on the untouched seed** (both ship complete implementations). That
+is #11's content defect in a language where nothing could see it, and they are now quarantined in
+`ci/verify-red-invariant.sh` — safe to quarantine only *because* of the pin, since before it
+whether they read GREEN or RED depended on the host's gradle.
+
+**Still unpinned: `cmake`, `go`, `npm`, `python3`, `cargo`.** No equivalent failure is known for
+them, which is not the same as none existing — the java one was invisible for as long as the nodes
+existed. Report the toolchain versions alongside any result taken from this corpus.
 
 The 25 hand-authored nodes are clean on every count — which is why they are the held-out stratum
 in more than the leakage sense, and why their small size (below) is this corpus's binding

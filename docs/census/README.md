@@ -119,9 +119,10 @@ never see one.
   "no reference solution has reached GREEN", not "no solution can".
 - `cpp-gigasecond` and `cpp-meetup` require Boost, which `requires:` does not declare. They are
   ENV-broken on any host without it; the fix is a `requires:` entry, not a seed change.
-- Toolchain versions matter and the corpus does not pin them. This census was taken with
-  Gradle **8.7** (the version the seeds' own wrapper names), cmake 4.4.2, go 1.24.3, JDK 21,
-  node 24, python 3.13, cargo (stable). The java result would be entirely different on Gradle 9.
+- Toolchain versions matter. This census was taken with Gradle **8.7** (the version the seeds'
+  own wrapper names), cmake 4.4.2, go 1.24.3, JDK 21, node 24, python 3.13, cargo (stable). The
+  java result would have been entirely different on Gradle 9 — which is why #23 pinned it. The
+  other five toolchains are still unpinned, so this list is part of the result, not a footnote.
 
 ## Reproducing it
 
@@ -166,11 +167,15 @@ is 59% one-assertion nodes.
 makes **#21 a prerequisite, not parallel hygiene** — and it is mechanical (strip `#[ignore]` /
 `@Disabled` / `xtest`, define `EXERCISM_RUN_ALL_TESTS`), not an authoring program.
 
-**#23 is a prerequisite for a different reason.** The 47 gradle nodes are instruments *conditional
-on Gradle 8.7*, the wrapper that would pin it is missing its `.jar`, and a runner resolving Gradle
-9 silently drops N from **232 to 185** with nothing announcing it.
+**#23 was a prerequisite for a different reason, and it has landed.** The 47 gradle nodes were
+instruments *conditional on Gradle 8.7*, with a runner resolving Gradle 9 silently dropping N from
+**232 to 185**. The wrapper jar now ships and the accept invokes `./gradlew`, so that
+conditionality is gone and check F keeps it gone. Pinning also made two nodes visible that CI had
+always reported RED — `java-ledger` and `java-tree-building` are GREEN on the untouched seed — and
+both were already counted as BROKEN in this census, so `N_instrument` is unchanged at 232.
 
-**Order: #23 → #21 → measure `d` → then decide #17.** Both prerequisites are mechanical.
+**Order: ~~#23~~ → #21 → measure `d` → then decide #17.** #23 is done; #21 is the remaining
+prerequisite, and it is mechanical.
 
 Sensitivity, since the whole answer turns on `d`:
 

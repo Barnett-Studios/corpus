@@ -36,6 +36,25 @@ ever drifts from the actual data.
 - **Gradle wrapper / Apache-2.0** — © Gradle Inc. The wrapper is the standard redistributable Gradle
   bootstrap. Source: https://github.com/gradle/gradle.
 
+  Until #23 this row was **inaccurate**: it claimed `gradle/wrapper/*` was bundled, but
+  `gradle-wrapper.jar` — the only part of the wrapper that is actually a Gradle Inc. artifact, and
+  the only part that carries the Apache-2.0 obligation — had never been committed. The attribution
+  described a redistribution that was not happening. `gradlew` and `gradlew.bat` are shell/batch
+  bootstraps; without the jar they cannot run.
+
+  The jar is now present in all 47 nodes, pinned to the version the seeds' own
+  `gradle-wrapper.properties` names:
+
+  | | |
+  |---|---|
+  | version | 8.7 |
+  | sha256 | `cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8` |
+  | verified against | `https://services.gradle.org/distributions/gradle-8.7-wrapper.jar.sha256` |
+
+  `ci/verify-accept-oracle.sh` check F asserts that digest on every run. The jar is a binary each
+  java node executes, so an unnoticed swap would be arbitrary code execution across 47 nodes;
+  attribution and integrity are the same problem here, and the check covers both.
+
 Language scaffolds without a separate license obligation — `go.mod` (45), `Cargo.toml` (37 — one more
 than the 36 `rust-*` nodes because `rust-macros` ships a workspace + proc-macro pair),
 `CMakeLists.txt`, JavaScript `package.json` — are trivial build descriptors generated per exercise
