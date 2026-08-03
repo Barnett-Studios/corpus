@@ -1,7 +1,7 @@
 id: "cpp-clock"
 language: "cpp"
 files: ["clock.cpp", "clock.h"]
-accept: "cmake -S . -B build >/dev/null 2>&1 && cmake --build build >/dev/null 2>&1"
+accept: "cmake -S . -B build -DEXERCISM_RUN_ALL_TESTS=1 >/dev/null 2>&1 && cmake --build build >/dev/null 2>&1"
 forbid: ["new_deps"]
 requires: ["cmake"]
 change: "Implement the solution in clock.cpp, clock.h so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nImplement a clock that handles times without dates.\n\nYou should be able to add and subtract minutes to it.\n\nTwo clocks that represent the same time should be equal to each other."

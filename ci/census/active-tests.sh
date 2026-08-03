@@ -39,11 +39,19 @@ for d in "$C"/*; do
         tot=$((tot + a + x)); act=$((act + a))
       done ;;
     cpp)
+      # cpp gates its suite from the BUILD, not the test file: everything after the first
+      # TEST_CASE sits behind `#if defined(EXERCISM_RUN_ALL_TESTS)`. So the enabled count is a
+      # property of the ACCEPT, not of the source — counting the source alone reports 1 active
+      # test even when the accept defines the flag and the whole suite compiles.
       t="$d/seed/$(echo "${n#cpp-}" | tr '-' '_')_test.cpp"
       if [ -f "$t" ]; then
         tot=$(grep -c 'TEST_CASE' "$t")
+        acc="$(sed -n 's/^accept: *"\(.*\)"$/\1/p' "$d/meta.yaml" | head -1)"
         line=$(grep -n 'EXERCISM_RUN_ALL_TESTS' "$t" | head -1 | cut -d: -f1)
-        if [ -n "$line" ]; then act=$(head -n "$((line - 1))" "$t" | grep -c 'TEST_CASE'); else act=$tot; fi
+        case "$acc" in
+          *EXERCISM_RUN_ALL_TESTS*) act=$tot ;;
+          *) if [ -n "$line" ]; then act=$(head -n "$((line - 1))" "$t" | grep -c 'TEST_CASE'); else act=$tot; fi ;;
+        esac
       fi ;;
     go)
       for t in "$d"/seed/*_test.go; do

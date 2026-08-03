@@ -1,6 +1,5 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +18,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("33 ohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testBlueAndGreyAndBrown() {
         assertThat(
@@ -27,7 +25,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("680 ohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testRedAndBlackAndRed() {
         assertThat(
@@ -35,7 +32,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("2 kiloohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testGreenAndBrownAndOrange() {
         assertThat(
@@ -43,7 +39,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("51 kiloohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testYellowAndVioletAndYellow() {
         assertThat(
@@ -51,7 +46,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("470 kiloohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testBlueAndVioletAndBlue() {
         assertThat(
@@ -59,7 +53,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("67 megaohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testBlackAndBlackAndBlack() {
         assertThat(
@@ -67,7 +60,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("0 ohms");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testWhiteAndWhiteAndWhite() {
         assertThat(
@@ -75,7 +67,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("99 gigaohms");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFirstTwoColorsMakeAnInvalidOctalNumber() {
         assertThat(
@@ -83,7 +74,6 @@ public class ResistorColorTrioTest {
         ).isEqualTo("8 ohms");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testIgnoreExtraColors() {
         assertThat(

@@ -11,7 +11,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('one entry', () => {
+  test('one entry', () => {
     let currency = 'USD';
     let locale = 'en-US';
     let entries = [createEntry('2015-01-01', 'Buy present', -1000)];
@@ -22,7 +22,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('credit and debit', () => {
+  test('credit and debit', () => {
     let currency = 'USD';
     let locale = 'en-US';
     let entries = [
@@ -37,7 +37,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('final order tie breaker is change', () => {
+  test('final order tie breaker is change', () => {
     let currency = 'USD';
     let locale = 'en-US';
     let entries = [
@@ -54,7 +54,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('overlong description is truncated', () => {
+  test('overlong description is truncated', () => {
     let currency = 'USD';
     let locale = 'en-US';
     let entries = [
@@ -67,7 +67,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('euros', () => {
+  test('euros', () => {
     let currency = 'EUR';
     let locale = 'en-US';
     let entries = [createEntry('2015-01-01', 'Buy present', -1000)];
@@ -78,7 +78,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('Dutch locale', () => {
+  test('Dutch locale', () => {
     let currency = 'USD';
     let locale = 'nl-NL';
     let entries = [createEntry('2015-03-12', 'Buy present', 123456)];
@@ -89,7 +89,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('Dutch locale and euros', () => {
+  test('Dutch locale and euros', () => {
     let currency = 'EUR';
     let locale = 'nl-NL';
     let entries = [createEntry('2015-03-12', 'Buy present', 123456)];
@@ -100,7 +100,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('Dutch negative number with 3 digits before decimal point', () => {
+  test('Dutch negative number with 3 digits before decimal point', () => {
     let currency = 'USD';
     let locale = 'nl-NL';
     let entries = [createEntry('2015-03-12', 'Buy present', -12345)];
@@ -111,7 +111,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('American negative number with 3 digits before decimal point', () => {
+  test('American negative number with 3 digits before decimal point', () => {
     let currency = 'USD';
     let locale = 'en-US';
     let entries = [createEntry('2015-03-12', 'Buy present', -12345)];
@@ -122,7 +122,7 @@ describe('Ledger', () => {
     expect(formatEntries(currency, locale, entries)).toEqual(expected);
   });
 
-  xtest('multiple entries on same date ordered by description', () => {
+  test('multiple entries on same date ordered by description', () => {
     let currency = 'USD';
     let locale = 'en-US';
     let entries = [

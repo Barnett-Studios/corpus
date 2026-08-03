@@ -1,6 +1,5 @@
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +15,6 @@ public class RestApiTest {
         assertThat(new RestApi().get(url)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void addUser() {
         String expected = new JSONObject()
@@ -31,7 +29,6 @@ public class RestApiTest {
         assertThat(new RestApi().post(url, payload)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void getSingleUser() {
         String expected = new JSONObject()
@@ -92,7 +89,6 @@ public class RestApiTest {
                 .post(url, payload)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void borrowerHasNegativeBalance() {
         String expected =
@@ -133,7 +129,6 @@ public class RestApiTest {
                 .post(url, payload)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void lenderHasNegativeBalance() {
         String expected =
@@ -176,7 +171,6 @@ public class RestApiTest {
                 .post(url, payload)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void lenderOwesBorrower() {
         String expected =
@@ -214,7 +208,6 @@ public class RestApiTest {
                 .post(url, payload)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void lenderOwesBorrowerLessThanNewLoan() {
         String expected =
@@ -252,7 +245,6 @@ public class RestApiTest {
                 .post(url, payload)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void lenderOwesBorrowerSameAsNewLoan() {
         String expected =

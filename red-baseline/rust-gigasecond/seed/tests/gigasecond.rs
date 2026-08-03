@@ -7,7 +7,6 @@ fn date_only_specification_of_time() {
 }
 
 #[test]
-#[ignore]
 fn second_test_for_date_only_specification_of_time() {
     let start = datetime(1977, 6, 13, 0, 0, 0);
     let actual = gigasecond::after(start);
@@ -16,7 +15,6 @@ fn second_test_for_date_only_specification_of_time() {
 }
 
 #[test]
-#[ignore]
 fn third_test_for_date_only_specification_of_time() {
     let start = datetime(1959, 7, 19, 0, 0, 0);
     let actual = gigasecond::after(start);
@@ -25,7 +23,6 @@ fn third_test_for_date_only_specification_of_time() {
 }
 
 #[test]
-#[ignore]
 fn full_time_specified() {
     let start = datetime(2015, 1, 24, 22, 0, 0);
     let actual = gigasecond::after(start);
@@ -34,7 +31,6 @@ fn full_time_specified() {
 }
 
 #[test]
-#[ignore]
 fn full_time_with_day_roll_over() {
     let start = datetime(2015, 1, 24, 23, 59, 59);
     let actual = gigasecond::after(start);

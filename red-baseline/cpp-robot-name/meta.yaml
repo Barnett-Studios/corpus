@@ -1,7 +1,7 @@
 id: "cpp-robot-name"
 language: "cpp"
 files: ["robot_name.cpp", "robot_name.h"]
-accept: "cmake -S . -B build >/dev/null 2>&1 && cmake --build build >/dev/null 2>&1"
+accept: "cmake -S . -B build -DEXERCISM_RUN_ALL_TESTS=1 >/dev/null 2>&1 && cmake --build build >/dev/null 2>&1"
 forbid: ["new_deps"]
 requires: ["cmake"]
 change: "Implement the solution in robot_name.cpp, robot_name.h so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nManage robot factory settings.\n\nWhen a robot comes off the factory floor, it has no name.\n\nThe first time you turn on a robot, a random name is generated in the format of two uppercase letters followed by three digits, such as RX837 or BC811.\n\nEvery once in a while we need to reset a robot to its factory settings, which means that its name gets wiped.\nThe next time you ask, that robot will respond with a new random name.\n\nThe names must be random: they should not follow a predictable sequence.\nUsing random names means a risk of collisions.\nYour solution must ensure that every existing robot has a unique name."

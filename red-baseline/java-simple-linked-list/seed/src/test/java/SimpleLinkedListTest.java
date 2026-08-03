@@ -1,7 +1,6 @@
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
@@ -14,7 +13,6 @@ public class SimpleLinkedListTest {
         assertThat(list.size()).isEqualTo(0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void canCreateFromArray() {
         Character[] values = new Character[]{'1', '2', '3'};
@@ -22,7 +20,6 @@ public class SimpleLinkedListTest {
         assertThat(list.size()).isEqualTo(3);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void popOnEmptyListWillThrow() {
         SimpleLinkedList<String> list = new SimpleLinkedList<String>();
@@ -30,7 +27,6 @@ public class SimpleLinkedListTest {
         assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(list::pop);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void popReturnsLastAddedElement() {
         SimpleLinkedList<Integer> list = new SimpleLinkedList<Integer>();
@@ -42,7 +38,6 @@ public class SimpleLinkedListTest {
         assertThat(list.size()).isEqualTo(0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void reverseReversesList() {
         SimpleLinkedList<String> list = new SimpleLinkedList<String>();
@@ -59,7 +54,6 @@ public class SimpleLinkedListTest {
         assertThat(list.pop()).isEqualTo("5");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void canReturnListAsArray() {
         SimpleLinkedList<Character> list = new SimpleLinkedList<Character>();
@@ -72,7 +66,6 @@ public class SimpleLinkedListTest {
         assertThat(list.asArray(Character.class)).isEqualTo(expected);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void canReturnEmptyListAsEmptyArray() {
         SimpleLinkedList<Object> list = new SimpleLinkedList<Object>();
