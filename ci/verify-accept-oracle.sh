@@ -2,8 +2,9 @@
 # CI invariant for issues #4 and #15 — the accept oracle honors the runner's exit code, and no
 # acceptance test lives in an editable (`files:`) file. See docs/adrs/0001-green-is-runner-exit-zero.md.
 #
-# Five checks (any failure => non-zero exit):
+# Six checks (any failure => non-zero exit):
 #   A  static      no accept ANYWHERE IN THE CORPUS pipes into grep   (#15: all 250 nodes)
+#   F  static      a node shipping a toolchain pin actually uses it    (#23: wrapper complete + used)
 #   D  structural  no editable (`files:`) file contains a test        (#15: all 250 nodes)
 #   E  behavioral  a 2-passed/12-failed run scores RED under every python accept  (#15 reproduction)
 #   B  behavioral  the pipe-discard mechanism the invariant defends against, reproduced
@@ -193,6 +194,70 @@ else
   elif [[ $e_fail -eq 0 ]]; then
     note "ok: all $e_ran pytest accepts score the partial-pass fixture RED"
   fi
+fi
+
+echo "== check F: a node that ships a toolchain pin must actually use it (#23) =="
+# corpus#23. `accept: gradle test` invokes whatever `gradle` is on PATH. On Gradle 9.x every
+# gradle node dies with "Failed to load JUnit Platform" BEFORE a single test runs — RED for an
+# environmental reason and unsolvable, which is exactly the cpp class #14 confirmed. The seeds
+# already declare the version they want in gradle-wrapper.properties; they just could not use it,
+# because gradle-wrapper.jar was missing and gradlew was not executable.
+#
+# Three properties, all mechanical:
+#   the wrapper is COMPLETE   (jar present, gradlew executable)
+#   the accept USES it        (./gradlew, not ambient gradle)
+#   the jar is the REAL one   (sha256 vs Gradle's published wrapper checksum)
+#
+# The checksum is not ceremony. The jar is a binary that every java node executes, so an
+# unnoticed swap is arbitrary code execution across 47 nodes. Gradle publishes the digest at
+# services.gradle.org/distributions/gradle-<v>-wrapper.jar.sha256; this is 8.7's, verified
+# against that endpoint when the jar was added.
+WRAPPER_SHA256_8_7="cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8"
+f_fail=0; f_checked=0
+sha_of() {
+  if have shasum; then shasum -a 256 "$1" | cut -d' ' -f1
+  elif have sha256sum; then sha256sum "$1" | cut -d' ' -f1
+  else printf ''; fi
+}
+for node in "${ALL_GLOB[@]}"; do
+  [[ -d "$node" ]] || continue
+  src="$node/seed"; [[ -d "$src" ]] || src="$node"
+  # Only nodes that ship a wrapper are in scope; a node with no pin is a different question.
+  [[ -f "$src/gradle/wrapper/gradle-wrapper.properties" ]] || continue
+  f_checked=$((f_checked + 1))
+  base="$(basename "$node")"
+  acc="$(accept_of "$node")"
+
+  jar="$src/gradle/wrapper/gradle-wrapper.jar"
+  if [[ ! -f "$jar" ]]; then
+    note "FAIL $base: pins gradle in gradle-wrapper.properties but ships no gradle-wrapper.jar — ./gradlew cannot run"
+    fail=1; f_fail=1
+  else
+    got="$(sha_of "$jar")"
+    if [[ -z "$got" ]]; then
+      note "skip $base: no sha256 tool — wrapper jar integrity unverified"
+    elif [[ "$got" != "$WRAPPER_SHA256_8_7" ]]; then
+      note "FAIL $base: gradle-wrapper.jar sha256 $got != published $WRAPPER_SHA256_8_7"
+      fail=1; f_fail=1
+    fi
+  fi
+
+  if [[ -f "$src/gradlew" && ! -x "$src/gradlew" ]]; then
+    note "FAIL $base: gradlew is not executable — the pin cannot be invoked"
+    fail=1; f_fail=1
+  fi
+
+  # `gradle ...` unqualified resolves off PATH; `./gradlew ...` is the pin.
+  if [[ "$acc" == *"gradle "* && "$acc" != *"./gradlew"* ]]; then
+    note "FAIL $base: accept invokes ambient gradle, not the pinned ./gradlew -> $acc"
+    fail=1; f_fail=1
+  fi
+done
+if [[ $f_checked -eq 0 ]]; then
+  note "FAIL: check F matched no wrapper-shipping node — the corpus lost its java stratum, or the probe is stale"
+  fail=1; f_fail=1
+elif [[ $f_fail -eq 0 ]]; then
+  note "ok: all $f_checked wrapper-shipping nodes ship a complete, verified wrapper and invoke it"
 fi
 
 echo "== check B: the pipe-discard mechanism the invariant forbids =="
