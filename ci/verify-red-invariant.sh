@@ -190,6 +190,14 @@ fi
 #   corpus#11  go-counter, go-ledger, go-markdown — CONTENT. go-counter ships no test at
 #              all; the other two ship complete implementations never reduced to a stub.
 #              Repairable: author the missing test, re-stub the two.
+#   corpus#23  java-ledger, java-tree-building — the SAME content defect, in a language
+#              where it could not be seen. Both ship complete implementations, and both
+#              were invisible while the accept invoked ambient `gradle`: on Gradle 9.x the
+#              test executor never starts, so they exited non-zero and this check printed
+#              `ok ... RED` for them. Pinning the wrapper (#23) is what made them visible.
+#              They are safe to quarantine only BECAUSE of that pin — before it, whether
+#              they read GREEN or RED depended on the host's gradle, and an entry here
+#              would have tripped the anti-rot branch on any runner resolving 9.x.
 #   corpus#16  javascript-ledger — COMPOSITION, and not repairable. It is an upstream
 #              *refactoring* exercise whose prompt states the code "consistently passes
 #              the test suite". There is no RED state to start from and no accept oracle
@@ -207,7 +215,7 @@ fi
 # Adding an entry is a deliberate, reviewable edit. Do not add one to make CI green.
 # KNOWN_GREEN_OVERRIDE exists so --self-test can exercise the anti-rot branch; it is not
 # a production knob and CI never sets it.
-KNOWN_GREEN="${KNOWN_GREEN_OVERRIDE:-go-counter go-ledger go-markdown javascript-ledger}"
+KNOWN_GREEN="${KNOWN_GREEN_OVERRIDE:-go-counter go-ledger go-markdown javascript-ledger java-ledger java-tree-building}"
 
 is_quarantined() {
   case " $KNOWN_GREEN " in *" $1 "*) return 0 ;; *) return 1 ;; esac
@@ -239,7 +247,7 @@ for node in "$CORPUS_ROOT"/*; do
   if is_quarantined "$base"; then
     quarantined=$((quarantined + 1))
     if [[ "$ec" -eq 0 ]]; then
-      note "QUARANTINED $base: GREEN, known broken (corpus#11) — NOT counted as verified"
+      note "QUARANTINED $base: GREEN, known broken (corpus#11/#16/#23) — NOT counted as verified"
     else
       note "FAIL $base: quarantined as known-GREEN but is RED — remove it from KNOWN_GREEN"
       stale_quarantine="$stale_quarantine $base"
@@ -259,7 +267,7 @@ done
 echo
 echo "RED invariant: considered=$considered checked=$checked skipped=$skipped quarantined=$quarantined${LANG_FILTER:+ (language=$LANG_FILTER)}"
 if [[ $quarantined -gt 0 ]]; then
-  echo "  quarantined (known-GREEN, corpus#11 — the gate does NOT cover these):$(
+  echo "  quarantined (known-GREEN, corpus#11/#16/#23 — the gate does NOT cover these):$(
     for q in $KNOWN_GREEN; do [[ -d "$CORPUS_ROOT/$q" ]] && printf ' %s' "$q"; done)"
 fi
 
