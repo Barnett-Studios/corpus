@@ -1,5 +1,7 @@
-# Get the exercise name from the current directory
-get_filename_component(exercise ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+# Pinned, not derived from the directory name: a harness materialises this seed
+# into a scratch dir, and a derived name makes cmake look for <scratchdir>_test.cpp
+# and fail to configure. See corpus#14.
+set(exercise "meetup")
 
 # Basic CMake project
 cmake_minimum_required(VERSION 3.5.1)

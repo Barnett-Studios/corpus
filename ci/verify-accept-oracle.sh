@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
-# CI invariant for issue #4 — the clean-subset accept oracle honors the runner's exit code, and no
+# CI invariant for issues #4 and #15 — the accept oracle honors the runner's exit code, and no
 # acceptance test lives in an editable (`files:`) file. See docs/adrs/0001-green-is-runner-exit-zero.md.
 #
-# Four checks (any failure => non-zero exit):
-#   A  static      no clean-subset accept pipes into grep       (RED-first #1: fails until #4's fix)
-#   D  structural  no editable (`files:`) file contains a test  (RED-first #2: fails for rust until relocated)
+# Five checks (any failure => non-zero exit):
+#   A  static      no accept ANYWHERE IN THE CORPUS pipes into grep   (#15: all 250 nodes)
+#   D  structural  no editable (`files:`) file contains a test        (#15: all 250 nodes)
+#   E  behavioral  a 2-passed/12-failed run scores RED under every python accept  (#15 reproduction)
 #   B  behavioral  the pipe-discard mechanism the invariant defends against, reproduced
 #   C  RED-invariant  each clean-subset seed scores non-zero, incl. rust with its editable file emptied
-# B and C skip a language whose toolchain is absent (fail-open, mirroring `requires`).
+# B, C and E skip a language whose toolchain is absent (fail-open, mirroring `requires`).
+#
+# SCOPE, AND WHY IT MOVED (#15). Checks A and D were originally scoped to the 25-node clean subset.
+# That is precisely how 222 Exercism nodes kept a `grep`-on-output accept while the contract that
+# forbids it was "enforced in CI": the guard never looked at the population it certifies. A and D now
+# sweep all 250. C stays on the clean subset deliberately — running every seed is
+# `verify-red-invariant.sh`'s job and it already shards that across the full corpus in CI.
 #
 # Usage: verify-accept-oracle.sh [<corpus-root>]   (<corpus-root> defaults to $CORPUS_ROOT, else the
 # repo's own red-baseline/ resolved relative to this script). Portable to bash 3.2 (no mapfile).
@@ -32,9 +39,16 @@ have() { command -v "$1" >/dev/null 2>&1; }
 # The clean subset: the 24 hand-authored katas + py-add. A brace pattern that matches nothing
 # stays literal, so the `-d` guard skips it.
 CLEAN_GLOB=("$CORPUS_ROOT"/{go,java,python,rust}-0[1-6]-* "$CORPUS_ROOT"/py-add)
+# Every node. Checks A and D sweep this; #15 is the ticket that moved them off CLEAN_GLOB.
+ALL_GLOB=("$CORPUS_ROOT"/*)
 
-# accept: "..."  ->  the command string (clean-subset accepts are single-line, double-quoted).
-accept_of() { sed -n 's/^accept: *"\(.*\)"$/\1/p' "$1/meta.yaml" | sed -n '1p'; }
+# accept: "..."  ->  the command string, with YAML double-quoted escapes resolved (accepts are
+# single-line, double-quoted). The unescape matches verify-red-invariant.sh's: an accept carrying
+# `\\` in the file means `\` once YAML has read it, and check E evals the string.
+accept_of() {
+  sed -n 's/^accept: *"\(.*\)"$/\1/p' "$1/meta.yaml" | sed -n '1p' \
+    | sed -e 's/\\"/"/g' -e 's/\\\\/\\/g'
+}
 language_of() { sed -n 's/^language: *"\{0,1\}\([a-z+]*\)"\{0,1\}.*/\1/p' "$1/meta.yaml" | sed -n '1p'; }
 # files: ["a", "b"]  ->  bash array FILES (no nested process-substitution; bash-3.2 safe).
 FILES=()
@@ -55,13 +69,18 @@ resolve_file() {
 }
 # A test-definition marker for the given language, or empty if we don't gate that language here.
 # Whitespace-tolerant (`#[ test ]` is a valid rust test); [[:space:]] not \s, for BSD+GNU grep -E.
+# javascript and cpp markers added with #15, when D grew to all 250 nodes. Both were checked
+# against every editable file in the corpus before being added: 0 hits, so neither can fire as a
+# false positive on implementation code today.
 test_marker() {
   case "$1" in
-    rust)   printf '%s' '#\[[[:space:]]*test[[:space:]]*\]|#\[[[:space:]]*cfg[[:space:]]*\([[:space:]]*test' ;;
-    go)     printf '%s' 'func (Test|Example|Benchmark)' ;;
-    python) printf '%s' 'def test|import unittest|from unittest|import pytest' ;;
-    java)   printf '%s' '@Test|class TestRunner' ;;
-    *)      printf '%s' '' ;;
+    rust)       printf '%s' '#\[[[:space:]]*test[[:space:]]*\]|#\[[[:space:]]*cfg[[:space:]]*\([[:space:]]*test' ;;
+    go)         printf '%s' 'func (Test|Example|Benchmark)' ;;
+    python)     printf '%s' 'def test|import unittest|from unittest|import pytest' ;;
+    java)       printf '%s' '@Test|class TestRunner' ;;
+    javascript) printf '%s' 'describe\(|\bit\(|test\(|expect\(' ;;
+    cpp)        printf '%s' 'TEST_CASE|REQUIRE\(|CHECK\(' ;;
+    *)          printf '%s' '' ;;
   esac
 }
 # Is a language's toolchain present? (echoes "yes"/"no")
@@ -85,23 +104,34 @@ if [[ $found_clean -ne $EXPECTED_CLEAN ]]; then
   exit 2
 fi
 
-echo "== check A: no clean-subset accept pipes its runner (a pipe discards its exit code) =="
+# Same tripwire for the full corpus, now that A and D sweep it: a wrong CORPUS_ROOT would
+# otherwise make the widened checks pass over nothing, which is the exact failure mode #15 is
+# about — a guard reporting green over a population it never looked at.
+EXPECTED_NODES="${EXPECTED_NODES:-250}"
+found_all=0
+for node in "${ALL_GLOB[@]}"; do [[ -d "$node" ]] && found_all=$((found_all + 1)); done
+if [[ $found_all -ne $EXPECTED_NODES ]]; then
+  echo "corpus drift: found $found_all nodes, expected $EXPECTED_NODES (renamed/dropped/added node, or wrong CORPUS_ROOT)" >&2
+  exit 2
+fi
+
+echo "== check A: no accept in the corpus pipes its runner (a pipe discards its exit code) =="
 a_fail=0
-for node in "${CLEAN_GLOB[@]}"; do
+for node in "${ALL_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   acc="$(accept_of "$node")"
   # A pipe makes the pipeline's status the LAST command's, not the runner's — the exact defect,
-  # for grep OR rg/awk/perl/sed/etc. The clean-subset accepts are bare runners or `&&`-chains,
-  # never piped, so any `|` is the anti-pattern.
+  # for grep OR rg/awk/perl/sed/etc. An accept must be a bare runner or an `&&`-chain, never
+  # piped, so any `|` is the anti-pattern.
   if [[ "$acc" == *"|"* ]]; then
     note "FAIL $(basename "$node"): accept pipes its runner (exit code discarded) -> $acc"; fail=1; a_fail=1
   fi
 done
-[[ $a_fail -eq 0 ]] && note "ok: no accept pipes its runner"
+[[ $a_fail -eq 0 ]] && note "ok: no accept pipes its runner ($found_all nodes)"
 
 echo "== check D: no editable (files:) file contains its acceptance test =="
 d_fail=0
-for node in "${CLEAN_GLOB[@]}"; do
+for node in "${ALL_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   lang="$(language_of "$node")"
   marker="$(test_marker "$lang")"
@@ -117,7 +147,53 @@ for node in "${CLEAN_GLOB[@]}"; do
     fi
   done
 done
-[[ $d_fail -eq 0 ]] && note "ok: no editable file contains its acceptance test"
+[[ $d_fail -eq 0 ]] && note "ok: no editable file contains its acceptance test ($found_all nodes)"
+
+echo "== check E: a 2-passed/12-failed run scores RED under every python accept (#15) =="
+# The reproduction that found #15, run against the real accepts rather than a mock of them.
+#
+# ci/fixtures/partial-pass/ is a project whose suite emits exactly `2 passed, 12 failed` — the
+# output `python-react` shipped while scoring GREEN. Every python node's accept is taken verbatim,
+# its `<name>_test.py` argument repointed at the fixture, and run. A `grep -qE '[1-9][0-9]* passed'`
+# accept matches the substring `2 passed` and returns 0 (GREEN, wrong). An exit-status accept
+# returns pytest's 1 (RED, correct).
+#
+# Check A already forbids the pipe statically across all 250. This check is the behavioural half:
+# it proves what the static rule is FOR, on the concrete case, so a future accept that reintroduces
+# a success-substring filter by some other spelling is still caught.
+e_fail=0
+FIXTURE="$HERE/fixtures/partial-pass"
+if [[ ! -d "$FIXTURE" ]]; then
+  note "FAIL: fixture missing at $FIXTURE"; fail=1; e_fail=1
+elif ! have python3 || ! python3 -m pytest --version >/dev/null 2>&1; then
+  # Fail-open on toolchain, per CONTRACT — but say so, so a skip is never read as a pass.
+  note "skip: python3/pytest absent — check E did not run"
+else
+  e_ran=0
+  for node in "${ALL_GLOB[@]}"; do
+    [[ -d "$node" ]] || continue
+    [[ "$(language_of "$node")" == python ]] || continue
+    acc="$(accept_of "$node")"
+    # Only the pytest-shaped accepts can be repointed; the unittest katas name a test METHOD, not
+    # a file, and are out of this check's reach. They are covered by A and D.
+    [[ "$acc" == *_test.py* ]] || continue
+    probe="$(printf '%s' "$acc" | sed -E 's/[A-Za-z0-9_]+_test\.py/partial_test.py/g')"
+    work="$(mktemp -d)"
+    cp -R "$FIXTURE/." "$work/"
+    ec=0; ( set +o pipefail; cd "$work" && eval "$probe" >/dev/null 2>&1 ) || ec=$?
+    rm -rf "$work"
+    e_ran=$((e_ran + 1))
+    if [[ $ec -eq 0 ]]; then
+      note "FAIL $(basename "$node"): scores a 2-passed/12-failed run GREEN -> $acc"; fail=1; e_fail=1
+    fi
+  done
+  # Vacuity guard: a check that repointed nothing proved nothing.
+  if [[ $e_ran -eq 0 ]]; then
+    note "FAIL: check E matched no python accept — the probe's rewrite rule has gone stale"; fail=1; e_fail=1
+  elif [[ $e_fail -eq 0 ]]; then
+    note "ok: all $e_ran pytest accepts score the partial-pass fixture RED"
+  fi
+fi
 
 echo "== check B: the pipe-discard mechanism the invariant forbids =="
 # The katas' accepts run as a plain command (no `set -o pipefail`), so a pipe returns the RIGHTMOST

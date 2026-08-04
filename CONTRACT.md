@@ -183,24 +183,44 @@ This section would mislead if it stopped here, because it documents the *lesser*
 The same nodes carry two further defects, and by this project's own analysis the first outranks
 contamination:
 
-- **The accept oracle is unsound (#15) — 222 of the 225.** They score by `grep` on runner output
-  instead of on the runner's exit status, the practice this contract forbids two sections up. The
-  demonstration case was `python-react`: it ships **2 passed, 12 failed** and scored GREEN, because
-  `grep -qE '[1-9][0-9]* passed'` matches the "2 passed". Three such nodes are repaired in #3;
-  222 remain.
+- **The accept oracle was unsound (#15) — 222 of the 225. Repaired.** They scored by `grep` on
+  runner output instead of on the runner's exit status, the practice this contract forbids two
+  sections up. The demonstration case was `python-react`: it ships **2 passed, 12 failed** and
+  scored GREEN, because `grep -qE '[1-9][0-9]* passed'` matches the "2 passed". Three such nodes
+  were repaired in #3; the remaining 222 in #15, which also widened
+  `ci/verify-accept-oracle.sh` from the 25-node clean subset to all 250 — the scoping that let
+  this survive is that the guard never looked at the population it certifies. The reproduction is
+  kept as a fixture (`ci/fixtures/partial-pass/`, check E), so a partial pass scoring GREEN is now
+  a build failure rather than a discovery.
 
-  This is not a memorisation effect and it does not cancel in a paired delta. It is a *mislabelled
+  This was not a memorisation effect and it did not cancel in a paired delta. It is a *mislabelled
   outcome*: a partial pass counted as a full one moves a node from discordant to concordant, the
   same way a memorised node does, while also corrupting the absolute rate for reasons that have
-  nothing to do with what any model learned. Until #15 is repaired the power these nodes appear to
-  offer is not reachable, so growing a battery with more of them buys less than the count suggests.
+  nothing to do with what any model learned.
+
+  **A sound oracle is necessary, not sufficient.** Converting these accepts changed no node's
+  verdict on its own seed — all 250 were measured under both forms and none flipped. The
+  conversion's value is on *solved* states, which is where a substring filter mislabels. Two
+  further defects, below, decide whether a node is usable at all.
 
 - **GREEN-reachability is unverified across all 225 (#14).** `ci/verify-red-invariant.sh` proves
   each accept is RED on the seed; `prove-solvable.sh` proves a reference solution reaches GREEN and
   covers only the 25 hand-authored nodes. From outside, a node that is RED because its toolchain
   never reached the tests is indistinguishable from one that is RED because the stub is
-  unimplemented — and in CI the 26 cpp nodes each report RED in ~0.17s, below the floor for a real
-  cmake configure and build.
+  unimplemented.
+
+  The 26 cpp nodes were that case, and it is now confirmed rather than suspected. Their
+  `CMakeLists.txt` derived the exercise name — and therefore its **source filenames** — from the
+  work directory (`get_filename_component(exercise ${CMAKE_CURRENT_SOURCE_DIR} NAME)`). A harness
+  materialises each seed into a scratch directory, so cmake looked for `<scratchdir>_test.cpp`
+  and failed at *configure*, which is what the ~0.17s CI timings were. Every cpp node was RED for
+  an environmental reason and unsolvable with any submission. Compounding it, no cpp node
+  registers a `ctest` test at all, so the `ctest … | grep '0 tests failed'` leg of the shipped
+  accept could never match: the accept was not merely unsound, it was **unsatisfiable**. Both are
+  repaired in #15 — the name is pinned to the node's own exercise and the accept is
+  `cmake -S . -B build && cmake --build build`, the `add_custom_target(… ALL … COMMAND ${exercise})`
+  already running the test binary as part of the build. Verified end to end: stub → exit 2 (RED),
+  reference solution → exit 0 (GREEN).
 
 **The splits coincide, and that is the point.** Contaminated: 225. Unsound oracle: 222 of those
 same 225, and **0 of the 25** hand-authored. Unverified solvability: the same 225. These are not
