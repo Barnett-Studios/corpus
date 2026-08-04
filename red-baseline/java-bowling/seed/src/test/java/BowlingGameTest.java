@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +20,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isZero();
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void shouldBeAbleToScoreAGameWithNoStrikesOrSpares() {
         int[] rolls = {3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6, 3, 6};
@@ -30,7 +28,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(90);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void aSpareFollowedByZerosIsWorthTenPoints() {
         int[] rolls = {6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -39,7 +36,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(10);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void pointsScoredInTheRollAfterASpareAreCountedTwice() {
         int[] rolls = {6, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -48,7 +44,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(16);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void consecutiveSparesEachGetAOneRollBonus() {
         int[] rolls = {5, 5, 3, 7, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -57,7 +52,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(31);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void aSpareInTheLastFrameGetsAOneRollBonusThatIsCountedOnce() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3, 7};
@@ -66,7 +60,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(17);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void aStrikeEarnsTenPointsInFrameWithASingleRoll() {
         int[] rolls = {10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -75,7 +68,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(10);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void pointsScoredInTheTwoRollsAfterAStrikeAreCountedTwiceAsABonus() {
         int[] rolls = {10, 5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -84,7 +76,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(26);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void consecutiveStrikesEachGetTheTwoRollBonus() {
         int[] rolls = {10, 10, 10, 5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -93,7 +84,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(81);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void aStrikeInTheLastFrameGetsATwoRollBonusThatIsCountedOnce() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 7, 1};
@@ -102,7 +92,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(18);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void rollingASpareWithTheTwoRollBonusDoesNotGetABonusRoll() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 7, 3};
@@ -111,7 +100,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(20);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void strikesWithTheTwoRollBonusDoNotGetBonusRolls() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10};
@@ -120,7 +108,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(30);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void lastTwoStrikesFollowedByOnlyLastBonusWithNonStrikePoints() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 1};
@@ -129,7 +116,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(31);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void aStrikeWithTheOneRollBonusAfterASpareInTheLastFrameDoesNotGetABonus() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3, 10};
@@ -138,7 +124,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(20);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void allStrikesIsAPerfectGame() {
         int[] rolls = {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10};
@@ -147,7 +132,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(300);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void rollsCanNotScoreNegativePoints() {
         int[] rolls = {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -157,7 +141,6 @@ public class BowlingGameTest {
             .withMessage("Negative roll is invalid");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void aRollCanNotScoreMoreThan10Points() {
         int[] rolls = {11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -167,7 +150,6 @@ public class BowlingGameTest {
             .withMessage("Pin count exceeds pins on the lane");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void twoRollsInAFrameCanNotScoreMoreThan10Points() {
         int[] rolls = {5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -177,7 +159,6 @@ public class BowlingGameTest {
             .withMessage("Pin count exceeds pins on the lane");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void bonusRollAfterAStrikeInTheLastFrameCanNotScoreMoreThan10Points() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 11, 0};
@@ -187,7 +168,6 @@ public class BowlingGameTest {
             .withMessage("Pin count exceeds pins on the lane");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void twoBonusRollsAfterAStrikeInTheLastFrameCanNotScoreMoreThan10Points() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 5, 6};
@@ -197,7 +177,6 @@ public class BowlingGameTest {
             .withMessage("Pin count exceeds pins on the lane");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void twoBonusRollsAfterAStrikeInTheLastFrameCanScoreMoreThan10PointsIfOneIsAStrike() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 6};
@@ -207,7 +186,6 @@ public class BowlingGameTest {
         assertThat(game.score()).isEqualTo(26);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void theSecondBonusRollsAfterAStrikeInTheLastFrameCanNotBeAStrikeIfTheFirstOneIsNotAStrike() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 6, 10};
@@ -217,7 +195,6 @@ public class BowlingGameTest {
             .withMessage("Pin count exceeds pins on the lane");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void secondBonusRollAfterAStrikeInTheLastFrameCanNotScoreMoreThan10Points() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 11};
@@ -227,7 +204,6 @@ public class BowlingGameTest {
             .withMessage("Pin count exceeds pins on the lane");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void anUnstartedGameCanNotBeScored() {
         int[] rolls = new int[0];
@@ -239,7 +215,6 @@ public class BowlingGameTest {
             .withMessage("Score cannot be taken until the end of the game");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void anIncompleteGameCanNotBeScored() {
         int[] rolls = {0, 0};
@@ -251,7 +226,6 @@ public class BowlingGameTest {
             .withMessage("Score cannot be taken until the end of the game");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void canNotRollIfGameAlreadyHasTenFrames() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -261,7 +235,6 @@ public class BowlingGameTest {
             .withMessage("Cannot roll after game is over");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void bonusRollsForAStrikeInTheLastFrameMustBeRolledBeforeScoreCanBeCalculated() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10};
@@ -273,7 +246,6 @@ public class BowlingGameTest {
             .withMessage("Score cannot be taken until the end of the game");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void bothBonusRollsForAStrikeInTheLastFrameMustBeRolledBeforeScoreCanBeCalculated() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10};
@@ -285,7 +257,6 @@ public class BowlingGameTest {
             .withMessage("Score cannot be taken until the end of the game");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void bonusRollForASpareInTheLastFrameMustBeRolledBeforeScoreCanBeCalculated() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3};
@@ -297,7 +268,6 @@ public class BowlingGameTest {
             .withMessage("Score cannot be taken until the end of the game");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void canNotRollAfterBonusRollForSpare() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 3, 2, 2};
@@ -307,7 +277,6 @@ public class BowlingGameTest {
             .withMessage("Cannot roll after game is over");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void canNotRollAfterBonusRollForStrike() {
         int[] rolls = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 3, 2, 2};

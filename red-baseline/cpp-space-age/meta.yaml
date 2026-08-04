@@ -1,7 +1,7 @@
 id: "cpp-space-age"
 language: "cpp"
 files: ["space_age.cpp", "space_age.h"]
-accept: "cmake -S . -B build >/dev/null 2>&1 && cmake --build build >/dev/null 2>&1"
+accept: "cmake -S . -B build -DEXERCISM_RUN_ALL_TESTS=1 >/dev/null 2>&1 && cmake --build build >/dev/null 2>&1"
 forbid: ["new_deps"]
 requires: ["cmake"]
 change: "Implement the solution in space_age.cpp, space_age.h so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nGiven an age in seconds, calculate how old someone would be on a planet in our Solar System.\n\nOne Earth year equals 365.25 Earth days, or 31,557,600 seconds.\nIf you were told someone was 1,000,000,000 seconds old, their age would be 31.69 Earth-years.\n\nFor the other planets, you have to account for their orbital period in Earth Years:\n\n| Planet  | Orbital period in Earth Years |\n| ------- | ----------------------------- |\n| Mercury | 0.2408467                     |\n| Venus   | 0.61519726                    |\n| Earth   | 1.0                           |\n| Mars    | 1.8808158                     |\n| Jupiter | 11.862615                     |\n| Saturn  | 29.447498                     |\n| Uranus  | 84.016846                     |\n| Neptune | 164.79132                     |\n\n~~~~exercism/note\nThe actual length of one complete orbit of the Earth around the sun is closer to 365.256 days (1 sidereal year).\nThe Gregorian calendar has, on average, 365.2425 days.\nWhile not entirely accurate, 365.25 is the value used in this exercise.\nSee [Year on Wikipedia][year] for more ways to measure a year.\n\n[year]: https://en.wikipedia.org/wiki/Year#Summary\n~~~~"

@@ -2,9 +2,10 @@
 # CI invariant for issues #4 and #15 — the accept oracle honors the runner's exit code, and no
 # acceptance test lives in an editable (`files:`) file. See docs/adrs/0001-green-is-runner-exit-zero.md.
 #
-# Six checks (any failure => non-zero exit):
+# Seven checks (any failure => non-zero exit):
 #   A  static      no accept ANYWHERE IN THE CORPUS pipes into grep   (#15: all 250 nodes)
 #   F  static      a node shipping a toolchain pin actually uses it    (#23: wrapper complete + used)
+#   G  static      a node's acceptance suite is not shipped disabled   (#21: full suite enabled)
 #   D  structural  no editable (`files:`) file contains a test        (#15: all 250 nodes)
 #   E  behavioral  a 2-passed/12-failed run scores RED under every python accept  (#15 reproduction)
 #   B  behavioral  the pipe-discard mechanism the invariant defends against, reproduced
@@ -258,6 +259,68 @@ if [[ $f_checked -eq 0 ]]; then
   fail=1; f_fail=1
 elif [[ $f_fail -eq 0 ]]; then
   note "ok: all $f_checked wrapper-shipping nodes ship a complete, verified wrapper and invoke it"
+fi
+
+echo "== check G: a node's acceptance suite is not shipped disabled (#21) =="
+# corpus#21. Exercism ships practice exercises with only the FIRST test enabled so a learner can
+# work test-by-test. The corpus inherited that verbatim: 149 of 250 nodes shipped most of their
+# suite disabled and 145 graded on exactly ONE test. `rust-acronym` ran 1 of 10, and
+# `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scored it GREEN.
+#
+# A sound oracle does not repair this — `cargo test` exits 0 with 620 ignored tests. It is a
+# third mechanism producing concordance, alongside contamination and the permanently GREEN/RED
+# nodes, and it silently lowers the pass bar the whole battery is calibrated against.
+#
+# The marker is per-track, which is why no single grep found it for so long.
+disable_marker() {
+  case "$1" in
+    rust)       printf '%s' '#\[[[:space:]]*ignore' ;;
+    java)       printf '%s' '@Disabled|@Ignore' ;;
+    javascript) printf '%s' 'xtest[[:space:]]*\(|xit[[:space:]]*\(|\.skip[[:space:]]*\(' ;;
+    cpp)        printf '%s' 'EXERCISM_RUN_ALL_TESTS' ;;
+    go)         printf '%s' 't\.Skip' ;;
+    python)     printf '%s' '@unittest\.skip|@skip|pytest\.mark\.skip' ;;
+    *)          printf '%s' '' ;;
+  esac
+}
+g_fail=0; g_checked=0
+for node in "${ALL_GLOB[@]}"; do
+  [[ -d "$node" ]] || continue
+  lang="$(language_of "$node")"
+  marker="$(disable_marker "$lang")"
+  [[ -z "$marker" ]] && continue
+  src="$node/seed"; [[ -d "$src" ]] || src="$node"
+  base="$(basename "$node")"
+  g_checked=$((g_checked + 1))
+
+  # cpp gates its suite from the BUILD, not the test file: everything after the first TEST_CASE
+  # sits behind `#if defined(EXERCISM_RUN_ALL_TESTS)`, which the accept must define.
+  if [[ "$lang" == cpp ]]; then
+    if grep -rq 'EXERCISM_RUN_ALL_TESTS' "$src" 2>/dev/null; then  # in `if`: exit 1 is safe here
+      acc="$(accept_of "$node")"
+      if [[ "$acc" != *"EXERCISM_RUN_ALL_TESTS"* ]]; then
+        note "FAIL $base: suite is gated behind EXERCISM_RUN_ALL_TESTS and the accept never defines it"
+        fail=1; g_fail=1
+      fi
+    fi
+    continue
+  fi
+
+  # `|| true` is load-bearing under `set -euo pipefail`: grep exits 1 when it matches nothing,
+  # which is the COMMON case here, and pipefail would propagate that through `| head` and kill
+  # the script mid-sweep. Without it this check silently covered only the nodes before the first
+  # clean one — and still exited non-zero, so it looked like a working RED.
+  hits="$(grep -rlE "$marker" "$src" 2>/dev/null | head -1 || true)"
+  if [[ -n "$hits" ]]; then
+    n="$(grep -rhcE "$marker" "$src" 2>/dev/null | awk '{s+=$1} END {print s+0}' || true)"
+    note "FAIL $base: ships $n disabled test(s) — the node grades on a fraction of its own suite"
+    fail=1; g_fail=1
+  fi
+done
+if [[ $g_checked -eq 0 ]]; then
+  note "FAIL: check G matched no node — the probe has gone stale"; fail=1; g_fail=1
+elif [[ $g_fail -eq 0 ]]; then
+  note "ok: all $g_checked nodes run their full acceptance suite"
 fi
 
 echo "== check B: the pipe-discard mechanism the invariant forbids =="

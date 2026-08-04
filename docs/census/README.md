@@ -1,6 +1,6 @@
 # The validity census
 
-**`N_instrument = 232` of 250.**
+**`N_instrument = 230` of 250 — and all 230 grade on their full acceptance suite.**
 
 One row per node in [`validity-census.tsv`](validity-census.tsv). It answers the question the
 corpus had never been asked: *how many of these nodes function as a measurement instrument?*
@@ -25,8 +25,8 @@ produced it, so a reader can audit a call rather than trust it.
 
 | | nodes |
 |---|---|
-| **INSTRUMENT** | **232** |
-| BROKEN | 17 |
+| **INSTRUMENT** | **230** |
+| BROKEN | 19 |
 | UNUSABLE_BY_DESIGN | 1 |
 
 | column | outcome | nodes |
@@ -35,32 +35,43 @@ produced it, so a reader can audit a call rather than trust it.
 | `red_for_right_reason` | TASK — the runner ran and the stub failed it | 242 |
 | | NOT_RED — accept exits 0 on the seed | 6 |
 | | ENV — RED because the toolchain never got there | 2 |
-| `green_reachable` | PROVEN | 237 |
-| | UNPROVEN | 13 |
+| `green_reachable` | PROVEN | 235 |
+| | UNPROVEN | 15 |
 
 By provenance — and the split is the whole point:
 
 | stratum | nodes | instruments | of which grade on their **full** suite |
 |---|---|---|---|
 | hand-authored (held out) | 25 | 25 | **25** |
-| Exercism (contaminated) | 225 | 207 | **71** |
-| | | **232** | **96** |
+| Exercism (contaminated) | 225 | 205 | **205** |
+| | | **230** | **230** |
 
-## The second bar, and why the count is quoted twice
+## The second bar closed (#21)
 
-232 nodes clear all three columns. **136 of them grade on one test out of many** — the Exercism
-convention of shipping every test after the first disabled (`#[ignore]`, `@Disabled`, `xtest`,
-`#if EXERCISM_RUN_ALL_TESTS`), inherited verbatim and never re-enabled. `rust-acronym` runs 1 of
-10 tests; `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scores it GREEN.
+The first version of this census reported two bars, because 136 of its 232 instruments graded on
+**one test out of many** — Exercism's convention of shipping every test after the first disabled
+(`#[ignore]`, `@Disabled`, `xtest`, `#if EXERCISM_RUN_ALL_TESTS`), inherited verbatim. `rust-acronym`
+ran 1 of 10 tests, and `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scored it GREEN.
 
-That is not a broken node — the oracle reports its suite faithfully — but it is a weak one, so the
-census reports both bars. Tracked as corpus#21.
+#21 re-enabled them: **2,219 tests across 152 nodes**, and every one of the 250 nodes now runs its
+full suite (3,613 tests). The cost was two nodes.
 
-| bar | N |
-|---|---|
-| all three columns hold | **232** |
-| …and the node grades on its full suite | **96** |
-| …and the node is also uncontaminated | **25** |
+| | before #21 | after #21 |
+|---|---|---|
+| INSTRUMENT | 232 | **230** |
+| …grading on their full suite | 96 | **230** |
+
+Re-enabling did not, as expected, trade too-easy nodes for unsolvable ones. Upstream examples
+satisfy full suites — which upstream's own CI implies, but nothing here had checked. What it did
+instead was **expose three port-drift cases** that a one-test bar had hidden (`java-sgf-parsing`,
+`javascript-forth` at 6 failed / 43 passed of 49, `javascript-phone-number`), and **fix one false
+negative**: `cpp-complex-numbers` was scored unsolvable because the seeds set `-Werror` and a
+helper in its own test file goes unused when only one test compiles —
+`error: unused function 'require_approx_equal' [-Werror,-Wunused-function]`. It builds cleanly with
+the full suite.
+
+So the disabled-suite defect was distorting the census in **both** directions at once, and both
+distortions were invisible for the same reason.
 
 ## What was actually wrong, by class
 
@@ -149,47 +160,50 @@ effect at N=232 — without authoring a single node.** #34 computed that prize c
 ("power at N=250 would be … 0.97 (π=0.70)") and could not claim it, because the stratum was
 unsound. The census is what makes it claimable.
 
-### Read the 0.96 with its confound, not just its condition
+### The confound is resolved, not caveated
 
-**That row takes `N` from one population and `d` from another.** `d = 0.375` was measured on the
-clean 25, which are **25 of 25 full-suite**. It is applied above to 232 nodes, of which **136
-(59%) grade on a single test**. The second bar in the same table is the proof: hold the full-suite
-line and it is N=96 at power **0.62**, not 232 at 0.96.
+The first version of this census reported 0.96 at N=232 with a warning attached: it took `N` from
+one population and `d` from another. `d = 0.375` was measured on the clean 25, which are **25 of 25
+full-suite**; it was being applied to 232 nodes of which 136 graded on a single test. The
+sensitivity ran the wrong way, too — an easier pass bar produces concordance, concordance
+suppresses the *measured* `d`, and a low `d` is exactly what would have justified an expensive
+authoring program.
 
-The confound has a **direction**, and that is what makes it a sequencing constraint rather than a
-caveat. A one-assertion bar makes a node easier → both arms pass → the node is concordant → Pratt
-drops it → the *measured* `d` comes out low. On the sensitivity table below, a low `d` maps
-directly onto "author ~113 katas". So **measuring `d` before #21 lands biases the org toward the
-most expensive outcome on the board**, on the strength of a rate estimated over a population that
-is 59% one-assertion nodes.
+**#21 closed that gap.** All 230 instruments now grade on their full suite, so `N` and `d` are
+drawn from populations with the same pass bar. The arithmetic is barely different; what changed is
+that it is now a legitimate calculation rather than an extrapolation across two bars.
 
-`d` should be measured on a population whose pass bar matches the one `d` was calibrated on. That
-makes **#21 a prerequisite, not parallel hygiene** — and it is mechanical (strip `#[ignore]` /
-`@Disabled` / `xtest`, define `EXERCISM_RUN_ALL_TESTS`), not an authoring program.
+| stratum | N | π=0.60 | π=0.65 | π=0.70 (large) |
+|---|---|---|---|---|
+| **post-#21 — all instruments, all full-suite** | **230** | 0.42 | **0.77** | **0.96** |
+| pre-#21 — full-suite subset only | 96 | 0.18 | 0.37 | 0.62 |
+| pre-#21 — all instruments (mixed bar, **not valid**) | 232 | 0.42 | 0.78 | 0.96 |
+| clean + full-suite (held-out) | 25 | 0.05 | 0.08 | 0.14 |
 
-**#23 was a prerequisite for a different reason, and it has landed.** The 47 gradle nodes were
-instruments *conditional on Gradle 8.7*, with a runner resolving Gradle 9 silently dropping N from
-**232 to 185**. The wrapper jar now ships and the accept invokes `./gradlew`, so that
-conditionality is gone and check F keeps it gone. Pinning also made two nodes visible that CI had
-always reported RED — `java-ledger` and `java-tree-building` are GREEN on the untouched seed — and
-both were already counted as BROKEN in this census, so `N_instrument` is unchanged at 232.
+The pre- and post-#21 headline figures differ by 0.001. That is the point worth keeping: **#21 was
+not worth doing because it moved the number, it was worth doing because it made the number mean
+something.** Had the bars not been reconciled, the same 0.96 would have rested on 59% of the
+population being one-assertion nodes.
 
-**Order: ~~#23~~ → #21 → measure `d` → then decide #17.** #23 is done; #21 is the remaining
-prerequisite, and it is mechanical.
+**The binding constraint is now `d`, and only `d`.** Contamination remains a reason it might not
+hold on this stratum — a memorised node lands first try in both arms and contributes nothing — but
+the second mechanism (#21's one-assertion bar) is gone.
 
-Sensitivity, since the whole answer turns on `d`:
+Sensitivity at N=230:
 
-| d | power at N=232, π=0.70 | N needed for 80% |
-|---|---|---|
-| 0.375 (measured, clean stratum) | 0.96 | 138 |
-| 0.25 | 0.85 | 207 |
-| 0.20 | 0.75 | 258 |
-| 0.15 | 0.60 | 345 |
+| d | π=0.65 | π=0.70 | N needed for 80% at π=0.70 |
+|---|---|---|---|
+| 0.573 (upper CI) | 0.93 | 1.00 | 90 |
+| **0.375 (measured)** | **0.77** | **0.96** | **138** |
+| 0.30 | 0.67 | 0.91 | 172 |
+| 0.25 | 0.58 | 0.85 | 207 |
+| 0.212 (lower CI) | 0.51 | 0.78 | 244 |
+| 0.15 | 0.36 | 0.60 | 345 |
 
-Even at the pessimistic end of `d`'s own CI (0.212), N=232 gives 0.78.
+Even at the pessimistic end of `d`'s own CI (0.212), N=230 gives 0.78.
 
 So the next act is the cheap one #34 already named — **measure `d` before committing to an
 authoring program**, because `d` is a rate and needs far fewer runs to pin than a difference does
-— but only *after* #23 and #21, so that the population `d` is measured on has a stable size and a
-pass bar comparable to the one `d` was calibrated on. See corpus#17 for the derivation and the
+— and that is now unblocked: #23 fixed the population's size (a runner resolving Gradle 9 would
+have made it 185 rather than 230) and #21 fixed its pass bar. See corpus#17 for the derivation and the
 decision it gates.

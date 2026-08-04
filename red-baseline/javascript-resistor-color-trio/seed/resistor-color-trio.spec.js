@@ -11,32 +11,32 @@ describe('Resistor Color Trio', () => {
     );
   });
 
-  xtest('Blue and grey and brown', () => {
+  test('Blue and grey and brown', () => {
     expect(new ResistorColorTrio(['blue', 'grey', 'brown']).label).toEqual(
       makeLabel({ value: 680, unit: 'ohms' }),
     );
   });
 
-  xtest('Red and black and red', () => {
+  test('Red and black and red', () => {
     expect(new ResistorColorTrio(['red', 'black', 'red']).label).toEqual(
       makeLabel({ value: 2, unit: 'kiloohms' }),
     );
   });
 
-  xtest('Green and brown and orange', () => {
+  test('Green and brown and orange', () => {
     expect(new ResistorColorTrio(['green', 'brown', 'orange']).label).toEqual(
       makeLabel({ value: 51, unit: 'kiloohms' }),
     );
   });
 
-  xtest('Yellow and violet and yellow', () => {
+  test('Yellow and violet and yellow', () => {
     expect(new ResistorColorTrio(['yellow', 'violet', 'yellow']).label).toEqual(
       makeLabel({ value: 470, unit: 'kiloohms' }),
     );
   });
 
   // optional: error
-  xtest('Invalid color', () => {
+  test('Invalid color', () => {
     expect(
       () => new ResistorColorTrio(['yellow', 'purple', 'black']).label,
     ).toThrowError(/invalid color/);

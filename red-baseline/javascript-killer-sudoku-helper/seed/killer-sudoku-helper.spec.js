@@ -12,7 +12,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('2', () => {
+  test('2', () => {
     const inputCage = {
       sum: 2,
       size: 1,
@@ -23,7 +23,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('3', () => {
+  test('3', () => {
     const inputCage = {
       sum: 3,
       size: 1,
@@ -34,7 +34,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('4', () => {
+  test('4', () => {
     const inputCage = {
       sum: 4,
       size: 1,
@@ -45,7 +45,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('5', () => {
+  test('5', () => {
     const inputCage = {
       sum: 5,
       size: 1,
@@ -56,7 +56,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('6', () => {
+  test('6', () => {
     const inputCage = {
       sum: 6,
       size: 1,
@@ -67,7 +67,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('7', () => {
+  test('7', () => {
     const inputCage = {
       sum: 7,
       size: 1,
@@ -78,7 +78,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('8', () => {
+  test('8', () => {
     const inputCage = {
       sum: 8,
       size: 1,
@@ -89,7 +89,7 @@ describe('Trivial 1-digit cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('9', () => {
+  test('9', () => {
     const inputCage = {
       sum: 9,
       size: 1,
@@ -102,7 +102,7 @@ describe('Trivial 1-digit cages', () => {
 });
 
 describe('Other cages', () => {
-  xtest('Cage with sum 45 contains all digits 1:9', () => {
+  test('Cage with sum 45 contains all digits 1:9', () => {
     const inputCage = {
       sum: 45,
       size: 9,
@@ -113,7 +113,7 @@ describe('Other cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('Cage with only 1 possible combination', () => {
+  test('Cage with only 1 possible combination', () => {
     const inputCage = {
       sum: 7,
       size: 3,
@@ -124,7 +124,7 @@ describe('Other cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('Cage with several combinations', () => {
+  test('Cage with several combinations', () => {
     const inputCage = {
       sum: 10,
       size: 2,
@@ -140,7 +140,7 @@ describe('Other cages', () => {
     expect(actual).toEqual(expected);
   });
 
-  xtest('Cage with several combinations that is restricted', () => {
+  test('Cage with several combinations that is restricted', () => {
     const inputCage = {
       sum: 10,
       size: 2,

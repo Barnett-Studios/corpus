@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +15,6 @@ public class TwoBucketTest {
 
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBucketOneSizeThreeBucketTwoSizeFiveStartWithTwo() {
 
@@ -28,7 +26,6 @@ public class TwoBucketTest {
 
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBucketOneSizeSevenBucketTwoSizeElevenStartWithOne() {
 
@@ -40,7 +37,6 @@ public class TwoBucketTest {
 
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBucketOneSizeSevenBucketTwoSizeElevenStartWithTwo() {
 
@@ -52,7 +48,6 @@ public class TwoBucketTest {
 
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBucketOneSizeOneBucketTwoSizeThreeStartWithTwo() {
 
@@ -64,7 +59,6 @@ public class TwoBucketTest {
 
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBucketOneSizeTwoBucketTwoSizeThreeStartWithOne() {
 

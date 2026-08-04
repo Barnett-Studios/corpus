@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +20,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaMiddleColumnVictory() {
 
@@ -30,7 +28,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaRightColumnVictory() {
 
@@ -39,7 +36,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaLeftColumnVictory() {
 
@@ -48,7 +44,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaMiddleColumnVictory() {
 
@@ -57,7 +52,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaRightColumnVictory() {
 
@@ -66,7 +60,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaTopRowVictory() {
 
@@ -75,7 +68,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaMiddleRowVictory() {
 
@@ -84,7 +76,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaBottomRowVictory() {
 
@@ -93,7 +84,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaTopRowVictory() {
 
@@ -102,7 +92,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaMiddleRowVictory() {
 
@@ -111,7 +100,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaBottomRowVictory() {
 
@@ -120,7 +108,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaFallingDiagonalVictory() {
 
@@ -129,7 +116,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaRisingDiagonalVictory() {
 
@@ -138,7 +124,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaFallingDiagonalVictory() {
 
@@ -147,7 +132,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereOWonViaRisingDiagonalVictory() {
 
@@ -156,7 +140,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaARowAndAColumnVictory() {
 
@@ -165,7 +148,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFinishedGameWhereXWonViaTwoDiagonalVictories() {
 
@@ -174,7 +156,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.WIN);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testDraw() {
 
@@ -183,7 +164,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.DRAW);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testAnotherDraw() {
         
@@ -192,7 +172,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.DRAW);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testOngoingGameOneMoveIn() {
 
@@ -201,7 +180,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.ONGOING);
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testOngoingGameTwoMovesIn() {
 
@@ -210,7 +188,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.ONGOING);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testOngoingGameFiveMovesIn() {
 
@@ -219,7 +196,6 @@ public class StateOfTicTacToeTest {
         ).isEqualTo(GameState.ONGOING);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testInvalidBoardXWentTwice() {
 
@@ -228,7 +204,6 @@ public class StateOfTicTacToeTest {
             .withMessage("Wrong turn order: X went twice");
     }
     
-    @Disabled("Remove to run test")
     @Test
     public void testInvalidBoardOStarted() {
 
@@ -237,7 +212,6 @@ public class StateOfTicTacToeTest {
             .withMessage("Wrong turn order: O started");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testInvalidBoard() {
 
@@ -246,7 +220,6 @@ public class StateOfTicTacToeTest {
             .withMessage("Impossible board: game should have ended after the game was won");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testInvalidBoardPlayersKeptPlayingAfterAWin() {
 

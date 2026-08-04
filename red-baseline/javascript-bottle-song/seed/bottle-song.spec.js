@@ -13,7 +13,7 @@ describe('Bottle Song', () => {
         expect(recite(10, 1)).toEqual(expected);
       });
 
-      xtest('last generic verse', () => {
+      test('last generic verse', () => {
         let expected = [
           `Three green bottles hanging on the wall,`,
           `Three green bottles hanging on the wall,`,
@@ -23,7 +23,7 @@ describe('Bottle Song', () => {
         expect(recite(3, 1)).toEqual(expected);
       });
 
-      xtest('verse with 2 bottles', () => {
+      test('verse with 2 bottles', () => {
         let expected = [
           `Two green bottles hanging on the wall,`,
           `Two green bottles hanging on the wall,`,
@@ -33,7 +33,7 @@ describe('Bottle Song', () => {
         expect(recite(2, 1)).toEqual(expected);
       });
 
-      xtest('verse with 1 bottle', () => {
+      test('verse with 1 bottle', () => {
         let expected = [
           `One green bottle hanging on the wall,`,
           `One green bottle hanging on the wall,`,
@@ -47,7 +47,7 @@ describe('Bottle Song', () => {
 
   describe('lyrics', () => {
     describe('multiple verses', () => {
-      xtest('first two verses', () => {
+      test('first two verses', () => {
         let expected = [
           `Ten green bottles hanging on the wall,`,
           `Ten green bottles hanging on the wall,`,
@@ -62,7 +62,7 @@ describe('Bottle Song', () => {
         expect(recite(10, 2)).toEqual(expected);
       });
 
-      xtest('last three verses', () => {
+      test('last three verses', () => {
         let expected = [
           `Three green bottles hanging on the wall,`,
           `Three green bottles hanging on the wall,`,
@@ -82,7 +82,7 @@ describe('Bottle Song', () => {
         expect(recite(3, 3)).toEqual(expected);
       });
 
-      xtest('all verses', () => {
+      test('all verses', () => {
         let expected = [
           `Ten green bottles hanging on the wall,`,
           `Ten green bottles hanging on the wall,`,

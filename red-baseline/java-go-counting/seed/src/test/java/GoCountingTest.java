@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -30,7 +29,6 @@ public class GoCountingTest {
         assertThat(gocounting.getTerritory(0, 1)).isEqualTo(territory);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void whiteCenter5x5BoardTest() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -42,7 +40,6 @@ public class GoCountingTest {
         assertThat(gocounting.getTerritory(2, 3)).isEqualTo(territory);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void openCorner5x5BoardTest() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -56,7 +53,6 @@ public class GoCountingTest {
         assertThat(gocounting.getTerritory(1, 4)).isEqualTo(territory);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void stoneNotTerritory5x5Board() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -67,7 +63,6 @@ public class GoCountingTest {
         assertThat(gocounting.getTerritory(1, 1)).isEqualTo(territory);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void invalidXTooLow5x5Board() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -77,7 +72,6 @@ public class GoCountingTest {
                 .withMessage("Invalid coordinate");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void invalidXTooHigh5x5Board() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -87,7 +81,6 @@ public class GoCountingTest {
                 .withMessage("Invalid coordinate");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void invalidYTooLow5x5Board() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -97,7 +90,6 @@ public class GoCountingTest {
                 .withMessage("Invalid coordinate");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void invalidYTooHigh5x5Board() {
         GoCounting gocounting = new GoCounting(board5x5);
@@ -107,7 +99,6 @@ public class GoCountingTest {
                 .withMessage("Invalid coordinate");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void oneTerritoryIsWholeBoardTest() {
         GoCounting gocounting = new GoCounting(" ");
@@ -125,7 +116,6 @@ public class GoCountingTest {
         assertThat(gocounting.getTerritories()).isEqualTo(territories);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void twoTerritoryRectangularBoardTest() {
         GoCounting gocounting = new GoCounting(" BW \n BW ");
@@ -148,7 +138,6 @@ public class GoCountingTest {
         assertThat(gocounting.getTerritories()).isEqualTo(territories);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void twoRegionRectangularBoardTest() {
         GoCounting gocounting = new GoCounting(" B ");

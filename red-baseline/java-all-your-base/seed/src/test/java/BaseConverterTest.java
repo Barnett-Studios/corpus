@@ -1,4 +1,3 @@
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +13,6 @@ public class BaseConverterTest {
                 .containsExactly(1);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBinaryToSingleDecimal() {
         BaseConverter baseConverter = new BaseConverter(2, new int[]{1, 0, 1});
@@ -23,7 +21,6 @@ public class BaseConverterTest {
                 .containsExactly(5);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testSingleDecimalToBinary() {
         BaseConverter baseConverter = new BaseConverter(10, new int[]{5});
@@ -32,7 +29,6 @@ public class BaseConverterTest {
                 .containsExactly(1, 0, 1);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testBinaryToMultipleDecimal() {
         BaseConverter baseConverter = new BaseConverter(2, new int[]{1, 0, 1, 0, 1, 0});
@@ -41,7 +37,6 @@ public class BaseConverterTest {
                 .containsExactly(4, 2);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testDecimalToBinary() {
         BaseConverter baseConverter = new BaseConverter(10, new int[]{4, 2});
@@ -50,7 +45,6 @@ public class BaseConverterTest {
                 .containsExactly(1, 0, 1, 0, 1, 0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testTrinaryToHexadecimal() {
         BaseConverter baseConverter = new BaseConverter(3, new int[]{1, 1, 2, 0});
@@ -59,7 +53,6 @@ public class BaseConverterTest {
                 .containsExactly(2, 10);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testHexadecimalToTrinary() {
         BaseConverter baseConverter = new BaseConverter(16, new int[]{2, 10});
@@ -68,7 +61,6 @@ public class BaseConverterTest {
                 .containsExactly(1, 1, 2, 0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void test15BitInteger() {
         BaseConverter baseConverter = new BaseConverter(97, new int[]{3, 46, 60});
@@ -77,7 +69,6 @@ public class BaseConverterTest {
                 .containsExactly(6, 10, 45);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testEmptyDigits() {
         BaseConverter baseConverter = new BaseConverter(2, new int[]{});
@@ -86,7 +77,6 @@ public class BaseConverterTest {
                 .containsExactly(0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testSingleZero() {
         BaseConverter baseConverter = new BaseConverter(10, new int[]{0});
@@ -95,7 +85,6 @@ public class BaseConverterTest {
                 .containsExactly(0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testMultipleZeros() {
         BaseConverter baseConverter = new BaseConverter(10, new int[]{0, 0, 0});
@@ -104,7 +93,6 @@ public class BaseConverterTest {
                 .containsExactly(0);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testLeadingZeros() {
         BaseConverter baseConverter = new BaseConverter(7, new int[]{0, 6, 0});
@@ -113,7 +101,6 @@ public class BaseConverterTest {
                 .containsExactly(4, 2);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFirstBaseIsOne() {
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -121,7 +108,6 @@ public class BaseConverterTest {
             .withMessage("Bases must be at least 2.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFirstBaseIsZero() {
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -129,7 +115,6 @@ public class BaseConverterTest {
             .withMessage("Bases must be at least 2.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testFirstBaseIsNegative() {
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -137,7 +122,6 @@ public class BaseConverterTest {
             .withMessage("Bases must be at least 2.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testNegativeDigit() {
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -145,7 +129,6 @@ public class BaseConverterTest {
             .withMessage("Digits may not be negative.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testInvalidPositiveDigit() {
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -153,7 +136,6 @@ public class BaseConverterTest {
             .withMessage("All digits must be strictly less than the base.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testSecondBaseIsOne() {
         BaseConverter baseConverter =
@@ -164,7 +146,6 @@ public class BaseConverterTest {
             .withMessage("Bases must be at least 2.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testSecondBaseIsZero() {
         BaseConverter baseConverter = new BaseConverter(10, new int[]{7});
@@ -174,7 +155,6 @@ public class BaseConverterTest {
             .withMessage("Bases must be at least 2.");
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testSecondBaseIsNegative() {
         BaseConverter baseConverter = new BaseConverter(2, new int[]{1});

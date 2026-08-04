@@ -230,39 +230,37 @@ the one this section is named after.
 
 ### How many nodes actually work: the validity census
 
-**`N_instrument = 232` of 250.** Measured per node, one row each, in
+**`N_instrument = 230` of 250, all of them grading on their full acceptance suite.** Measured per node, one row each, in
 [`docs/census/`](docs/census/README.md) — a node counts only if its accept scores on the runner's
 exit status, it is RED on the seed *because the stub is unimplemented* rather than because the
 toolchain never ran, and a reference solution actually reaches GREEN.
 
 | | nodes |
 |---|---|
-| INSTRUMENT | **232** |
-| BROKEN | 17 |
+| INSTRUMENT | **230** |
+| BROKEN | 19 |
 | UNUSABLE_BY_DESIGN (`javascript-ledger`, #16) | 1 |
-
-Quote it at two bars, because they answer different questions:
 
 | bar | N |
 |---|---|
-| all three columns hold | **232** |
-| …and the node grades on its **full** suite (see #21 below) | **96** |
+| all three columns hold | **230** |
+| …and the node grades on its **full** suite | **230** — #21 closed this gap |
 | …and the node is also uncontaminated | **25** |
 
-**Do not mix the bars across a power calculation.** The discordant rate `d = 0.375`
-(dotclaude#34) was measured on the clean 25, which are 25/25 full-suite. Applying it to N=232 —
-59% of which grade on a single test — takes `N` from one population and `d` from another, and the
-error has a direction: an easier pass bar produces concordance, concordance suppresses the
-*measured* `d`, and a low `d` is exactly what would justify an expensive authoring program. Fix
-#23 (toolchain pinning, which decides whether N is 232 or 185) and #21 (the pass bar) before
-estimating `d`. See [`docs/census/README.md`](docs/census/README.md).
+The full-suite bar used to sit at 96 and is now the same population as the first, which matters
+for more than tidiness. The discordant rate `d = 0.375` (dotclaude#34) was measured on the clean
+25, which are 25/25 full-suite; applying it to a battery that was 59% one-assertion nodes took `N`
+from one population and `d` from another, with a direction — an easier pass bar produces
+concordance, concordance suppresses the *measured* `d`, and a low `d` is exactly what would
+justify an expensive authoring program. #21 and #23 removed both distortions. See
+[`docs/census/README.md`](docs/census/README.md).
 
 GREEN-reachability across the 225 needed no authoring: each maps 1:1 onto an upstream Exercism
 exercise shipping a canonical example, and slug coverage was 225 of 225.
 
-### A fourth defect: most nodes grade on one test (#21)
+### A fourth defect: most nodes graded on one test (#21) — repaired
 
-**149 of 250 nodes ship most of their acceptance suite disabled**, and 145 of those grade on
+**149 of 250 nodes shipped most of their acceptance suite disabled**, and 145 of those graded on
 **exactly one** test. The corpus inherited Exercism's learner convention — `#[ignore]` (rust),
 `@Disabled` (java), `xtest` (javascript), `#if defined(EXERCISM_RUN_ALL_TESTS)` (cpp) — and never
 re-enabled anything. go and python are unaffected; the hand-authored katas are unaffected.
@@ -274,10 +272,16 @@ re-enabled anything. go and python are unaffected; the hand-authored katas are u
 | javascript | 885 | 51 |
 | rust | 686 | 66 |
 
-`rust-acronym` runs 1 of 10 tests, and `fn abbreviate(_: &str) -> String { "PNG".to_string() }`
-scores it GREEN. **A sound oracle does not repair this** — `cargo test` exits 0 with 620 ignored
-tests. It is a third mechanism producing concordance, alongside contamination and the permanently
-GREEN/RED nodes, and it is the reason the census reports a full-suite bar separately.
+`rust-acronym` ran 1 of 10 tests, and `fn abbreviate(_: &str) -> String { "PNG".to_string() }`
+scored it GREEN. **A sound oracle does not repair this** — `cargo test` exits 0 with 620 ignored
+tests. It was a third mechanism producing concordance, alongside contamination and the permanently
+GREEN/RED nodes.
+
+Repaired in #21: 2,219 tests re-enabled across 152 nodes, and all 250 nodes now run their full
+suite (3,613 tests). `ci/verify-accept-oracle.sh` check G keeps it that way. The cost was two
+nodes (232 → 230 instruments), and re-enabling also **fixed** a false negative — `cpp-complex-numbers`
+was scored unsolvable because the seeds set `-Werror` and a helper in its own test file goes unused
+when only one test compiles. The defect was distorting the corpus in both directions at once.
 
 ### Toolchain versions: java is pinned, the rest are not
 
