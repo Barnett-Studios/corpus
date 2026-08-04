@@ -228,6 +228,69 @@ three overlapping populations, they are one population with three defects. A rea
 the paired-comparison argument above and uses the Exercism stratum anyway inherits all three, not
 the one this section is named after.
 
+### How many nodes actually work: the validity census
+
+**`N_instrument = 232` of 250.** Measured per node, one row each, in
+[`docs/census/`](docs/census/README.md) — a node counts only if its accept scores on the runner's
+exit status, it is RED on the seed *because the stub is unimplemented* rather than because the
+toolchain never ran, and a reference solution actually reaches GREEN.
+
+| | nodes |
+|---|---|
+| INSTRUMENT | **232** |
+| BROKEN | 17 |
+| UNUSABLE_BY_DESIGN (`javascript-ledger`, #16) | 1 |
+
+Quote it at two bars, because they answer different questions:
+
+| bar | N |
+|---|---|
+| all three columns hold | **232** |
+| …and the node grades on its **full** suite (see #21 below) | **96** |
+| …and the node is also uncontaminated | **25** |
+
+**Do not mix the bars across a power calculation.** The discordant rate `d = 0.375`
+(dotclaude#34) was measured on the clean 25, which are 25/25 full-suite. Applying it to N=232 —
+59% of which grade on a single test — takes `N` from one population and `d` from another, and the
+error has a direction: an easier pass bar produces concordance, concordance suppresses the
+*measured* `d`, and a low `d` is exactly what would justify an expensive authoring program. Fix
+#23 (toolchain pinning, which decides whether N is 232 or 185) and #21 (the pass bar) before
+estimating `d`. See [`docs/census/README.md`](docs/census/README.md).
+
+GREEN-reachability across the 225 needed no authoring: each maps 1:1 onto an upstream Exercism
+exercise shipping a canonical example, and slug coverage was 225 of 225.
+
+### A fourth defect: most nodes grade on one test (#21)
+
+**149 of 250 nodes ship most of their acceptance suite disabled**, and 145 of those grade on
+**exactly one** test. The corpus inherited Exercism's learner convention — `#[ignore]` (rust),
+`@Disabled` (java), `xtest` (javascript), `#if defined(EXERCISM_RUN_ALL_TESTS)` (cpp) — and never
+re-enabled anything. go and python are unaffected; the hand-authored katas are unaffected.
+
+| language | tests shipped | tests enabled |
+|---|---|---|
+| cpp | 459 | 31 |
+| java | 790 | 48 |
+| javascript | 885 | 51 |
+| rust | 686 | 66 |
+
+`rust-acronym` runs 1 of 10 tests, and `fn abbreviate(_: &str) -> String { "PNG".to_string() }`
+scores it GREEN. **A sound oracle does not repair this** — `cargo test` exits 0 with 620 ignored
+tests. It is a third mechanism producing concordance, alongside contamination and the permanently
+GREEN/RED nodes, and it is the reason the census reports a full-suite bar separately.
+
+### Toolchain versions are not pinned, and it matters
+
+`accept` invokes ambient tools (`gradle`, `cmake`, `go`, `npm`). Nothing pins a version, so a
+node's verdict can depend on the host. This is not theoretical: on **Gradle 9.x** every one of the
+47 gradle-java nodes fails with *"Failed to load JUnit Platform"* — RED for an environmental
+reason and unsolvable, exactly cpp's class. The seeds carry a wrapper pinned to 8.7 but omit
+`gradle-wrapper.jar`, so `./gradlew` cannot run either. Under a real 8.7 the stratum is healthy —
+and two nodes CI has always reported RED are in fact **GREEN on the untouched seed**
+(`java-ledger`, `java-tree-building`), a #11-class defect invisible until the tests ran.
+
+Report the toolchain versions alongside any result taken from this corpus.
+
 The 25 hand-authored nodes are clean on every count — which is why they are the held-out stratum
 in more than the leakage sense, and why their small size (below) is this corpus's binding
 constraint rather than a footnote to it.

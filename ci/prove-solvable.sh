@@ -21,8 +21,11 @@ fi
 fail=0
 note() { printf '  %s\n' "$1"; }
 have() { command -v "$1" >/dev/null 2>&1; }
-# The 24 katas (py-add is not part of the grep fix and ships no reference solution).
-CLEAN_GLOB=("$CORPUS_ROOT"/{go,java,python,rust}-0[1-6]-*)
+# The 24 katas plus py-add. py-add was excluded because it shipped no reference solution;
+# the validity census (#14) then scored it BROKEN for exactly that reason — the only
+# hand-authored node whose GREEN-reachability nothing proved. `ci/solutions/py-add/calc.py`
+# closes it, so the clean subset is now proven end to end rather than 24/25 of it.
+CLEAN_GLOB=("$CORPUS_ROOT"/{go,java,python,rust}-0[1-6]-* "$CORPUS_ROOT"/py-add)
 
 accept_of() { sed -n 's/^accept: *"\(.*\)"$/\1/p' "$1/meta.yaml" | sed -n '1p'; }
 language_of() { sed -n 's/^language: *"\{0,1\}\([a-z+]*\)"\{0,1\}.*/\1/p' "$1/meta.yaml" | sed -n '1p'; }
@@ -42,9 +45,9 @@ toolchain_ok() {
   esac
 }
 
-# Drift tripwire: exactly 24 katas expected. A node-less/renamed CORPUS_ROOT would otherwise make
-# this whole spot-check vacuously PASS. Bump when the kata set deliberately grows.
-EXPECTED_KATAS=24
+# Drift tripwire: exactly 25 nodes expected (24 katas + py-add). A node-less/renamed CORPUS_ROOT
+# would otherwise make this whole spot-check vacuously PASS. Bump when the set deliberately grows.
+EXPECTED_KATAS=25
 found_katas=0
 for node in "${CLEAN_GLOB[@]}"; do [[ -d "$node" ]] && found_katas=$((found_katas + 1)); done
 if [[ $found_katas -ne $EXPECTED_KATAS ]]; then
