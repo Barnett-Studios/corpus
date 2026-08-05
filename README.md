@@ -32,8 +32,8 @@ Every one of these was live, in CI, reported as passing, for months.
   filenames from the *work directory*, so cmake failed at configure in any scratch dir
   (`Cannot find source file: tmp.Lw4Jihzyc6_test.cpp`). RED, correctly reported, for entirely the
   wrong reason. *(corpus#14; 23 of the 26 are now instruments.)*
-- **145 nodes grading on exactly one test out of ten or more.** Exercism ships every test after
-  the first disabled (`#[ignore]`, `@Disabled`, `xtest`, `#if EXERCISM_RUN_ALL_TESTS`); the port
+- **145 nodes grading on exactly one test of the many their suite ships.** Exercism ships every
+  test after the first disabled (`#[ignore]`, `@Disabled`, `xtest`, `#if EXERCISM_RUN_ALL_TESTS`); the port
   inherited that verbatim. `rust-acronym` ran 1 of its 10 tests, and
   `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scored it GREEN.
   *(corpus#21 — found by this census, not previously known.)*
