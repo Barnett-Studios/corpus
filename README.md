@@ -117,9 +117,11 @@ surfaced.
   Under the 8.7 the wrapper does name, the stratum is healthy — so the defect was only ever visible
   from the wrong host. **A check that passes for the wrong reason is the hardest kind to find,
   because the only signal it leaves is in the shape of a green result.**
-- **One was a quantity nobody had built a threshold for** — the disabled suites. No check asserted
-  anything about how many tests ran, so no check could have failed; the mechanism differs per track,
-  which is why no single grep found it earlier either.
+- **One was a quantity nobody had built a threshold for** — the disabled suites. At the time,
+  nothing in `ci/` asserted anything about how many tests ran, so no check could have failed; the
+  mechanism differs per track, which is why no single grep found it earlier either. #21 added the
+  missing assertion as part of the fix — `verify-accept-oracle.sh` now fails any node that "ships
+  disabled test(s)" — so this gap is closed, unlike the fifth question's for five of six toolchains.
 
 The middle pair is the part worth carrying away, and not for the reason it first appears. Both were
 invisible to the check that *looked* like it covered them — but `verify-red-invariant.sh` asserts
