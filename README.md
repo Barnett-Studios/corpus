@@ -151,10 +151,14 @@ whole corpus — not because anyone had learned to reread that script's passes.
 The first four are mechanised here: [`ci/verify-accept-oracle.sh`](ci/verify-accept-oracle.sh),
 [`ci/verify-red-invariant.sh`](ci/verify-red-invariant.sh),
 [`ci/prove-solvable.sh`](ci/prove-solvable.sh), and the two-stage sweep in
-[`ci/census/`](ci/census/). **The fifth is not.** Nothing here asserts a toolchain *version* — the
-scripts check only that a tool is present, which is precisely how the java stratum's verdict came
-to depend on which Gradle happened to be installed. The question that cost the most is the one
-still answered by discipline rather than by a check.
+[`ci/census/`](ci/census/). **The fifth is mechanised for exactly one toolchain — the one that
+already cost us.** After the java stratum's verdict turned out to depend on which Gradle was
+installed, #23 taught `verify-accept-oracle.sh` to check the wrapper jar's published SHA-256 and to
+fail any accept that invokes ambient `gradle` instead of the pinned `./gradlew`. The other five
+toolchains are still unpinned, which is why the census has to name the versions it was taken under
+(cmake 4.4.2, go 1.24.3, JDK 21, node 24, python 3.13, cargo stable) and treat that list as part of
+its result rather than a footnote. The question that cost the most is the only one anyone has
+mechanised, and it took the cost to get there.
 
 ## What's here
 
@@ -193,8 +197,9 @@ ABPROOF_CORPUS=/path/to/red-baseline abproof run experiment.yaml --dry-run
 This was previously disclosed only as a **licensing** matter (`ATTRIBUTION.md`). It is also, and
 more importantly, a **train/test leakage** problem, and it was never named as one.
 
-The Exercism nodes do not merely resemble public tasks — many embed the upstream instruction
-text **verbatim** in `change:`, including the original `~~~~exercism/note` markers. So a model may
+The Exercism nodes do not merely resemble public tasks — 220 of the 225 embed the upstream
+instruction text **verbatim** in `change:`, and 19 of those carry it down to upstream's own
+`~~~~exercism/note` markers. So a model may
 have memorised both the prompt and a canonical solution. On such a node, a score measures
 recall, not the capability the harness change was supposed to move.
 
