@@ -156,11 +156,15 @@ The first four are mechanised here: [`ci/verify-accept-oracle.sh`](ci/verify-acc
 [`ci/census/`](ci/census/). **The fifth is mechanised for exactly one toolchain — the one that
 already cost us.** After the java stratum's verdict turned out to depend on which Gradle was
 installed, #23 taught `verify-accept-oracle.sh` to check the wrapper jar's published SHA-256 and to
-fail any accept that invokes ambient `gradle` instead of the pinned `./gradlew`. The other five
-toolchains are still unpinned, which is why the census has to name the versions it was taken under
-(cmake 4.4.2, go 1.24.3, JDK 21, node 24, python 3.13, cargo stable) and treat that list as part of
-its result rather than a footnote. The question that cost the most is the only one anyone has
-mechanised, and it took the cost to get there.
+fail any accept that invokes ambient `gradle` instead of the pinned `./gradlew`.
+
+**It pinned Gradle, not the JDK those tests compile against** — none of the 47 `build.gradle` files
+sets `sourceCompatibility`, `targetCompatibility` or `languageVersion`, so the java verdict can
+still move on a different JDK. That is the same defect one layer down, inside the fix for it. The
+other five toolchains have no pin at all, which is why the census names the versions it was taken
+under — Gradle 8.7, **JDK 21**, cmake 4.4.2, go 1.24.3, node 24, python 3.13, cargo stable — and
+treats that list as part of its result rather than a footnote. The question that cost the most is
+the only one anyone mechanised, it took the cost to get there, and it is still only half done.
 
 ## What's here
 
