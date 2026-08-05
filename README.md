@@ -50,16 +50,20 @@ passing, correctly, the whole time.
 - **Six nodes whose seed was never meant to fail.** `go-ledger`, `java-ledger`,
   `javascript-ledger`, `go-markdown` and `java-tree-building` are upstream **refactoring**
   exercises — their premise is that the code already works and reads badly — and `go-counter` is an
-  upstream-*deprecated* exercise where the task is to write the test suite. The three `ledger`
-  nodes say it outright in the corpus's own `meta.yaml` — *"The code however is rather badly
-  written, though (somewhat surprisingly) it consistently passes the test suite"* — and the rest
-  imply it in their own wording. They were selected for a corpus whose defining invariant is that
-  every seed ships failing.
+  upstream-*deprecated* exercise where the task is to write the test suite — so it has no
+  acceptance test to fail, which is a different thing again. Of the five refactoring nodes, the
+  three `ledger` ones say it outright in the corpus's own `meta.yaml` — *"The code however is
+  rather badly written, though (somewhat surprisingly) it consistently passes the test suite"* —
+  and `go-markdown` says it in its own words: *"somehow it works and all the tests are passing!"*
+  Only `java-tree-building` leaves it to inference, describing the task as refactoring "a working
+  but slow and ugly piece of code". All six were selected for a corpus whose defining invariant is
+  that every seed ships failing.
 
   *One cause, filed across three tickets: corpus#11 (the go nodes), #16 (`javascript-ledger`), and
   #23 — where `java-ledger` and `java-tree-building` appear because they were **invisible until the
-  gradle toolchain was pinned**. CI had reported them RED for as long as they had existed, and no
-  test had ever run.*
+  gradle toolchain was pinned**. `gradle-wrapper.jar` was absent from the very first import commit,
+  so no java test had ever run; and for as long as the RED-invariant check existed, it reported
+  them RED.*
 
 **The resolution: `N_instrument = 230 of 250`, and all 230 grade on their full acceptance suite** —
 3,613 tests across the 250 nodes, after #21 re-enabled the 2,219 that had shipped disabled across
