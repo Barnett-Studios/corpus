@@ -21,7 +21,8 @@ these nodes function as a measurement instrument at all?** — and the answer wa
 
 ## What the audit found
 
-Every one of these was live, in CI, and reported as passing on every run until it was audited.
+None of these was found by the suite failing. Each was found only once someone wrote a check for a
+property the suite was assumed to have — and every such check went red on its first run.
 
 - **A node shipping `2 passed, 12 failed` and scoring GREEN.** `python-react`'s accept was
   `grep -qE '[1-9][0-9]* passed'` on runner output, which the "2 passed" satisfies. 222 of 250 nodes
@@ -31,7 +32,7 @@ Every one of these was live, in CI, and reported as passing on every run until i
   `ok … RED (exit 1)` for every one of them, every run. Each `CMakeLists.txt` derived its source
   filenames from the *work directory*, so cmake failed at configure in any scratch dir
   (`Cannot find source file: tmp.Lw4Jihzyc6_test.cpp`). RED, correctly reported, for entirely the
-  wrong reason. *(corpus#14; 23 of the 26 are now instruments.)*
+  wrong reason. *(corpus#14; 24 of the 26 are now instruments.)*
 - **145 nodes grading on exactly one test of the many their suite ships.** Exercism ships every
   test after the first disabled (`#[ignore]`, `@Disabled`, `xtest`, `#if EXERCISM_RUN_ALL_TESTS`); the port
   inherited that verbatim. `rust-acronym` ran 1 of its 10 tests, and
@@ -43,9 +44,13 @@ Every one of these was live, in CI, and reported as passing on every run until i
   the cpp class. The seeds ship a wrapper pinned to 8.7, but `gradle-wrapper.jar` was missing, so
   `./gradlew` could not run either. Under a real 8.7 the stratum is healthy — **and two nodes CI
   had always reported RED turn out to be GREEN on the untouched seed**. *(Pinned in #23.)*
-- **Nodes with no acceptance test at all, and nodes shipping a complete implementation.**
-  `go-counter`, `go-ledger`, `go-markdown`, plus `java-ledger` (a finished 168-line `Ledger.java`)
-  and `java-tree-building`, invisible until the tests actually ran. *(corpus#11.)*
+- **Six nodes whose seed was never meant to fail.** `go-ledger`, `java-ledger`,
+  `javascript-ledger`, `go-markdown` and `java-tree-building` are upstream **refactoring**
+  exercises — their premise is that the code already works and reads badly — and `go-counter` is an
+  upstream-*deprecated* exercise where the task is to write the test suite. Their instruction text
+  says so in the corpus's own `meta.yaml`: *"The code however is rather badly written, though
+  (somewhat surprisingly) it consistently passes the test suite."* They were selected for a corpus whose defining invariant is that every seed ships
+  failing. *(corpus#11 and #16 — one cause, split across two tickets.)*
 
 **The resolution: `N_instrument = 230 of 250`, and all 230 grade on their full acceptance suite** —
 3,613 tests across the 250 nodes, after #21 re-enabled the 2,219 that had shipped disabled across
@@ -56,21 +61,23 @@ that produced its verdict, so a reader can audit a call rather than trust it. Th
 
 ### What this is not
 
-**Every one of the five classes above was our own porting bug.** The grep oracle, the cpp
-work-directory paths, the inherited disabled suites, the unpinned java accept and the content
-defects were all introduced by *this project* when it adapted upstream exercises — not defects in
-upstream, and not a universal truth about eval corpora.
+**Four of the five classes were defects this project introduced.** The grep oracle, the cpp
+work-directory paths, the inherited disabled suites and the unpinned java accept were all created
+when we adapted upstream exercises — not defects in upstream, and not a universal truth about eval
+corpora.
 
-A sixth class is inherent rather than introduced, and is the one node this corpus cannot fix:
-`javascript-ledger` is an upstream *refactoring* exercise whose premise is that the seed already
-passes, so no accept oracle recovers a RED state from it. It is the single `UNUSABLE_BY_DESIGN`
-verdict in the census.
+**The fifth is not a defect at all.** The six passing-seed nodes are upstream exercises working
+exactly as upstream intended; a refactoring exercise is *supposed* to start green. Nothing about
+their content was introduced here. What this project got wrong was **selecting** them for a corpus
+whose defining invariant is that every seed ships failing — a smaller and more ordinary error than
+the other four, and worth stating as the smaller thing it is.
 
-So this is not evidence that everyone else's acceptance suite is broken in these ways. It is
-evidence that a suite can be green, in CI, on every run, while measuring something other than what
-its owners believe — and that the only way to know is to check each node against the specification
-rather than against the suite's own reports. **The transferable asset is the validation method, not
-the finding.**
+So this is not evidence that everyone else's acceptance suite is broken in these ways. The
+transferable claim is narrower: **a suite reports on the property it was built to check, and is
+silent on every property nobody built a check for.** Nothing here was caught by a test going red on
+its own; each class surfaced only when someone wrote a check for something the suite was assumed to
+guarantee, and each of those checks failed immediately. **The transferable asset is the validation
+method, not the finding.**
 
 ## The method, as questions to ask any suite
 
@@ -156,9 +163,10 @@ first: a reader who accepted the paired-comparison argument and used the Exercis
 would have inherited all of them, not just the one this section is named after.
 
 Those defects are repaired for the 230 nodes the census calls instruments. **They are not repaired
-everywhere:** 19 nodes remain `BROKEN` and one `UNUSABLE_BY_DESIGN`, including 3 of the 26 cpp
-nodes and the content defects of corpus#11, which is still open. Those 20 are excluded from
-`N_instrument` rather than fixed, and the census names each one with its reason.
+everywhere:** 19 nodes remain `BROKEN` and one `UNUSABLE_BY_DESIGN` — 2 of the 26 cpp nodes (both
+needing Boost, which `requires:` does not declare) and the six passing-seed nodes among them, with
+corpus#11 still open. Those 20 are excluded from `N_instrument` rather than fixed, and the census
+names each one with its reason.
 
 Contamination is in a different category again — it is not repaired, and cannot be, because it is a
 property of using public exercises. It remains the standing reason a measured effect on this
