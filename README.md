@@ -39,7 +39,7 @@ property the suite was assumed to have — and every such check went red on its 
   `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scored it GREEN.
   *(corpus#21 — found by this census, not previously known.)*
 - **A whole language stratum whose verdict depended on which toolchain happened to be on `PATH`.**
-  `accept: gradle test` resolves to whatever `gradle` is installed. On Gradle 9.x all 47 gradle
+  Every java accept invoked bare `gradle`, which resolves to whatever is installed. On Gradle 9.x all 47 gradle
   nodes fail with *"Failed to load JUnit Platform"* — environmentally RED and unsolvable, exactly
   the cpp class. The seeds ship a wrapper pinned to 8.7, but `gradle-wrapper.jar` was missing, so
   `./gradlew` could not run either. Under a real 8.7 the stratum is healthy — **and two nodes CI
@@ -66,8 +66,8 @@ that a porting decision made here broke. That distinction is the honest one, and
 "our bugs".
 
 **Written here — two.** The grep oracle and the unpinned `gradle test` both live in `accept:`, a
-field this corpus invented and upstream has no equivalent of. Nobody but this project ever chose
-either string.
+field this corpus invented — upstream ships per-track runner tooling, but nothing that commits a
+per-node shell string as data. Nobody but this project ever chose either string.
 
 **Upstream content, broken by a decision made here — three.**
 
@@ -90,13 +90,26 @@ silent on every property nobody built a check for.** No class here was caught by
 on its own; each surfaced only when someone wrote a check for something the suite was assumed to
 guarantee.
 
-Writing the check was not always enough. Four of the five classes fell out of a check that failed
-the first time it ran. The cpp class did not: `verify-red-invariant.sh` reported
-`ok … RED (exit 1)` for all 26 nodes, correctly, on every run — the class surfaced only because
-someone noticed each of those passes took ~0.17s, below the floor for a cmake configure, and went
-looking. **A check that passes for the wrong reason is the hardest kind to find, because the only
-signal it leaves is in the shape of a green result.** That one is worth more than the other four
-put together.
+Writing the check was not always enough, and the five classes split three ways by how they actually
+surfaced.
+
+- **Two fell out of a check that failed the first time it ran** — the grep oracle and the
+  passing-seed nodes, both from the RED-invariant sweep added in #3, which went red on six nodes
+  immediately and a seventh shortly after.
+- **Two were checks that passed for the wrong reason.** `verify-red-invariant.sh` reported
+  `ok … RED (exit 1)` for all 26 cpp nodes and all 47 gradle nodes, correctly, on every run, while
+  in neither stratum did a single test execute. cpp surfaced because someone noticed each pass took
+  ~0.17s — below the floor for a cmake configure alone — and went looking. java surfaced only when
+  the census ran the stratum under the Gradle version the seeds' own wrapper names. **A check that
+  passes for the wrong reason is the hardest kind to find, because the only signal it leaves is in
+  the shape of a green result.**
+- **One was a quantity nobody had built a threshold for** — the disabled suites. No check asserted
+  anything about how many tests ran, so no check could have failed; the mechanism differs per track,
+  which is why no single grep found it earlier either.
+
+The middle pair is the part worth carrying away. Both were invisible to a check *written for exactly
+that property*, and the second was found only because the first had already taught us to distrust a
+green result from that script.
 
 **The transferable asset is the validation method, not the finding.**
 
