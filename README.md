@@ -61,23 +61,44 @@ that produced its verdict, so a reader can audit a call rather than trust it. Th
 
 ### What this is not
 
-**Four of the five classes were defects this project introduced.** The grep oracle, the cpp
-work-directory paths, the inherited disabled suites and the unpinned java accept were all created
-when we adapted upstream exercises — not defects in upstream, and not a universal truth about eval
-corpora.
+**None of the five is a defect in upstream.** Two were written here; three are upstream content
+that a porting decision made here broke. That distinction is the honest one, and it is finer than
+"our bugs".
 
-**The fifth is not a defect at all.** The six passing-seed nodes are upstream exercises working
-exactly as upstream intended; a refactoring exercise is *supposed* to start green. Nothing about
-their content was introduced here. What this project got wrong was **selecting** them for a corpus
-whose defining invariant is that every seed ships failing — a smaller and more ordinary error than
-the other four, and worth stating as the smaller thing it is.
+**Written here — two.** The grep oracle and the unpinned `gradle test` both live in `accept:`, a
+field this corpus invented and upstream has no equivalent of. Nobody but this project ever chose
+either string.
+
+**Upstream content, broken by a decision made here — three.**
+
+- The cpp `CMakeLists.txt` derived the exercise name from its own directory
+  (`get_filename_component(exercise ${CMAKE_CURRENT_SOURCE_DIR} NAME)`) — upstream's line, and
+  correct upstream, where the directory *is* the exercise name. It broke because this harness
+  materialises each seed into a randomly-named scratch dir. The pin that replaced it is ours; the
+  line that failed was not.
+- The disabled suites are upstream's by design: a learner enables the tests one at a time. The
+  defect was not re-enabling them when building a *graded* corpus, where nobody is learning.
+- The six passing-seed nodes are upstream exercises working as upstream meant them to —
+  a refactoring exercise is supposed to start green, and `go-counter` is a deprecated exercise
+  shipping zero tests because the learner is meant to write them. The defect was **selecting** them
+  for a corpus whose defining invariant is that every seed ships failing. Nothing that makes them
+  pass was introduced here.
 
 So this is not evidence that everyone else's acceptance suite is broken in these ways. The
 transferable claim is narrower: **a suite reports on the property it was built to check, and is
-silent on every property nobody built a check for.** Nothing here was caught by a test going red on
-its own; each class surfaced only when someone wrote a check for something the suite was assumed to
-guarantee, and each of those checks failed immediately. **The transferable asset is the validation
-method, not the finding.**
+silent on every property nobody built a check for.** No class here was caught by a test going red
+on its own; each surfaced only when someone wrote a check for something the suite was assumed to
+guarantee.
+
+Writing the check was not always enough. Four of the five classes fell out of a check that failed
+the first time it ran. The cpp class did not: `verify-red-invariant.sh` reported
+`ok … RED (exit 1)` for all 26 nodes, correctly, on every run — the class surfaced only because
+someone noticed each of those passes took ~0.17s, below the floor for a cmake configure, and went
+looking. **A check that passes for the wrong reason is the hardest kind to find, because the only
+signal it leaves is in the shape of a green result.** That one is worth more than the other four
+put together.
+
+**The transferable asset is the validation method, not the finding.**
 
 ## The method, as questions to ask any suite
 
