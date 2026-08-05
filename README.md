@@ -21,7 +21,7 @@ these nodes function as a measurement instrument at all?** — and the answer wa
 
 ## What the audit found
 
-Every one of these was live, in CI, reported as passing, for months.
+Every one of these was live, in CI, and reported as passing on every run until it was audited.
 
 - **A node shipping `2 passed, 12 failed` and scoring GREEN.** `python-react`'s accept was
   `grep -qE '[1-9][0-9]* passed'` on runner output, which the "2 passed" satisfies. 222 of 250 nodes
@@ -56,15 +56,18 @@ that produced its verdict, so a reader can audit a call rather than trust it. Th
 
 ### What this is not
 
-**Four of the five defect classes were our own porting bugs.** The grep oracle, the cpp
-work-directory paths, the inherited disabled suites and the unpinned java accept were all
-introduced by *this project* when it adapted upstream exercises — not defects in upstream, and not
-a universal truth about eval corpora. Only the fifth is inherent: `javascript-ledger` is an
-upstream *refactoring* exercise whose premise is that the seed passes, so no accept oracle recovers
-a RED state from it.
+**Every one of the five classes above was our own porting bug.** The grep oracle, the cpp
+work-directory paths, the inherited disabled suites, the unpinned java accept and the content
+defects were all introduced by *this project* when it adapted upstream exercises — not defects in
+upstream, and not a universal truth about eval corpora.
+
+A sixth class is inherent rather than introduced, and is the one node this corpus cannot fix:
+`javascript-ledger` is an upstream *refactoring* exercise whose premise is that the seed already
+passes, so no accept oracle recovers a RED state from it. It is the single `UNUSABLE_BY_DESIGN`
+verdict in the census.
 
 So this is not evidence that everyone else's acceptance suite is broken in these ways. It is
-evidence that a suite can be green, in CI, for months, while measuring something other than what
+evidence that a suite can be green, in CI, on every run, while measuring something other than what
 its owners believe — and that the only way to know is to check each node against the specification
 rather than against the suite's own reports. **The transferable asset is the validation method, not
 the finding.**
@@ -152,8 +155,14 @@ same 225 Exercism nodes and **0 of the 25** hand-authored — which is why the a
 first: a reader who accepted the paired-comparison argument and used the Exercism stratum anyway
 would have inherited all of them, not just the one this section is named after.
 
-Those defects are repaired. Contamination is not, and cannot be: it is a property of using public
-exercises. It remains the standing reason a measured effect on this stratum might not hold.
+Those defects are repaired for the 230 nodes the census calls instruments. **They are not repaired
+everywhere:** 19 nodes remain `BROKEN` and one `UNUSABLE_BY_DESIGN`, including 3 of the 26 cpp
+nodes and the content defects of corpus#11, which is still open. Those 20 are excluded from
+`N_instrument` rather than fixed, and the census names each one with its reason.
+
+Contamination is in a different category again — it is not repaired, and cannot be, because it is a
+property of using public exercises. It remains the standing reason a measured effect on this
+stratum might not hold.
 
 ### The held-out stratum is small
 
