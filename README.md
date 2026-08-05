@@ -47,10 +47,16 @@ property the suite was assumed to have — and every such check went red on its 
 - **Six nodes whose seed was never meant to fail.** `go-ledger`, `java-ledger`,
   `javascript-ledger`, `go-markdown` and `java-tree-building` are upstream **refactoring**
   exercises — their premise is that the code already works and reads badly — and `go-counter` is an
-  upstream-*deprecated* exercise where the task is to write the test suite. Their instruction text
-  says so in the corpus's own `meta.yaml`: *"The code however is rather badly written, though
-  (somewhat surprisingly) it consistently passes the test suite."* They were selected for a corpus whose defining invariant is that every seed ships
-  failing. *(corpus#11 and #16 — one cause, split across two tickets.)*
+  upstream-*deprecated* exercise where the task is to write the test suite. The three `ledger`
+  nodes say it outright in the corpus's own `meta.yaml` — *"The code however is rather badly
+  written, though (somewhat surprisingly) it consistently passes the test suite"* — and the rest
+  imply it in their own wording. They were selected for a corpus whose defining invariant is that
+  every seed ships failing.
+
+  *One cause, filed across three tickets: corpus#11 (the go nodes), #16 (`javascript-ledger`), and
+  #23 — where `java-ledger` and `java-tree-building` appear because they were **invisible until the
+  gradle toolchain was pinned**. CI had reported them RED for as long as they had existed, and no
+  test had ever run.*
 
 **The resolution: `N_instrument = 230 of 250`, and all 230 grade on their full acceptance suite** —
 3,613 tests across the 250 nodes, after #21 re-enabled the 2,219 that had shipped disabled across
