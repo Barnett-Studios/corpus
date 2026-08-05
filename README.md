@@ -39,7 +39,8 @@ property the suite was assumed to have — and every such check went red on its 
   `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scored it GREEN.
   *(corpus#21 — found by this census, not previously known.)*
 - **A whole language stratum whose verdict depended on which toolchain happened to be on `PATH`.**
-  Every java accept invoked bare `gradle`, which resolves to whatever is installed. On Gradle 9.x all 47 gradle
+  All 47 gradle accepts invoked bare `gradle`, which resolves to whatever is installed (the six
+  hand-authored java nodes use `javac` directly and were never exposed). On Gradle 9.x all 47 gradle
   nodes fail with *"Failed to load JUnit Platform"* — environmentally RED and unsolvable, exactly
   the cpp class. The seeds ship a wrapper pinned to 8.7, but `gradle-wrapper.jar` was missing, so
   `./gradlew` could not run either. Under a real 8.7 the stratum is healthy — **and two nodes CI
@@ -102,20 +103,30 @@ surfaced.
 - **Two fell out of a check that failed the first time it ran** — the grep oracle and the
   passing-seed nodes, both from the RED-invariant sweep added in #3, which went red on six nodes
   immediately and a seventh shortly after.
-- **Two were checks that passed for the wrong reason.** `verify-red-invariant.sh` reported
-  `ok … RED (exit 1)` for all 26 cpp nodes and all 47 gradle nodes, correctly, on every run, while
-  in neither stratum did a single test execute. cpp surfaced because someone noticed each pass took
-  ~0.17s — below the floor for a cmake configure alone — and went looking. java surfaced only when
-  the census ran the stratum under the Gradle version the seeds' own wrapper names. **A check that
-  passes for the wrong reason is the hardest kind to find, because the only signal it leaves is in
-  the shape of a green result.**
+- **Two were checks that passed for the wrong reason.** `verify-red-invariant.sh` reported RED for
+  all 26 cpp nodes and all 47 gradle nodes, correctly, on every run — while in neither stratum did a
+  single test execute. cpp surfaced because someone noticed each pass took ~0.17s, below the floor
+  for a cmake configure alone, and went looking. java surfaced by accident: the census host happened
+  to have a Gradle the seeds' wrapper does *not* name, on which all 47 fail before any test runs.
+  Under the 8.7 the wrapper does name, the stratum is healthy — so the defect was only ever visible
+  from the wrong host. **A check that passes for the wrong reason is the hardest kind to find,
+  because the only signal it leaves is in the shape of a green result.**
 - **One was a quantity nobody had built a threshold for** — the disabled suites. No check asserted
   anything about how many tests ran, so no check could have failed; the mechanism differs per track,
   which is why no single grep found it earlier either.
 
-The middle pair is the part worth carrying away. Both were invisible to a check *written for exactly
-that property*, and the second was found only because the first had already taught us to distrust a
-green result from that script.
+The middle pair is the part worth carrying away, and not for the reason it first appears. Both were
+invisible to the check that *looked* like it covered them — but `verify-red-invariant.sh` asserts
+only that `accept` exits non-zero on the untouched seed, and a toolchain that never reached the
+tests exits non-zero exactly as reliably as an unimplemented stub. It was never written for the
+property everyone read its green tick as guaranteeing. The guard that would have caught both — a
+check that the *runner actually ran*, not merely that the command failed — did not exist, and was
+still an open proposal when the census found the second instance.
+
+So this is not a case of writing the check and having it fail you. It is the thesis above,
+arriving in its most expensive form: **the property had no check, and an adjacent check's green
+tick was mistaken for one.** java was found because cpp had prompted the census that swept the
+whole corpus — not because anyone had learned to reread that script's passes.
 
 **The transferable asset is the validation method, not the finding.**
 
