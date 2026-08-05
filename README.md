@@ -21,8 +21,9 @@ these nodes function as a measurement instrument at all?** — and the answer wa
 
 ## What the audit found
 
-None of these was found by the suite failing. Each was found only once someone wrote a check for a
-property the suite was assumed to have — and every such check went red on its first run.
+None of these was found by the suite failing. Each surfaced only when someone went looking for a
+property the suite was assumed to have — and in two cases the check that appeared to cover it was
+passing, correctly, the whole time.
 
 - **A node shipping `2 passed, 12 failed` and scoring GREEN.** `python-react`'s accept was
   `grep -qE '[1-9][0-9]* passed'` on runner output, which the "2 passed" satisfies. 222 of 250 nodes
@@ -33,9 +34,10 @@ property the suite was assumed to have — and every such check went red on its 
   filenames from the *work directory*, so cmake failed at configure in any scratch dir
   (`Cannot find source file: tmp.Lw4Jihzyc6_test.cpp`). RED, correctly reported, for entirely the
   wrong reason. *(corpus#14; 24 of the 26 are now instruments.)*
-- **145 nodes grading on exactly one test of the many their suite ships.** Exercism ships every
-  test after the first disabled (`#[ignore]`, `@Disabled`, `xtest`, `#if EXERCISM_RUN_ALL_TESTS`); the port
-  inherited that verbatim. `rust-acronym` ran 1 of its 10 tests, and
+- **145 nodes grading on exactly one test of the many their suite ships.** Four of the six tracks
+  ship every test after the first disabled (`#[ignore]`, `@Disabled`, `xtest`,
+  `#if EXERCISM_RUN_ALL_TESTS`) so a learner enables them one at a time — cpp, java, javascript and
+  rust; go and python ship theirs fully enabled. The port inherited the convention verbatim. `rust-acronym` ran 1 of its 10 tests, and
   `fn abbreviate(_: &str) -> String { "PNG".to_string() }` scored it GREEN.
   *(corpus#21 — found by this census, not previously known.)*
 - **A whole language stratum whose verdict depended on which toolchain happened to be on `PATH`.**
@@ -142,10 +144,13 @@ whole corpus — not because anyone had learned to reread that script's passes.
 5. **Is the environment pinned, or is the verdict ambient?** If a different toolchain on `PATH`
    changes the answer, the toolchain is part of the result.
 
-Every one is mechanised here: [`ci/verify-accept-oracle.sh`](ci/verify-accept-oracle.sh),
+The first four are mechanised here: [`ci/verify-accept-oracle.sh`](ci/verify-accept-oracle.sh),
 [`ci/verify-red-invariant.sh`](ci/verify-red-invariant.sh),
 [`ci/prove-solvable.sh`](ci/prove-solvable.sh), and the two-stage sweep in
-[`ci/census/`](ci/census/).
+[`ci/census/`](ci/census/). **The fifth is not.** Nothing here asserts a toolchain *version* — the
+scripts check only that a tool is present, which is precisely how the java stratum's verdict came
+to depend on which Gradle happened to be installed. The question that cost the most is the one
+still answered by discipline rather than by a check.
 
 ## What's here
 
