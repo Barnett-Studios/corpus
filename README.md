@@ -203,11 +203,22 @@ ABPROOF_CORPUS=/path/to/red-baseline abproof run experiment.yaml --dry-run
 This was previously disclosed only as a **licensing** matter (`ATTRIBUTION.md`). It is also, and
 more importantly, a **train/test leakage** problem, and it was never named as one.
 
-The Exercism nodes do not merely resemble public tasks — 220 of the 225 embed the upstream
-instruction text **verbatim** in `change:`, and 19 of those carry it down to upstream's own
-`~~~~exercism/note` markers. So a model may
-have memorised both the prompt and a canonical solution. On such a node, a score measures
-recall, not the capability the harness change was supposed to move.
+The Exercism nodes do not merely resemble public tasks — **all 225** carry upstream's own
+instruction document inside `change:`, markdown headings and all, and **18 of them** kept
+upstream's `~~~~exercism/note` markers with it. Both figures are greps, not estimates:
+
+```bash
+# 225 — every Exercism node embeds a markdown document after "Task:", and no hand-authored node does
+grep -lF 'Task:\n\n#' red-baseline/*/meta.yaml | wc -l
+# 18 — of those, the ones that kept upstream's note markers verbatim
+grep -lF '~~~~exercism/note' red-baseline/*/meta.yaml | wc -l
+```
+
+Word-for-word identity with upstream is *not* claimed here: the upstream text is not vendored in
+this repo, so nothing in it can diff against it. What is measured is that the prompt is upstream's
+document rather than a paraphrase of it. So a model may have memorised both the prompt and a
+canonical solution. On such a node, a score measures recall, not the capability the harness change
+was supposed to move.
 
 ### What this does and does not invalidate
 
