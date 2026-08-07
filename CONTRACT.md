@@ -155,8 +155,8 @@ yet registered** in `promise/checkpoints.yaml`; the consume-back adds it before 
 This was previously disclosed only as a **licensing** matter (`ATTRIBUTION.md`). It is also, and
 more importantly, a **train/test leakage** problem, and it was never named as one.
 
-The Exercism nodes do not merely resemble public tasks — many embed the upstream instruction
-text **verbatim** in `change:`, including the original `~~~~exercism/note` markers. So a model may
+The Exercism nodes do not merely resemble public tasks — all 225 carry upstream's own instruction
+document inside `change:`, and 18 of them kept its `~~~~exercism/note` markers. So a model may
 have memorised both the prompt and a canonical solution. On such a node, a score measures
 recall, not the capability the harness change was supposed to move.
 
@@ -177,7 +177,7 @@ one either. **Report the two strata separately** — `provenance` in `MANIFEST.t
 `meta.yaml` exists to make that mechanical — and report the discordant-pair count alongside any
 null.
 
-### Contamination is not the worst thing wrong with this stratum
+### Contamination was not the worst thing wrong with this stratum
 
 This section would mislead if it stopped here, because it documents the *lesser* risk in detail.
 The same nodes carry two further defects, and by this project's own analysis the first outranks
@@ -203,7 +203,8 @@ contamination:
   conversion's value is on *solved* states, which is where a substring filter mislabels. Two
   further defects, below, decide whether a node is usable at all.
 
-- **GREEN-reachability is unverified across all 225 (#14).** `ci/verify-red-invariant.sh` proves
+- **GREEN-reachability was unverified across all 225 (#14). Confirmed and repaired.**
+  `ci/verify-red-invariant.sh` proves
   each accept is RED on the seed; `prove-solvable.sh` proves a reference solution reaches GREEN and
   covers only the 25 hand-authored nodes. From outside, a node that is RED because its toolchain
   never reached the tests is indistinguishable from one that is RED because the stub is
