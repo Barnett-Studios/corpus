@@ -3,7 +3,7 @@ language: "java"
 files: ["src/main/java/WordSearcher.java"]
 accept: "./gradlew test --console=plain"
 forbid: ["new_deps"]
-requires: ["gradle"]
+requires: []
 change: "Implement the solution in src/main/java/WordSearcher.java so the test suite passes. Do not modify the test files. Task:\n\n# Instructions\n\nIn word search puzzles you get a square of letters and have to find specific words in them.\n\nFor example:\n\n```text\njefblpepre\ncamdcimgtc\noivokprjsm\npbwasqroua\nrixilelhrs\nwolcqlirpc\nscreeaumgr\nalxhpburyi\njalaycalmp\nclojurermt\n```\n\nThere are several programming languages hidden in the above square.\n\nWords can be hidden in all kinds of directions: left-to-right, right-to-left, vertical and diagonal.\n\nGiven a puzzle and a list of words return the location of the first and last letter of each word."
 created: "2026-07-07T21:50:37Z"
 tier: "A"

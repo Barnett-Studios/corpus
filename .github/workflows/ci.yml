@@ -59,6 +59,32 @@ jobs:
       - name: RED-invariant checker self-test (the guard must bite)
         run: bash ci/verify-red-invariant.sh --self-test
 
+  # corpus#26 — the census's own controls. Two separate things, deliberately in one job
+  # because both are seconds and neither needs a toolchain:
+  #
+  #   1. the census scripts' completeness guards are themselves exercised (`spec.py`'s
+  #      self-test), so a guard that has stopped guarding is caught here rather than the
+  #      next time someone re-runs the census;
+  #   2. the committed `docs/census/validity-census.tsv` still describes THIS tree.
+  #
+  # Note what (2) is not. #26 proposed re-running stage 2 and diffing, but `classify.py`
+  # reads `.census-work/`, which is gitignored — nothing in the repo can reproduce the
+  # classification without first re-running the 250-node stage-1 sweep. `census-inputs.py`
+  # checks the property that actually matters instead: the inputs the census was computed
+  # over are unchanged, so the verdicts still apply. See its module docstring.
+  census:
+    name: census
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - name: census guards bite (spec.py self-test)
+        run: python3 ci/census/spec.py --self-test
+      - name: the committed census still describes this tree
+        run: python3 ci/census/census-inputs.py
+
   # corpus#3 — the RED invariant: every node must ship FAILING. A node that drifts to
   # GREEN is a free point for both arms of every A/B, silently inflating solve-rate.
   #

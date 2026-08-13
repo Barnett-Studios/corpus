@@ -25,6 +25,7 @@ caveat so the count can be reported at both bars.
 import json
 import os
 import re
+import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 H = os.environ.get("CENSUS_WORK", os.path.join(REPO, ".census-work"))
@@ -33,7 +34,12 @@ GREEN = os.path.join(H, "green")
 CORPUS = os.environ.get("CORPUS_ROOT", os.path.join(REPO, "red-baseline"))
 
 import classify  # reuse the per-language runner signatures
+import spec  # corpus#26: what the corpus contains, read from the tree and never from an input
 
+# Display order only. `spec.languages()` is the authority on which languages exist — a
+# seventh language missing from this list used to mean its GREEN file was never read, so
+# every one of its nodes came out UNPROVEN and therefore BROKEN with nothing saying the
+# input had simply not been produced.
 LANGS = ["cpp", "go", "java", "javascript", "python", "rust"]
 
 
@@ -51,18 +57,35 @@ def meta(node, field):
 
 def load():
     red = {}
-    with open(os.path.join(RUNS, "all.tsv"), encoding="utf-8") as fh:
-        for line in fh:
+    all_tsv = os.path.join(RUNS, "all.tsv")
+    with open(all_tsv, encoding="utf-8") as fh:
+        for lineno, line in enumerate(fh, 1):
             p = line.rstrip("\n").split("\t")
             if len(p) < 7:
-                continue
+                # NOT `continue` (corpus#26). A column-count change would have skipped
+                # every line, left `rows` empty, printed `rows: 0`, written a well-formed
+                # empty census and exited 0. The shape of the input changing is the one
+                # case where silence is least affordable.
+                sys.exit("census: %s:%d has %d field(s), expected >= 7. Refusing to skip "
+                         "a row whose shape this script does not recognise — that is how "
+                         "a census over nothing reports success.\n  %r"
+                         % (all_tsv, lineno, len(p), line[:120]))
             red[p[0]] = {"lang": p[1], "exit": int(p[4])}
+    spec.require_complete("the RED arm", red, all_tsv)
 
     green = {}
-    for lang in LANGS:
+    for lang in sorted(spec.languages()):
         path = os.path.join(GREEN, lang + ".tsv")
         if not os.path.exists(path):
-            continue
+            # NOT `continue`. A missing file marked every node of that language as having
+            # no GREEN evidence, which the verdict logic reads as BROKEN — so an input
+            # that was never produced was reported as a corpus defect.
+            sys.exit("census: no GREEN evidence file %s, but the corpus contains %d %s "
+                     "node(s). Every one of them would be reported BROKEN for a missing "
+                     "reference solution, which is a claim about the corpus made from a "
+                     "missing input file."
+                     % (path, len([n for n in spec.nodes() if spec.language_of(n) == lang]),
+                        lang))
         with open(path, encoding="utf-8") as fh:
             for line in fh:
                 p = line.rstrip("\n").split("\t")
@@ -184,7 +207,8 @@ def main():
         if r["verdict"] != "INSTRUMENT":
             print("  %-32s %-20s %s" % (r["node_id"], r["verdict"], r["reason"][:78]))
     print("\nwrote %s" % out)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
