@@ -7,8 +7,10 @@ redistributes them under those terms, with the attribution below, and adds its o
 adaptation layer (the `meta.yaml` task descriptors and the RED framing) © Barnett Studios under MIT.
 
 Provenance and per-license breakdown are machine-verifiable: [`MANIFEST.tsv`](MANIFEST.tsv) lists
-every one of the 250 nodes with its language, `requires` (the ambient toolchain the node still
-needs — empty for one that ships its own), seed license, and any bundled third-party component; [`verify-attribution.sh --check`](verify-attribution.sh) fails if the manifest
+every one of the 250 nodes with its language, `requires` (the ambient toolchain the node declares
+it still needs — empty where it declares none; for the 47 gradle-wrapper nodes that is because the
+accept invokes `./gradlew`, which needs nothing ambient), seed license, and any bundled third-party
+component; [`verify-attribution.sh --check`](verify-attribution.sh) fails if the manifest
 ever drifts from the actual data.
 
 ## Upstream: Exercism (MIT)
