@@ -208,12 +208,32 @@ echo "== check F: a node that ships a toolchain pin must actually use it (#23) =
 #   the wrapper is COMPLETE   (jar present, gradlew executable)
 #   the accept USES it        (./gradlew, not ambient gradle)
 #   the jar is the REAL one   (sha256 vs Gradle's published wrapper checksum)
+#   the DISTRIBUTION is too   (distributionSha256Sum set, and set to the right digest)
 #
 # The checksum is not ceremony. The jar is a binary that every java node executes, so an
 # unnoticed swap is arbitrary code execution across 47 nodes. Gradle publishes the digest at
 # services.gradle.org/distributions/gradle-<v>-wrapper.jar.sha256; this is 8.7's, verified
 # against that endpoint when the jar was added.
 WRAPPER_SHA256_8_7="cb0da6751c2b753a16ac168bb354870ebb1e162e9083f116729cec9c781156b8"
+
+# corpus#27, the same reasoning one link down the chain. The digest-verified 43 KB jar's
+# entire job is to fetch a ~130 MB distribution and execute it, and until this landed no
+# node checked those bytes at all — `validateDistributionUrl=true` validates the URL, not
+# the payload. So the arbitrary-code-execution surface the wrapper checksum closes was
+# still wide open behind it, across the same 47 nodes.
+#
+# 8.7-bin's digest, from services.gradle.org/distributions/gradle-8.7-bin.zip.sha256 and
+# re-verified against the 128 MB payload actually served (shasum -a 256) rather than
+# transcribed on trust. That confirms the digest describes the artifact; it cannot say
+# anything about a compromised vendor host, which is the residual and is not closable from
+# here.
+#
+# Keyed by the version in distributionUrl, and a version with no entry FAILS rather than
+# skipping: the point of the check is that no node executes an unverified distribution, and
+# a table that silently passes what it does not know is a check that shrinks to whatever it
+# already covers. Bumping the wrapper means adding the digest here — that edit is the
+# intended review moment.
+DIST_SHA256_8_7="544c35d6bd849ae8a5ed0bcea39ba677dc40f49df7d1835561582da2009b961d"
 f_fail=0; f_checked=0
 sha_of() {
   if have shasum; then shasum -a 256 "$1" | cut -d' ' -f1
@@ -224,10 +244,33 @@ for node in "${ALL_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   src="$node/seed"; [[ -d "$src" ]] || src="$node"
   # Only nodes that ship a wrapper are in scope; a node with no pin is a different question.
-  [[ -f "$src/gradle/wrapper/gradle-wrapper.properties" ]] || continue
+  props="$src/gradle/wrapper/gradle-wrapper.properties"
+  [[ -f "$props" ]] || continue
   f_checked=$((f_checked + 1))
   base="$(basename "$node")"
   acc="$(accept_of "$node")"
+
+  # The distribution the wrapper will download, and whether its bytes are pinned (#27).
+  dist_ver="$(sed -n 's/^distributionUrl=.*gradle-\([0-9.]*\)-bin\.zip.*/\1/p' "$props" | sed -n '1p')"
+  dist_sum="$(sed -n 's/^distributionSha256Sum=\(.*\)/\1/p' "$props" | sed -n '1p' | tr -d '[:space:]')"
+  case "$dist_ver" in
+    8.7) want_sum="$DIST_SHA256_8_7" ;;
+    "")  want_sum=""
+         note "FAIL $base: gradle-wrapper.properties has no recognisable gradle-<v>-bin.zip distributionUrl — this check cannot tell what it will execute"
+         fail=1; f_fail=1 ;;
+    *)   want_sum=""
+         note "FAIL $base: distributionUrl pins gradle $dist_ver, which has no published digest recorded in this script — add it rather than let an unverified distribution through"
+         fail=1; f_fail=1 ;;
+  esac
+  if [[ -n "$want_sum" ]]; then
+    if [[ -z "$dist_sum" ]]; then
+      note "FAIL $base: no distributionSha256Sum — the wrapper would download and execute ~130 MB of unverified bytes (#27)"
+      fail=1; f_fail=1
+    elif [[ "$dist_sum" != "$want_sum" ]]; then
+      note "FAIL $base: distributionSha256Sum $dist_sum != published $want_sum for gradle $dist_ver"
+      fail=1; f_fail=1
+    fi
+  fi
 
   jar="$src/gradle/wrapper/gradle-wrapper.jar"
   if [[ ! -f "$jar" ]]; then
@@ -258,7 +301,7 @@ if [[ $f_checked -eq 0 ]]; then
   note "FAIL: check F matched no wrapper-shipping node — the corpus lost its java stratum, or the probe is stale"
   fail=1; f_fail=1
 elif [[ $f_fail -eq 0 ]]; then
-  note "ok: all $f_checked wrapper-shipping nodes ship a complete, verified wrapper and invoke it"
+  note "ok: all $f_checked wrapper-shipping nodes ship a complete, verified wrapper, pin the distribution digest, and invoke it"
 fi
 
 echo "== check G: a node's acceptance suite is not shipped disabled (#21) =="

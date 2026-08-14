@@ -29,7 +29,12 @@ if [[ ! -d "$CORPUS_ROOT" ]]; then
 fi
 
 generate() {
-  printf 'node_id\tlanguage\taccept_tool\tseed_license\tthird_party\tprovenance\n'
+  # `requires`, not `accept_tool`: this column has only ever mirrored the meta.yaml field,
+  # and 59 nodes already read `-` because they declare none. #27 drops `gradle` from the 47
+  # wrapper nodes — their accept is `./gradlew`, which needs no ambient tool — so under the
+  # old name the manifest would have asserted that a gradle node has no accept tool. The
+  # column has no consumer outside this script; the name was the only thing making a claim.
+  printf 'node_id\tlanguage\trequires\tseed_license\tthird_party\tprovenance\n'
   for d in "$CORPUS_ROOT"/*/; do
     local id lang req lic tp
     id=$(basename "$d")

@@ -141,6 +141,40 @@ never see one.
 time across six toolchains, so it is not wired into CI; the committed TSV is the artifact, and the
 scripts exist so a reader can re-derive rather than take it on faith.
 
+## Keeping it honest (corpus#26)
+
+An audit exhibit whose own controls skip silently is not an exhibit. Two things are wired into CI
+(the `census` job — seconds, no toolchain):
+
+**1. The census scripts' guards are exercised.** `ci/census/spec.py --self-test` proves each one
+bites: an unreadable or empty `CORPUS_ROOT` fails rather than yielding a corpus of zero nodes; a
+directory without `meta.yaml` is not counted; a measurement missing a node fails *and names it*;
+so does a measurement carrying a row for a node that is not in the tree. Both directions, because
+they are different defects — a short input means the report describes a smaller population than
+the corpus, and a long one means the input was produced against a different corpus entirely.
+
+Every guard exists because its absence had already produced a green report. `build-census.py` and
+`classify.py` used to `continue` past a short line and past a missing `green/<lang>.tsv`; a column
+change would have written a well-formed empty census, printed `rows: 0`, and exited 0. The
+denominator now comes from the node directories on disk — never from a census input, which would
+be asking the measurement whether the measurement is complete — and never from a literal like
+`EXPECTED_NODES = 250`, a number that moved twice inside one stack of PRs.
+
+**2. The committed TSV still describes this tree.** `ci/census/census-inputs.py` records one
+sha256 per node over every tracked file in its directory, in
+[`census-inputs.tsv`](census-inputs.tsv), and CI re-computes and diffs. Editing a node's
+`meta.yaml`, accept, or tests fails the build with the node named, because the verdicts were
+computed over the old inputs and nothing else would say so.
+
+#26 originally proposed re-running stage 2 and diffing. That cannot work: `classify.py` reads
+`.census-work/`, which is gitignored, so reproducing the classification means first re-running the
+~1 hour stage-1 sweep. The digest checks the property the proposal was after — the inputs are
+unchanged, so the verdicts still apply — at zero cost.
+
+**What it does not do:** it never re-verifies a verdict. If the census was wrong when it was
+recorded, this keeps it wrong and says nothing. And re-recording (`--write`) without re-running the
+census makes the gate agree with whatever the tree says, which is the one way to defeat it.
+
 ## What it means for the experiment (corpus#17, dotclaude#34)
 
 dotclaude#34 measured the discordant rate on the **clean 24-kata stratum**: `d = 9/24 = 0.375`,

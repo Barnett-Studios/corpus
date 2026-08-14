@@ -7,8 +7,10 @@ redistributes them under those terms, with the attribution below, and adds its o
 adaptation layer (the `meta.yaml` task descriptors and the RED framing) © Barnett Studios under MIT.
 
 Provenance and per-license breakdown are machine-verifiable: [`MANIFEST.tsv`](MANIFEST.tsv) lists
-every one of the 250 nodes with its language, accept toolchain, seed license, and any bundled
-third-party component; [`verify-attribution.sh --check`](verify-attribution.sh) fails if the manifest
+every one of the 250 nodes with its language, `requires` (the ambient toolchain the node declares
+it still needs — empty where it declares none; for the 47 gradle-wrapper nodes that is because the
+accept invokes `./gradlew`, which needs no ambient `gradle`), seed license, and any bundled third-party
+component; [`verify-attribution.sh --check`](verify-attribution.sh) fails if the manifest
 ever drifts from the actual data.
 
 ## Upstream: Exercism (MIT)
@@ -54,6 +56,22 @@ ever drifts from the actual data.
   `ci/verify-accept-oracle.sh` check F asserts that digest on every run. The jar is a binary each
   java node executes, so an unnoticed swap would be arbitrary code execution across 47 nodes;
   attribution and integrity are the same problem here, and the check covers both.
+
+  **The distribution the wrapper fetches is pinned too (#27).** Nothing in this repo redistributes
+  it — the 43 KB jar downloads it at first run — but the same execution surface applies one link
+  down the chain, and until #27 those ~130 MB of bytes were unverified. `validateDistributionUrl`
+  validates the URL, not the payload.
+
+  | | |
+  |---|---|
+  | distribution | `gradle-8.7-bin.zip` |
+  | sha256 | `544c35d6bd849ae8a5ed0bcea39ba677dc40f49df7d1835561582da2009b961d` |
+  | published at | `https://services.gradle.org/distributions/gradle-8.7-bin.zip.sha256` |
+  | also verified against | the 128 MB payload actually served, hashed locally — not transcribed on trust |
+
+  All 47 seeds now carry it as `distributionSha256Sum`, and check F fails a node that omits it, sets
+  it wrong, or names a gradle version whose digest the script does not record. The residual is
+  vendor-host trust: digest and payload come from the same origin, and nothing here can close that.
 
 Language scaffolds without a separate license obligation — `go.mod` (45), `Cargo.toml` (37 — one more
 than the 36 `rust-*` nodes because `rust-macros` ships a workspace + proc-macro pair),

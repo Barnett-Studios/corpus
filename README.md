@@ -174,8 +174,9 @@ the only one anyone mechanised, it took the cost to get there, and it is still o
   what it means for whether a paired experiment over this corpus can be powered.
 - [`CONTRACT.md`](CONTRACT.md) — the `{meta, seed, RED}` per-node contract, the RED invariant, and the
   fail-open toolchain gate.
-- [`MANIFEST.tsv`](MANIFEST.tsv) — machine-readable index of all 250 nodes (id, language, accept tool,
-  seed license, third-party bundle, provenance).
+- [`MANIFEST.tsv`](MANIFEST.tsv) — machine-readable index of all 250 nodes (id, language, `requires`
+  — the ambient toolchain a node declares it still needs, empty where it declares none — seed
+  license, third-party bundle, provenance).
 - [`LICENSE`](LICENSE) · [`ATTRIBUTION.md`](ATTRIBUTION.md) — full provenance (Exercism MIT + bundled
   Catch2 BSL-1.0 + Gradle-wrapper Apache-2.0).
 - [`verify-attribution.sh`](verify-attribution.sh) — regenerate or (`--check`) drift-check the manifest

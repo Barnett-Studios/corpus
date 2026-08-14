@@ -89,23 +89,67 @@ toolchain_ok() {
   return 0
 }
 
-# Run a node's accept against a pristine copy of its seed. Echoes the exit code.
+# Run a node's accept against a pristine copy of its seed. Echoes the exit code; the
+# accept's combined output lands in $3, for env_failure_of to read.
+#
+# The log path is an ARGUMENT rather than a variable this function sets. Callers invoke it
+# as `ec="$(run_accept ...)"`, so every assignment inside it happens in a subshell and is
+# lost — an inert env-failure guard reading an empty path, which is what the self-test
+# caught the first time this was written.
+#
 # `set +o pipefail` inside the subshell: many accepts are pipelines ending in `grep -q`,
 # and pipefail would report the upstream runner's status instead of the accept's own — a
 # different oracle from the one abproof actually uses. This check must observe exactly
 # what the harness observes, warts included.
 run_accept() {
-  local node="$1" acc="$2" src work ec=0
+  local node="$1" acc="$2" log="$3" src work ec=0
   src="$node/seed"; [[ -d "$src" ]] || src="$node"
   work="$(mktemp -d)"
   cp -R "$src/." "$work/"
   if have timeout; then
-    ( set +o pipefail; cd "$work" && timeout "$ACCEPT_TIMEOUT" bash -c "$acc" >/dev/null 2>&1 ) || ec=$?
+    ( set +o pipefail; cd "$work" && timeout "$ACCEPT_TIMEOUT" bash -c "$acc" >"$log" 2>&1 ) || ec=$?
   else
-    ( set +o pipefail; cd "$work" && bash -c "$acc" >/dev/null 2>&1 ) || ec=$?
+    ( set +o pipefail; cd "$work" && bash -c "$acc" >"$log" 2>&1 ) || ec=$?
   fi
   rm -rf "$work"
   printf '%s' "$ec"
+}
+
+# A non-zero exit that came from the ENVIRONMENT, not from the unimplemented stub. Echoes
+# a reason, or nothing.
+#
+# corpus#27. Dropping `requires: ["gradle"]` from the 47 wrapper nodes is only an
+# improvement if this exists. Before, a machine without gradle SKIPPED them — visible in
+# the `skipped` count. After, it RUNS them, `./gradlew` fails to fetch its distribution,
+# the accept exits non-zero, and the sweep prints `ok <node>: RED (exit 1)`. That trades a
+# loud skip for a silent false pass, which is strictly the worse half of the same defect
+# the ticket is about.
+#
+# It is also load-bearing for the distribution digest pinned in check F: a wrong pin makes
+# every java node die with "Verification of Gradle distribution failed!", and all 47 would
+# have read as honestly RED with nothing saying the tests never ran.
+#
+# The header above documents the general limit — this check cannot tell "RED because
+# unimplemented" from "RED because the toolchain never reached the tests" — and this does
+# NOT lift it. It closes the specific signatures reachable from this change. A cmake
+# configure that fails for a novel reason still passes quietly; that remains #14.
+env_failure_of() {
+  local log="$1"
+  [[ -f "$log" ]] || return 0
+  # Ordered most specific first, so the printed reason names the actual cause.
+  local pat reason
+  while IFS='|' read -r pat reason; do
+    [[ -z "$pat" ]] && continue
+    if grep -qF -- "$pat" "$log" 2>/dev/null; then printf '%s' "$reason"; return 0; fi
+  done <<'PATTERNS'
+Verification of Gradle distribution failed|the pinned distributionSha256Sum does not match what was downloaded (check F's digest is wrong, or the payload is)
+Could not install Gradle distribution|the gradle wrapper could not unpack its distribution
+Exception in thread "main" java.net.UnknownHostException|DNS failed — no network to fetch the gradle distribution
+Exception in thread "main" java.net.ConnectException|connection refused — no network to fetch the gradle distribution
+Network is unreachable|no network to fetch the toolchain distribution
+Could not find or load main class org.gradle.wrapper.GradleWrapperMain|gradle-wrapper.jar is missing or unreadable
+PATTERNS
+  return 0
 }
 
 # ── self-test: the checker must catch a GREEN node ───────────────────────────────
@@ -127,9 +171,15 @@ if [[ "${1:-}" == "--self-test" ]]; then
   # this check would bless it. The fixture is GREEN, so it must be caught.
   printf 'id: esc-node\nlanguage: "python"\nfiles: ["s.py"]\naccept: "echo '"'"'result: ok. 3'"'"' | grep -qE '"'"'ok\\\\. [1-9]'"'"'"\nforbid: []\n' > "$tmp/esc-node/meta.yaml"
   printf 'x = 1\n' > "$tmp/esc-node/seed/s.py"
+  # ENV: non-zero for an environmental reason (corpus#27). Without env_failure_of this
+  # node reads `ok env-node: RED (exit 1)` — a toolchain that never reached the tests,
+  # blessed as a verified invariant.
+  mkdir -p "$tmp/env-node/seed"
+  printf 'id: env-node\nlanguage: "python"\nfiles: ["s.py"]\naccept: "echo Could not install Gradle distribution from '"'"'https://services.gradle.org/x.zip'"'"'; exit 1"\nforbid: []\n' > "$tmp/env-node/meta.yaml"
+  printf 'x = 1\n' > "$tmp/env-node/seed/s.py"
 
   out=""; rc=0
-  out="$(EXPECTED_NODES=3 CORPUS_ROOT="$tmp" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc=$?
+  out="$(EXPECTED_NODES=4 CORPUS_ROOT="$tmp" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc=$?
   if [[ $rc -eq 0 ]]; then
     echo "SELF-TEST FAIL: a GREEN node did not fail the sweep" >&2
     printf '%s\n' "$out" >&2; exit 1
@@ -144,10 +194,24 @@ if [[ "${1:-}" == "--self-test" ]]; then
     echo "SELF-TEST FAIL: an honestly-RED node was flagged" >&2
     printf '%s\n' "$out" >&2; exit 1
   fi
+  # corpus#27. The distinguishing assertion is not "env-node failed" — it is that it failed
+  # as ENVIRONMENTAL and was never counted as checked. A guard that failed it for any other
+  # reason would still leave the sweep claiming it verified the node.
+  if ! printf '%s' "$out" | grep -q 'FAIL env-node: accept exited 1 for an ENVIRONMENTAL reason'; then
+    echo "SELF-TEST FAIL: an environmentally-RED node was not distinguished from an honest RED" >&2
+    printf '%s\n' "$out" >&2; exit 1
+  fi
+  # 4 fixtures considered, 3 checked: env-node must be excluded from the denominator, not
+  # merely failed. A guard that failed it while still counting it would leave the summary
+  # line claiming a node was verified that never ran its tests.
+  if ! printf '%s' "$out" | grep -q 'considered=4 checked=3'; then
+    echo "SELF-TEST FAIL: an environmentally-RED node was counted as checked" >&2
+    printf '%s\n' "$out" >&2; exit 1
+  fi
   # The quarantine must not rot: a node listed as known-GREEN that is actually RED has
   # been fixed, and leaving it listed would silently shrink the gate's coverage forever.
   out2=""; rc2=0
-  out2="$(EXPECTED_NODES=3 CORPUS_ROOT="$tmp" KNOWN_GREEN_OVERRIDE="red-node green-node esc-node" \
+  out2="$(EXPECTED_NODES=4 CORPUS_ROOT="$tmp" KNOWN_GREEN_OVERRIDE="red-node green-node esc-node" \
           bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc2=$?
   if [[ $rc2 -eq 0 ]]; then
     echo "SELF-TEST FAIL: quarantining an honestly-RED node was accepted; the list can rot" >&2
@@ -162,6 +226,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
   echo "  - a GREEN node fails the sweep; an honestly-RED node does not"
   echo "  - a node that only reads GREEN once YAML escapes are resolved is still caught"
   echo "  - a stale quarantine entry (listed known-GREEN but actually RED) fails the sweep"
+  echo "  - a node that is RED for an ENVIRONMENTAL reason fails, and is not counted as checked"
   exit 0
 fi
 
@@ -223,7 +288,7 @@ is_quarantined() {
 
 LANG_FILTER="${CORPUS_LANG:-}"
 fail=0; checked=0; skipped=0; considered=0; quarantined=0
-green_nodes=""; stale_quarantine=""
+green_nodes=""; stale_quarantine=""; env_nodes=""
 
 for node in "$CORPUS_ROOT"/*; do
   [[ -d "$node" ]] || continue
@@ -241,9 +306,25 @@ for node in "$CORPUS_ROOT"/*; do
     note "FAIL $(basename "$node"): no accept command in meta.yaml"; fail=1; continue
   fi
 
-  ec="$(run_accept "$node" "$acc")"
-  checked=$((checked + 1))
+  ACCEPT_LOG="$(mktemp)"
+  ec="$(run_accept "$node" "$acc" "$ACCEPT_LOG")"
   base="$(basename "$node")"
+
+  # Before anything else: was this RED for an environmental reason? Checked ahead of the
+  # quarantine branch because an env failure there would otherwise be reported as "listed
+  # known-GREEN but is RED", sending the reader to delete a quarantine entry over a
+  # network outage.
+  env_reason=""
+  if [[ "$ec" -ne 0 ]]; then env_reason="$(env_failure_of "$ACCEPT_LOG")"; fi
+  rm -f "$ACCEPT_LOG"
+  if [[ -n "$env_reason" ]]; then
+    note "FAIL $base: accept exited $ec for an ENVIRONMENTAL reason, not an unimplemented stub — $env_reason"
+    env_nodes="$env_nodes $base"
+    fail=1
+    continue
+  fi
+
+  checked=$((checked + 1))
   if is_quarantined "$base"; then
     quarantined=$((quarantined + 1))
     if [[ "$ec" -eq 0 ]]; then
@@ -281,6 +362,7 @@ fi
 if [[ $fail -ne 0 ]]; then
   [[ -n "$green_nodes" ]] && echo "GREEN nodes (corpus bugs — every measurement over them is inflated):$green_nodes" >&2
   [[ -n "$stale_quarantine" ]] && echo "Stale quarantine (now RED — delete from KNOWN_GREEN):$stale_quarantine" >&2
+  [[ -n "$env_nodes" ]] && echo "Environmentally RED (the runner, not the corpus — these nodes were NOT verified):$env_nodes" >&2
   echo "RED invariant: FAIL" >&2
   exit 1
 fi

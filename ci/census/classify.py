@@ -22,6 +22,8 @@ import os
 import re
 import sys
 
+import spec  # corpus#26: what the corpus contains, read from the tree and never from an input
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 H = os.environ.get("CENSUS_WORK", os.path.join(REPO, ".census-work"))
 RUNS = os.path.join(H, "census-runs")
@@ -117,11 +119,17 @@ def classify_red(node, lang, exit_code, log):
 
 def main():
     rows = []
-    with open(os.path.join(RUNS, "all.tsv"), encoding="utf-8") as fh:
-        for line in fh:
+    all_tsv = os.path.join(RUNS, "all.tsv")
+    with open(all_tsv, encoding="utf-8") as fh:
+        for lineno, line in enumerate(fh, 1):
             parts = line.rstrip("\n").split("\t")
             if len(parts) < 7:
-                continue
+                # NOT `continue` (corpus#26). This function returned None and the module
+                # ended `sys.exit(main())`, so a column-count change skipped every line
+                # and still exited 0 with an empty classification.
+                sys.exit("classify: %s:%d has %d field(s), expected >= 7. A row whose "
+                         "shape this script does not recognise is not a row to skip.\n  %r"
+                         % (all_tsv, lineno, len(parts), line[:120]))
             node, lang = parts[0], parts[1]
             exit_rc = int(parts[4])
             log = ""
@@ -135,6 +143,8 @@ def main():
                 "red": red, "evidence": evidence,
                 "provenance": meta(node, "provenance"),
             })
+
+    spec.require_complete("the classification", {r["node"] for r in rows}, all_tsv)
 
     # enabled-test counts (corpus#21)
     enabled = {}
@@ -165,6 +175,7 @@ def main():
     with open(os.path.join(H, "census-stage2.json"), "w", encoding="utf-8") as fh:
         json.dump(rows, fh, indent=1)
     print("\nwrote census-stage2.json (%d rows)" % len(rows))
+    return 0
 
 
 if __name__ == "__main__":

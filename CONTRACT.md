@@ -128,6 +128,25 @@ isolation (see `cordon`), which is outside what corpus data can express.
 failure — so a corpus with `java-*` nodes stays honest on a host without a JDK. Pure-Python /
 JavaScript nodes carry `requires: []`.
 
+**List only what the accept actually invokes (#27).** The 47 gradle-java nodes declared
+`requires: ["gradle"]` while their accept had become `./gradlew test` — the pinned wrapper that
+exists precisely so ambient gradle is *not* needed. So on any machine with a JDK and no system
+Gradle — a clean runner, a container, a scratch dir — all 47 skipped despite being perfectly
+runnable, and a skip surfaces only as a smaller `considered` count. They now declare `requires: []`;
+the JDK they really need is covered by `verify-red-invariant.sh`'s per-language baseline, which
+checks `javac`/`java` for `language: java` regardless of what `requires` says.
+
+**What `requires` cannot express, and why that is not fixed by adding a key.** The wrapper's real
+second requirement is *network access on first run*, to fetch `gradle-8.7-bin.zip`. Adding
+something like `requires: ["network"]` would restore exactly the defect above: a silent skip whose
+only trace is a shrinking denominator. Instead the sweep now **fails** a node whose accept exited
+non-zero for a recognisably environmental reason — a distribution that would not download, a
+distribution digest that did not match, a missing wrapper jar — rather than printing `ok <node>:
+RED`. An environmental RED is a runner problem being reported as a verified corpus invariant, and
+those nodes are excluded from `checked` as well as named. This narrows, but does not lift, the
+general limit stated at the top of `ci/verify-red-invariant.sh`: an accept that fails for a novel
+environmental reason still passes quietly (#14).
+
 ## Consumption
 
 - **abproof** reads the corpus via `$ABPROOF_CORPUS` pointing at `red-baseline/`,
@@ -296,7 +315,9 @@ either: the corpus declared a version it could not enforce and did not use.
 digest), `gradlew` is executable, and the accept is `./gradlew test --console=plain`. Verified with
 Gradle 9.5.1 deliberately on `PATH`: `./gradlew --version` reports 8.7 and the tests run.
 `ci/verify-accept-oracle.sh` check F asserts the wrapper is complete, digest-correct, and actually
-invoked — so a node cannot silently drift back to an ambient toolchain.
+invoked — so a node cannot silently drift back to an ambient toolchain. Since #27 it also asserts
+`distributionSha256Sum`: the digest-verified 43 KB jar's whole job is to fetch and execute a ~130 MB
+distribution, and those bytes were unchecked until then.
 
 Pinning made two nodes visible that CI had always reported RED: **`java-ledger` and
 `java-tree-building` are GREEN on the untouched seed** (both ship complete implementations). That
