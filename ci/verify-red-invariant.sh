@@ -224,11 +224,29 @@ if [[ "${1:-}" == "--self-test" ]]; then
 
   # The summary's quarantine COUNT and the names printed under it must describe the same
   # set. They did not: the list walked all of KNOWN_GREEN while the count only ever
-  # incremented for nodes this run reached, so `CORPUS_LANG=go` reported `quarantined=3`
-  # and then named six. Two fixtures are quarantined here and one entry names a node that
-  # does not exist in the fixture root, which is the shape that produced the divergence.
+  # incremented for nodes this run reached.
+  #
+  # The mechanism is ON-DISK-BUT-UNREACHED, and it needs its own fixture root to model.
+  # `CORPUS_LANG=go` reported `quarantined=3` and then named six; all six existed, they were
+  # just `continue`d past by the language filter before the counter ran. A quarantine entry
+  # naming a node that is NOT on disk is a different mechanism and does not discriminate —
+  # the `[[ -d ]]` guard drops it in both the fixed and the broken version, so a fixture
+  # built on it reports this property as verified while passing against the defect. It is
+  # kept in the override below because filtering it is worth pinning, not because it is the
+  # test.
+  #
+  # Two languages, one filter: `go-green` exists and is quarantined, and `CORPUS_LANG=python`
+  # means it is never reached. The count must see one node; the list must name the same one.
+  tmp2="$(mktemp -d)"
+  trap 'rm -rf "$tmp" "$tmp2"' EXIT
+  mkdir -p "$tmp2/py-green/seed" "$tmp2/go-green/seed"
+  printf 'id: py-green\nlanguage: "python"\nfiles: ["s.py"]\naccept: "test -f s.py"\nforbid: []\n' > "$tmp2/py-green/meta.yaml"
+  printf 'x = 1\n' > "$tmp2/py-green/seed/s.py"
+  printf 'id: go-green\nlanguage: "go"\nfiles: ["s.go"]\naccept: "test -f s.go"\nforbid: []\n' > "$tmp2/go-green/meta.yaml"
+  printf 'package main\n' > "$tmp2/go-green/seed/s.go"
   out3=""
-  out3="$(EXPECTED_NODES=4 CORPUS_ROOT="$tmp" KNOWN_GREEN_OVERRIDE="green-node esc-node absent-node" \
+  out3="$(EXPECTED_NODES=2 CORPUS_ROOT="$tmp2" CORPUS_LANG=python \
+          KNOWN_GREEN_OVERRIDE="py-green go-green absent-node" \
           bash "$HERE/verify-red-invariant.sh" 2>&1)" || true
   # `wc -w`, not `grep -c`: with an empty list `grep -c` exits 1, and under `set -euo
   # pipefail` that kills the whole self-test with no output at all — a guard that dies
@@ -238,10 +256,14 @@ if [[ "${1:-}" == "--self-test" ]]; then
   # Both halves, and the first is not redundant: with the count stuck at 0 the summary skips
   # the section entirely, so `q_count` and `q_named` agree at 0 while the gate's coverage gap
   # goes unreported — property 1 defeated by a guard that only ever compared the number to
-  # itself. 2 comes from the fixture (green-node, esc-node are quarantined and both exist),
-  # not from what the run printed.
-  if [[ "$q_count" != 2 ]]; then
-    echo "SELF-TEST FAIL: 2 fixtures are quarantined but the summary says quarantined=$q_count" >&2
+  # itself. 1 comes from the fixture (py-green is the only quarantined node this filter
+  # reaches), not from what the run printed.
+  if [[ "$q_count" != 1 ]]; then
+    echo "SELF-TEST FAIL: 1 fixture is quarantined under this filter but the summary says quarantined=$q_count" >&2
+    printf '%s\n' "$out3" >&2; exit 1
+  fi
+  if [[ "$q_count" != "$q_named" ]]; then
+    echo "SELF-TEST FAIL: quarantined=$q_count but $q_named node(s) named beside it" >&2
     printf '%s\n' "$out3" >&2; exit 1
   fi
   if [[ "$q_count" != "$q_named" ]]; then
@@ -317,7 +339,7 @@ fi
 #              tripped the anti-rot branch on any runner resolving 9.x.
 #
 # Verified in the same pass, so the list is not short: all 250 prompts were swept for the
-# task-verb, which named eight nodes. The two extra — `go-tree-building` and
+# task-verb, which named seven nodes. The two extra — `go-tree-building` and
 # `python-tree-building` — are honestly RED and belong nowhere near this list. The Go one
 # ships a stub; the Python one ships the upstream slow implementation and scores 6 failed /
 # 7 passed against its own suite. **The prompt does not decide RED-ability, the seed does** —
