@@ -222,11 +222,57 @@ if [[ "${1:-}" == "--self-test" ]]; then
     printf '%s\n' "$out2" >&2; exit 1
   fi
 
+  # The summary's quarantine COUNT and the names printed under it must describe the same
+  # set. They did not: the list walked all of KNOWN_GREEN while the count only ever
+  # incremented for nodes this run reached.
+  #
+  # The mechanism is ON-DISK-BUT-UNREACHED, and it needs its own fixture root to model.
+  # `CORPUS_LANG=go` reported `quarantined=3` and then named six; all six existed, they were
+  # just `continue`d past by the language filter before the counter ran. A quarantine entry
+  # naming a node that is NOT on disk is a different mechanism and does not discriminate —
+  # the `[[ -d ]]` guard drops it in both the fixed and the broken version, so a fixture
+  # built on it reports this property as verified while passing against the defect. It is
+  # kept in the override below because filtering it is worth pinning, not because it is the
+  # test.
+  #
+  # Two languages, one filter: `go-green` exists and is quarantined, and `CORPUS_LANG=python`
+  # means it is never reached. The count must see one node; the list must name the same one.
+  tmp2="$(mktemp -d)"
+  trap 'rm -rf "$tmp" "$tmp2"' EXIT
+  mkdir -p "$tmp2/py-green/seed" "$tmp2/go-green/seed"
+  printf 'id: py-green\nlanguage: "python"\nfiles: ["s.py"]\naccept: "test -f s.py"\nforbid: []\n' > "$tmp2/py-green/meta.yaml"
+  printf 'x = 1\n' > "$tmp2/py-green/seed/s.py"
+  printf 'id: go-green\nlanguage: "go"\nfiles: ["s.go"]\naccept: "test -f s.go"\nforbid: []\n' > "$tmp2/go-green/meta.yaml"
+  printf 'package main\n' > "$tmp2/go-green/seed/s.go"
+  out3=""
+  out3="$(EXPECTED_NODES=2 CORPUS_ROOT="$tmp2" CORPUS_LANG=python \
+          KNOWN_GREEN_OVERRIDE="py-green go-green absent-node" \
+          bash "$HERE/verify-red-invariant.sh" 2>&1)" || true
+  # `wc -w`, not `grep -c`: with an empty list `grep -c` exits 1, and under `set -euo
+  # pipefail` that kills the whole self-test with no output at all — a guard that dies
+  # silently on the very state it exists to detect. Caught by mutating the accumulator.
+  q_count="$(printf '%s' "$out3" | sed -n 's/.*quarantined=\([0-9]*\).*/\1/p' | head -1)"
+  q_named="$(printf '%s' "$out3" | sed -n 's/.*the gate does NOT cover these)://p' | wc -w | tr -d ' ')"
+  # Both halves, and the first is not redundant: with the count stuck at 0 the summary skips
+  # the section entirely, so `q_count` and `q_named` agree at 0 while the gate's coverage gap
+  # goes unreported — property 1 defeated by a guard that only ever compared the number to
+  # itself. 1 comes from the fixture (py-green is the only quarantined node this filter
+  # reaches), not from what the run printed.
+  if [[ "$q_count" != 1 ]]; then
+    echo "SELF-TEST FAIL: 1 fixture is quarantined under this filter but the summary says quarantined=$q_count" >&2
+    printf '%s\n' "$out3" >&2; exit 1
+  fi
+  if [[ "$q_count" != "$q_named" ]]; then
+    echo "SELF-TEST FAIL: quarantined=$q_count but $q_named node(s) named beside it" >&2
+    printf '%s\n' "$out3" >&2; exit 1
+  fi
+
   echo "RED-invariant self-test: PASS"
   echo "  - a GREEN node fails the sweep; an honestly-RED node does not"
   echo "  - a node that only reads GREEN once YAML escapes are resolved is still caught"
   echo "  - a stale quarantine entry (listed known-GREEN but actually RED) fails the sweep"
   echo "  - a node that is RED for an ENVIRONMENTAL reason fails, and is not counted as checked"
+  echo "  - the quarantine count and the names printed beside it describe the same set"
   exit 0
 fi
 
@@ -249,34 +295,60 @@ if [[ $found -ne $EXPECTED_NODES ]]; then
   exit 2
 fi
 
-# Known-GREEN quarantine. Defects that need a node authored, removed, or excluded — not
-# an oracle fix, so out of scope for the check that found them. Two tickets, two kinds:
+# Known-GREEN quarantine. Nodes whose seed passes its own tests, so this gate cannot cover
+# them. Three tickets found them in three sweeps and classified them three ways; re-derived
+# from each node's OWN prompt, **five of the six are one phenomenon** and #16 is the only
+# ticket that named it. The split was by which sweep found the node, not by what the node is.
 #
-#   corpus#11  go-counter, go-ledger, go-markdown — CONTENT. go-counter ships no test at
-#              all; the other two ship complete implementations never reduced to a stub.
-#              Repairable: author the missing test, re-stub the two.
-#   corpus#23  java-ledger, java-tree-building — the SAME content defect, in a language
-#              where it could not be seen. Both ship complete implementations, and both
-#              were invisible while the accept invoked ambient `gradle`: on Gradle 9.x the
-#              test executor never starts, so they exited non-zero and this check printed
-#              `ok ... RED` for them. Pinning the wrapper (#23) is what made them visible.
-#              They are safe to quarantine only BECAUSE of that pin — before it, whether
-#              they read GREEN or RED depended on the host's gradle, and an entry here
-#              would have tripped the anti-rot branch on any runner resolving 9.x.
-#   corpus#16  javascript-ledger — COMPOSITION, and not repairable. It is an upstream
-#              *refactoring* exercise whose prompt states the code "consistently passes
-#              the test suite". There is no RED state to start from and no accept oracle
-#              recovers one, because the exercise guarantees the seed passes. Awaiting a
-#              drop-or-exclude decision, not a fix.
+#   The phenomenon — an upstream exercise whose seed passes BY DESIGN:
+#     go-ledger, go-markdown  (corpus#11)   "The ledger/markdown exercise is a refactoring
+#     java-ledger             (corpus#23)    exercise … somehow it works and all the tests
+#     java-tree-building      (corpus#23)    are passing" / "refactor a WORKING but slow and
+#     javascript-ledger       (corpus#16)    ugly piece of code"
+#
+#   There is no RED state to start from and no accept oracle recovers one, because the
+#   exercise guarantees the seed passes. **Not repairable by re-stubbing**, which is what
+#   corpus#11 ("re-stub the two") and corpus#23 ("the SAME content defect") prescribe: gutting
+#   the implementation does not repair the node, it replaces the exercise with a different one
+#   whose `change` prompt — still saying "refactor this working code" — would then be a lie.
+#   That is corpus#16's parked drop-or-exclude decision, and it now governs five nodes.
+#
+#   The substitution IS available, and the corpus already contains the precedent: `go-tree-
+#   building` carries the identical "refactor a working…" prompt and the Go track ships it as
+#   a `panic("Please implement…")` stub, so it is honestly RED and is not quarantined. Taking
+#   it is a composition decision (the prompt has to change with the seed), not a repair.
+#
+#   corpus#11  go-counter — its OWN class, and the one entry #11 characterises correctly.
+#              Upstream-DEPRECATED and a write-your-own-tests exercise ("Design a test suite
+#              for a line/letter/character counter tool"), so nothing was ported:
+#              `counter_test.go` is the literal stub `// Define your tests here` and there is
+#              no acceptance test at all. It scores GREEN for any output, including empty.
+#              Not mechanically repairable either, but for a different reason, and the node's
+#              `change` ("Implement the solution in counter.go") contradicts the task text it
+#              carries.
+#   corpus#23  the gradle half of that ticket stands: java-ledger and java-tree-building were
+#              invisible while the accept invoked ambient `gradle` — on Gradle 9.x the test
+#              executor never starts, so they exited non-zero and this check printed
+#              `ok … RED` for them. Pinning the wrapper (#23) is what made them visible, and
+#              they are safe to quarantine only BECAUSE of that pin: before it, whether they
+#              read GREEN or RED depended on the host's gradle, and an entry here would have
+#              tripped the anti-rot branch on any runner resolving 9.x.
+#
+# Verified in the same pass, so the list is not short: all 250 prompts were swept for the
+# task-verb, which named seven nodes. The two extra — `go-tree-building` and
+# `python-tree-building` — are honestly RED and belong nowhere near this list. The Go one
+# ships a stub; the Python one ships the upstream slow implementation and scores 6 failed /
+# 7 passed against its own suite. **The prompt does not decide RED-ability, the seed does** —
+# which is why the sweep above is the authority here and this comment is only its reading.
 #
 # Two properties keep this from becoming a rug to sweep under:
 #   1. every entry is PRINTED on every run, so the gate's true coverage is never hidden;
 #   2. a quarantined node that turns out to be RED FAILS the build, so the list cannot
 #      rot silently once these are repaired — removing the entry is forced.
 #
-# Note that property 2 assumes entries are TEMPORARY. corpus#16 is the first that may not
-# be; if it is kept rather than dropped, this list needs a second category with different
-# semantics rather than a permanent resident in this one.
+# Note that property 2 assumes entries are TEMPORARY. Five of the six are not, unless the
+# drop-or-exclude decision goes that way; if they are kept, this list needs a second category
+# with different semantics rather than five permanent residents in this one.
 # Adding an entry is a deliberate, reviewable edit. Do not add one to make CI green.
 # KNOWN_GREEN_OVERRIDE exists so --self-test can exercise the anti-rot branch; it is not
 # a production knob and CI never sets it.
@@ -288,7 +360,7 @@ is_quarantined() {
 
 LANG_FILTER="${CORPUS_LANG:-}"
 fail=0; checked=0; skipped=0; considered=0; quarantined=0
-green_nodes=""; stale_quarantine=""; env_nodes=""
+green_nodes=""; stale_quarantine=""; env_nodes=""; quarantined_nodes=""
 
 for node in "$CORPUS_ROOT"/*; do
   [[ -d "$node" ]] || continue
@@ -327,6 +399,7 @@ for node in "$CORPUS_ROOT"/*; do
   checked=$((checked + 1))
   if is_quarantined "$base"; then
     quarantined=$((quarantined + 1))
+    quarantined_nodes="$quarantined_nodes $base"
     if [[ "$ec" -eq 0 ]]; then
       note "QUARANTINED $base: GREEN, known broken (corpus#11/#16/#23) — NOT counted as verified"
     else
@@ -348,8 +421,11 @@ done
 echo
 echo "RED invariant: considered=$considered checked=$checked skipped=$skipped quarantined=$quarantined${LANG_FILTER:+ (language=$LANG_FILTER)}"
 if [[ $quarantined -gt 0 ]]; then
-  echo "  quarantined (known-GREEN, corpus#11/#16/#23 — the gate does NOT cover these):$(
-    for q in $KNOWN_GREEN; do [[ -d "$CORPUS_ROOT/$q" ]] && printf ' %s' "$q"; done)"
+  # The nodes THIS run reached, not every entry in KNOWN_GREEN. Printing the whole list
+  # beside the count contradicted it under CORPUS_LANG: the go sweep reported
+  # `quarantined=3` and then named six, and a count that disagrees with the list next to it
+  # teaches the reader to trust neither.
+  echo "  quarantined (known-GREEN, corpus#11/#16/#23 — the gate does NOT cover these):$quarantined_nodes"
 fi
 
 # Vacuity guard. Everything skipped is not a pass — it is a sweep that proved nothing, and
