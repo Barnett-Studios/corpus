@@ -13,6 +13,17 @@ accept invokes `./gradlew`, which needs no ambient `gradle`), seed license, and 
 component; [`verify-attribution.sh --check`](verify-attribution.sh) fails if the manifest
 ever drifts from the actual data.
 
+Drift is not the whole claim, so the same script asks a second question with an enumeration
+that does **not** come from the two filename rules the manifest is built on: every shipped
+file is swept for a licence header or a bundled-artifact shape, and anything not explicitly
+classified is a **hard failure**. Detection is an allowlist with a refusal rather than a
+denylist, so an unrecognised bundled dependency stops the gate instead of being recorded as
+`-`. Today that sweep classifies 49 `LICENSE`, 47 `gradlew`/`gradlew.bat`, 47
+`gradle-wrapper.jar` and 26 `catch.hpp`, and finds nothing else across 1520 shipped files.
+
+Its honest limit: a vendored *source* file with an ordinary extension and no licence header
+matches neither signal (#2).
+
 ## Upstream: Exercism (MIT)
 
 - **What** — the exercise *specifications*, canonical *test suites*, and starter/stub files, across
