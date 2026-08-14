@@ -266,10 +266,6 @@ if [[ "${1:-}" == "--self-test" ]]; then
     echo "SELF-TEST FAIL: quarantined=$q_count but $q_named node(s) named beside it" >&2
     printf '%s\n' "$out3" >&2; exit 1
   fi
-  if [[ "$q_count" != "$q_named" ]]; then
-    echo "SELF-TEST FAIL: quarantined=$q_count but $q_named node(s) named beside it" >&2
-    printf '%s\n' "$out3" >&2; exit 1
-  fi
 
   echo "RED-invariant self-test: PASS"
   echo "  - a GREEN node fails the sweep; an honestly-RED node does not"
