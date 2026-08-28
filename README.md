@@ -179,7 +179,9 @@ the only one anyone mechanised, it took the cost to get there, and it is still o
   license, third-party bundle, provenance).
 - [`LICENSE`](LICENSE) · [`ATTRIBUTION.md`](ATTRIBUTION.md) — full provenance (Exercism MIT + bundled
   Catch2 BSL-1.0 + Gradle-wrapper Apache-2.0).
-- [`verify-attribution.sh`](verify-attribution.sh) — regenerate or (`--check`) drift-check the manifest
+- [`verify-attribution.sh`](verify-attribution.sh) — regenerate or (`--check`) drift-check the manifest,
+  and refuse any shipped file that looks like bundled third-party code without being classified
+  (`SELF_TEST=1 bash verify-attribution.sh` exercises the refusal, which the live corpus never does)
   against the node data. Defaults to the bundled `red-baseline/`; override with `$CORPUS_ROOT`.
 
 ## Use

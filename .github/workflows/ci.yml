@@ -23,6 +23,12 @@ jobs:
       # (non-zero) if MANIFEST.tsv has drifted from what is actually shipped.
       - name: attribution manifest matches the data
         run: CORPUS_ROOT=red-baseline ./verify-attribution.sh --check
+      # The step above proves the manifest agrees with the two filename heuristics that built
+      # it — self-consistency, not correctness (#2). The unclassified-artifact guard asks the
+      # other question, and the live corpus passes it, so nothing but this exercises the
+      # refusal path. A guard nobody has watched refuse is a guard nobody has watched.
+      - name: the attribution guard bites (self-test)
+        run: SELF_TEST=1 bash verify-attribution.sh
 
   accept-oracle:
     name: accept-oracle

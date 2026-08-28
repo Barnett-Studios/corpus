@@ -13,6 +13,35 @@ accept invokes `./gradlew`, which needs no ambient `gradle`), seed license, and 
 component; [`verify-attribution.sh --check`](verify-attribution.sh) fails if the manifest
 ever drifts from the actual data.
 
+Drift is not the whole claim, so the same script asks a second question with an enumeration
+that does **not** come from the two filename rules the manifest is built on: every shipped
+file is swept for a licence header or a bundled-artifact shape, and anything not explicitly
+classified is a **hard failure**. Detection is an allowlist with a refusal rather than a
+denylist, so an unrecognised bundled dependency stops the gate instead of being recorded as
+`-`. Today that sweep classifies 49 `LICENSE`, 47 `gradlew`/`gradlew.bat`, 47
+`gradle-wrapper.jar` and 26 `catch.hpp`, and finds nothing else across 1520 shipped files.
+
+Its honest limit is narrower than "no licence header", and the axis is the **form of the
+copyright line**, not the licence family. The content signal is three literal forms —
+`copyright (c)`, `SPDX-License-Identifier`, `Licensed under the Apache|MIT|Boost` — matched
+case-insensitively, so `copyright (c)` also catches `Copyright (C)`. That one character does
+most of the work: the canonical GPL, BSD-3-Clause, ISC and MIT headers all open with exactly
+that line, and all four are refused.
+
+Measured against 14 header shapes, 6 refuse and 8 pass through. What escapes is a copyright
+line in some other form, or none at all: `Copyright © 2020 Acme`; a bare `(C) 2020 Acme Corp`
+with no `copyright` keyword; `Copyright 2020 Acme Inc. All rights reserved.`; an MPL-2.0
+notice alone; a "this program is free software" preamble alone; the GPL and BSD bodies with
+their copyright lines stripped; and a file with no header at all.
+
+So a vendored *source* file with an ordinary extension escapes the sweep when it carries none
+of those three forms (#2). Nothing about the current corpus changes: the signal is exact on
+all 1520 shipped files today, and every binary in `red-baseline/` is caught by the shape
+signal — 47 tracked files carry a NUL byte in their first 8KB and every one is a
+`gradle-wrapper.jar`, which `\.jar$` matches. That is a measurement of this corpus, not a
+general property: the shape signal is an extension and vendor-path list, so a headerless `.o`
+or `.png` would pass through it.
+
 ## Upstream: Exercism (MIT)
 
 - **What** — the exercise *specifications*, canonical *test suites*, and starter/stub files, across
