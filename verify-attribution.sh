@@ -48,17 +48,22 @@ fi
 #             directory. Catches what carries no header: 47 gradle-wrapper.jar, and today
 #             nothing else at all.
 #
-# The honest limit, stated because a guard that hides one is worse than no guard — and stated
-# at its real width, because the first version of this comment said "no licence header" and the
-# content signal is not "a header", it is three literal forms. Measured, 8 of 13 header shapes
-# pass through: `Copyright ©`, `(C) 2020`, `Copyright … All rights reserved`, and every licence
-# family outside Apache/MIT/Boost — GPL, BSD, MPL, ISC.
+# The honest limit, stated because a guard that hides one is worse than no guard. Two earlier
+# versions of this comment got it wrong in opposite directions: "no licence header" was
+# narrower than the hole, and "every licence family outside Apache/MIT/Boost" was wider. The
+# axis is neither. It is the FORM OF THE COPYRIGHT LINE.
 #
-# So the hole is: a vendored *source* file with an ordinary extension carrying no header OR a
-# header outside those three forms. Still narrower than the two filenames it replaces, and
-# wider than the sentence that used to describe it. Widening the pattern is a real option and
-# is NOT taken here — `Copyright` alone matches ordinary prose, and this gate hard-fails, so
-# recall is bought with false refusals on files nobody vendored.
+# `grep -qEi` below is case-insensitive, so `copyright \(c\)` also matches `Copyright (C)` —
+# the opening line of the canonical GPL, BSD-3-Clause, ISC and MIT headers. All four refuse.
+# Measured over 14 header shapes: 6 refuse, 8 pass. What passes is a copyright line in some
+# other form, or none — `Copyright ©`, a bare `(C) 2020` with no keyword, `Copyright … All
+# rights reserved`, an MPL-2.0 notice alone, a "this program is free software" preamble alone,
+# GPL/BSD bodies with the copyright line stripped, and no header at all.
+#
+# So the hole is: a vendored *source* file with an ordinary extension carrying none of the
+# three forms. Widening the pattern is a real option and is NOT taken here — `Copyright` alone
+# matches ordinary prose, and this gate hard-fails, so recall is bought with false refusals on
+# files nobody vendored.
 #
 # TRACKED files, not the working tree: the claim is about what is redistributed, and a local
 # `__pycache__` is not. Running the sweep over a dirty tree reported two `.pyc` files as
