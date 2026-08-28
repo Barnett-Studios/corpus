@@ -48,9 +48,17 @@ fi
 #             directory. Catches what carries no header: 47 gradle-wrapper.jar, and today
 #             nothing else at all.
 #
-# The honest limit, stated because a guard that hides one is worse than no guard: a vendored
-# *source* file with an ordinary extension and no licence header matches neither signal. That
-# is a narrower hole than the two filenames it replaces, not the absence of one.
+# The honest limit, stated because a guard that hides one is worse than no guard — and stated
+# at its real width, because the first version of this comment said "no licence header" and the
+# content signal is not "a header", it is three literal forms. Measured, 8 of 13 header shapes
+# pass through: `Copyright ©`, `(C) 2020`, `Copyright … All rights reserved`, and every licence
+# family outside Apache/MIT/Boost — GPL, BSD, MPL, ISC.
+#
+# So the hole is: a vendored *source* file with an ordinary extension carrying no header OR a
+# header outside those three forms. Still narrower than the two filenames it replaces, and
+# wider than the sentence that used to describe it. Widening the pattern is a real option and
+# is NOT taken here — `Copyright` alone matches ordinary prose, and this gate hard-fails, so
+# recall is bought with false refusals on files nobody vendored.
 #
 # TRACKED files, not the working tree: the claim is about what is redistributed, and a local
 # `__pycache__` is not. Running the sweep over a dirty tree reported two `.pyc` files as
@@ -60,7 +68,28 @@ ARTIFACT_CONTENT_RE='copyright \(c\)|SPDX-License-Identifier|Licensed under the 
 ARTIFACT_SHAPE_RE='\.(jar|zip|whl|tar|tgz|gz|so|dylib|dll|a|class|pyc|exe|wasm)$|(^|/)(node_modules|vendor|third_party|bower_components|site-packages|Godeps)/'
 # Every entry must match something — `unmatched_classifications` fails if one stops doing so,
 # so a rule that outlives the artifact it classifies cannot sit here looking like coverage.
-CLASSIFIED='(^|/)(LICENSE|gradlew|gradlew\.bat|catch\.hpp|gradle-wrapper\.jar)$'
+#
+# ONE list. The regex and the anti-rot loop are both derived from it, because they were two
+# hand-written copies of the same five names and only entries appearing in BOTH were covered:
+# adding a classification to the regex alone — `nonexistent\.blob`, matching nothing shipped —
+# left `--self-test` and a live `--check` at exit 0, green on exactly the condition anti-rot
+# exists to detect. This is a DRIFT property, not a completeness one, so a shared denominator
+# is the correct shape here: the claim is about `CLASSIFIED`, so `CLASSIFIED` must be the
+# thing enumerated.
+CLASSIFIED_NAMES=(LICENSE gradlew gradlew.bat catch.hpp gradle-wrapper.jar)
+
+# Entries are plain filenames, and the refusal below is why that can be assumed rather than
+# hoped: only `.` is escaped when a name is spliced into a regex, so a name carrying any other
+# metacharacter would build a pattern that silently means something else. Fail loudly instead.
+for _n in "${CLASSIFIED_NAMES[@]}"; do
+    [[ "$_n" =~ ^[A-Za-z0-9._-]+$ ]] || {
+        echo "CLASSIFIED_NAMES entry '$_n' is not a plain filename — only [A-Za-z0-9._-] is" \
+             "escaped correctly into the regex below" >&2
+        exit 2
+    }
+done
+unset _n
+CLASSIFIED="(^|/)($(IFS='|'; printf '%s' "${CLASSIFIED_NAMES[*]//./\\.}"))\$"
 
 # Files this sweep can see, one per line. Prefers git so the answer is about what ships.
 shipped_files() {
@@ -96,7 +125,7 @@ unclassified_artifacts() {
 # early. Nondeterministic, and in the direction that invents findings.
 unmatched_classifications() {
     local files="$1" name
-    for name in LICENSE gradlew gradlew.bat catch.hpp gradle-wrapper.jar; do
+    for name in "${CLASSIFIED_NAMES[@]}"; do
         grep -qE "(^|/)${name//./\\.}$" <<< "$files" || printf '%s\n' "$name"
     done
 }
@@ -145,7 +174,12 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
   # A guard nobody has watched refuse is a guard nobody has watched. Three fixtures, each a
   # shape the corpus does not currently contain — which is the point: the live sweep passes,
   # so nothing else here proves the refusal path works at all.
-  t=$(mktemp -d)
+  # One trap, installed the moment `$t` exists: four `exit 1` paths below sat between the
+  # `mktemp -d` and the trap that used to be installed further down, and each leaked the
+  # fixture tree. `resource-cleanup` says every path including the error paths, and these are
+  # the error paths. `$e` is created later and joins the same trap rather than a second one.
+  t=$(mktemp -d); e=""
+  trap 'rm -rf "$t" ${e:+"$e"}' EXIT
   mkdir -p "$t/n/seed"
   printf 'id: "n"\nlanguage: "python"\nprovenance: "hand-authored"\n' > "$t/n/meta.yaml"
   printf 'print(1)\n' > "$t/n/seed/main.py"
@@ -198,7 +232,7 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
   # has none of LICENSE/gradlew/gradlew.bat/catch.hpp, so running the script against it stops
   # at the anti-rot branch instead — a confound that made this assertion pass for a mutant
   # that only warned. The guard under test has to be the only reason to stop.
-  e=$(mktemp -d); trap 'rm -rf "$t" "$e"' EXIT
+  e=$(mktemp -d)
   mkdir -p "$e/n/seed/gradle/wrapper"
   printf 'id: "n"\nlanguage: "cpp"\nprovenance: "hand-authored"\n' > "$e/n/meta.yaml"
   printf 'int main(){}\n'            > "$e/n/seed/main.cpp"
@@ -225,6 +259,31 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
     printf '%s\n' "$e2e" >&2; exit 1
   fi
 
+  # Anti-rot reads CLASSIFIED_NAMES, and that is the property — not that it fires on a corpus
+  # holding nothing classified, which the `$b` fixture above already covers and which a
+  # hard-coded loop passes just as well. The defect was two hand-written copies of the same
+  # five names: a classification added to one alone was dead coverage that both the self-test
+  # and a live `--check` reported as fine.
+  #
+  # `$e` carries one of every classified artifact, so on the real list nothing is unmatched —
+  # and adding one name that matches nothing must come back named. Both directions, because
+  # the first alone is satisfied by a function that returns every name it is given.
+  e_files=$( (cd "$e" && find . -type f | sed 's|^\./||') )
+  live_dead=$(unmatched_classifications "$e_files")
+  if [[ -n "$live_dead" ]]; then
+    echo "SELF-TEST FAIL: a fixture carrying every classified artifact reported dead entries: $live_dead" >&2
+    exit 1
+  fi
+  _saved_classified=("${CLASSIFIED_NAMES[@]}")
+  CLASSIFIED_NAMES+=("nonexistent.blob")
+  injected_dead=$(unmatched_classifications "$e_files")
+  CLASSIFIED_NAMES=("${_saved_classified[@]}")
+  if ! grep -qx 'nonexistent.blob' <<< "$injected_dead"; then
+    echo "SELF-TEST FAIL: a classification matching nothing shipped was not reported dead —" \
+         "anti-rot is not reading CLASSIFIED_NAMES (got: ${injected_dead:-<empty>})" >&2
+    exit 1
+  fi
+
   echo "attribution self-test: PASS"
   echo "  - a vendored source file with a licence header is refused (content)"
   echo "  - a binary artifact with no header is refused (shape)"
@@ -232,6 +291,7 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
   echo "  - an ordinary source file and a classified artifact are not"
   echo "  - and the script itself STOPS, non-zero, before the manifest diff"
   echo "  - a classification matching nothing shipped stops it too (anti-rot)"
+  echo "  - anti-rot enumerates CLASSIFIED_NAMES, so one list governs the regex and the loop"
   exit 0
 fi
 
