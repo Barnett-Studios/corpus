@@ -145,7 +145,27 @@ unmatched_classifications() {
 NOTICE_SHA256='e52f804e74f0fbd34e8927962319df346166b8194094309a0aee318693df44df'
 NOTICE_MUST_CONTAIN=('MIT License' 'Copyright (c)' 'Exercism' 'Permission is hereby granted')
 
-sha256_of() { shasum -a 256 "$1" | awk '{print $1}'; }
+# Whichever the platform ships: `sha256sum` on GNU, `shasum` on macOS. If neither is on PATH
+# the guard CANNOT RUN, and it says so instead of returning an empty string — an empty hash
+# never equals the pin, so every notice would have been reported `notice-altered`, and with the
+# comparison the other way round every notice would have passed. A check that could not run is
+# unknown, not a verdict. (Found on a bare Ubuntu image: `shasum: command not found` twice,
+# then "a compliant node was reported".)
+# Resolved once, at load, and refused HERE rather than inside `sha256_of`. An `exit` inside a
+# function called from `$(...)` leaves only the substitution: measured on an image with neither
+# hasher, the per-call version printed the complaint 225 times AND emitted 225 bogus
+# `notice-altered` rows, so it failed closed on a diagnosis that would send someone hunting
+# corrupted notices that are fine. Refusing at load stops before any verdict exists.
+if command -v sha256sum >/dev/null 2>&1; then
+  SHA256_CMD=(sha256sum)
+elif command -v shasum >/dev/null 2>&1; then
+  SHA256_CMD=(shasum -a 256)
+else
+  echo "neither sha256sum nor shasum is on PATH — the notice guard cannot verify anything," >&2
+  echo "and a check that cannot run is unknown, not a verdict. Install one and re-run." >&2
+  exit 2
+fi
+sha256_of() { "${SHA256_CMD[@]}" "$1" | awk '{print $1}'; }
 
 # A node's asserted provenance, read from its own declaration. One reader, because the
 # manifest and the notice guard must not be able to disagree about what a node claims.
@@ -354,13 +374,6 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
     exit 1
   fi
 
-  echo "attribution self-test: PASS"
-  echo "  - a vendored source file with a licence header is refused (content)"
-  echo "  - a binary artifact with no header is refused (shape)"
-  echo "  - a plain file inside a vendored directory is refused (shape, path)"
-  echo "  - an ordinary source file and a classified artifact are not"
-  echo "  - and the script itself STOPS, non-zero, before the manifest diff"
-  echo "  - a classification matching nothing shipped stops it too (anti-rot)"
   # The notice guard, four fixtures. The live corpus passes it, so nothing else here shows
   # any of its four refusals actually fire — and the one that matters most, a hand-authored
   # node shipping someone else's notice, is a shape the corpus has never contained.
@@ -375,8 +388,17 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
     [[ $# -ge 3 ]] && cp "$3" "$n/$1/seed/LICENSE"
     return 0
   }
-  real_notice=$(find "$CORPUS_ROOT" -path '*/seed/LICENSE' 2>/dev/null | head -1)
-  [[ -n "$real_notice" && -f "$real_notice" ]] || {
+  # A glob, not `find … | head -1`. Under `set -o pipefail`, `head` exiting after one line
+  # sends `find` SIGPIPE and the pipeline reports 141, which `set -e` turns into an abort —
+  # with the variable correctly assigned, so the script dies on a line that worked. GNU find
+  # trips it on 225 matches; BSD find buffers differently and never did, so it passed every
+  # local run and failed only on CI.
+  real_notice=""
+  for _f in "$CORPUS_ROOT"/*/seed/LICENSE; do
+    [[ -f "$_f" ]] && { real_notice="$_f"; break; }
+  done
+  unset _f
+  [[ -n "$real_notice" ]] || {
     echo "SELF-TEST FAIL: no upstream notice to build fixtures from" >&2; exit 1; }
 
   mknode ok-exercism      exercism      "$real_notice"
@@ -434,6 +456,13 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
          "agreement with itself, which unanimous nonsense also satisfies" >&2
     printf '%s\n' "$nv2" >&2; exit 1; }
 
+  echo "attribution self-test: PASS"
+  echo "  - a vendored source file with a licence header is refused (content)"
+  echo "  - a binary artifact with no header is refused (shape)"
+  echo "  - a plain file inside a vendored directory is refused (shape, path)"
+  echo "  - an ordinary source file and a classified artifact are not"
+  echo "  - and the script itself STOPS, non-zero, before the manifest diff"
+  echo "  - a classification matching nothing shipped stops it too (anti-rot)"
   echo "  - anti-rot enumerates CLASSIFIED_NAMES, so one list governs the regex and the loop"
   echo "  - the notice guard refuses missing, altered, and falsely-claimed notices"
   echo "  - and refuses a hash-matching file that is not a licence, so the pin cannot be"
