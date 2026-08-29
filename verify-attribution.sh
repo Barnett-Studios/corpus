@@ -135,14 +135,78 @@ unmatched_classifications() {
     done
 }
 
+# The upstream Exercism MIT notice, pinned by content. All 49 notices in the tree today are
+# byte-identical, so "the notice" is one file rather than a family.
+#
+# The hash alone would only prove the notices agree with EACH OTHER — copy a corrupted file to
+# every node and the sweep goes green on unanimous nonsense. So the shape is asserted
+# independently of the hash, against the four things MIT actually requires to travel: the
+# licence name, a copyright line, the named holder, and the permission grant.
+NOTICE_SHA256='e52f804e74f0fbd34e8927962319df346166b8194094309a0aee318693df44df'
+NOTICE_MUST_CONTAIN=('MIT License' 'Copyright (c)' 'Exercism' 'Permission is hereby granted')
+
+sha256_of() { shasum -a 256 "$1" | awk '{print $1}'; }
+
+# A node's asserted provenance, read from its own declaration. One reader, because the
+# manifest and the notice guard must not be able to disagree about what a node claims.
+node_provenance() {
+  sed -n 's/^provenance: *"\{0,1\}\([a-z-]*\)"\{0,1\}/\1/p' "$1/meta.yaml" 2>/dev/null | head -1
+}
+
+# What a seed is licensed under, from what it declares — not from which files it happens to
+# ship.
+license_for_provenance() {
+  case "$1" in
+    exercism)      printf 'MIT(Exercism)' ;;
+    hand-authored) printf 'none' ;;
+    *)             printf 'unknown' ;;
+  esac
+}
+
+# Nodes whose shipped notice does not match what they declare. MIT requires the copyright and
+# permission notice to travel with the material; `seed/` is what gets materialized in
+# isolation, so a repo-root notice does not reach a node extracted on its own.
+notice_violations() {
+  local root="$1" d id prov
+  for d in "$root"/*/; do
+    [[ -r "$d/meta.yaml" ]] || continue
+    id=$(basename "$d")
+    prov=$(node_provenance "$d")
+    if [[ "$prov" == "exercism" ]]; then
+      if [[ ! -f "$d/seed/LICENSE" ]]; then
+        printf '%s\tnotice-missing\n' "$id"
+      elif [[ "$(sha256_of "$d/seed/LICENSE")" != "$NOTICE_SHA256" ]]; then
+        printf '%s\tnotice-altered\n' "$id"
+      else
+        local want
+        for want in "${NOTICE_MUST_CONTAIN[@]}"; do
+          if ! grep -qF "$want" "$d/seed/LICENSE"; then
+            printf '%s\tnotice-not-a-licence(%s)\n' "$id" "$want"
+            break
+          fi
+        done
+      fi
+    elif [[ -f "$d/seed/LICENSE" ]] && grep -qFi 'Exercism' "$d/seed/LICENSE"; then
+      # A node claiming its own authorship while shipping someone else's notice attributes
+      # work to a party that did not do it — wrong in the direction nobody audits for.
+      printf '%s\tclaims-exercism-but-declares-%s\n' "$id" "${prov:-nothing}"
+    fi
+  done
+}
+
+# The corpus root to generate from, defaulting to the live one. Taking it as a parameter
+# rather than letting the self-test override `$CORPUS_ROOT` in a subshell keeps shellcheck's
+# SC2030/SC2031 quiet — and those two are worth keeping quiet honestly, since they warn about
+# exactly the class of bug where a fixture's root leaks into, or fails to reach, the real sweep.
 generate() {
+  local root="${1:-$CORPUS_ROOT}"
   # `requires`, not `accept_tool`: this column has only ever mirrored the meta.yaml field,
   # and 59 nodes already read `-` because they declare none. #27 drops `gradle` from the 47
   # wrapper nodes — their accept is `./gradlew`, which needs no ambient tool — so under the
   # old name the manifest would have asserted that a gradle node has no accept tool. The
   # column has no consumer outside this script; the name was the only thing making a claim.
   printf 'node_id\tlanguage\trequires\tseed_license\tthird_party\tprovenance\n'
-  for d in "$CORPUS_ROOT"/*/; do
+  for d in "$root"/*/; do
     local id lang req lic tp
     id=$(basename "$d")
     # A node without a readable meta.yaml is malformed — warn and skip it rather than
@@ -157,16 +221,17 @@ generate() {
     lang=$(sed -n 's/^language: *"\{0,1\}\([a-z+]*\)"\{0,1\}/\1/p' "$d/meta.yaml" 2>/dev/null | head -1)
     req=$(sed -n 's/.*requires: *\[\(.*\)\].*/\1/p' "$d/meta.yaml" 2>/dev/null | head -1 | tr -d '"[:space:]')
     [[ -z "$req" ]] && req="-"
-    lic="none"; [[ -f "$d/seed/LICENSE" ]] && lic="MIT(Exercism)"
+    lic=$(license_for_provenance "$(node_provenance "$d")")
     tp=""
     [[ -n "$(find "$d" -name catch.hpp 2>/dev/null)" ]] && tp="Catch2/BSL-1.0"
     [[ -n "$(find "$d" -name gradlew 2>/dev/null)" ]] && tp="${tp:+$tp,}Gradle-wrapper/Apache-2.0"
     [[ -z "$tp" ]] && tp="-"
-    # provenance is READ from the node's own declaration, never inferred. `seed_license`
-    # above is derived from LICENSE-file presence and is wrong for that reason (#1); a
-    # contamination marker inferred from a filename pattern would repeat the mistake on a
-    # field where being wrong is worse — it decides which nodes count as held-out.
-    prov=$(sed -n 's/^provenance: *"\{0,1\}\([a-z-]*\)"\{0,1\}/\1/p' "$d/meta.yaml" 2>/dev/null | head -1)
+    # Both fields are READ from the node's own declaration, never inferred. `seed_license`
+    # used to be `[[ -f seed/LICENSE ]] && "MIT(Exercism)"`, which recorded whether a notice
+    # happened to ship rather than what the seed is licensed under (#1) — 176 Exercism-derived
+    # nodes read "none" on a public repo. Whether the notice ships is now an INVARIANT the
+    # sweep enforces (`notice_violations`), not a value the manifest quietly reports.
+    prov=$(node_provenance "$d")
     if [[ -z "$prov" ]]; then
       echo "error: $id declares no provenance: (expected \"exercism\" or \"hand-authored\")" >&2
       exit 1
@@ -296,7 +361,85 @@ if [[ "${SELF_TEST:-0}" == "1" ]]; then
   echo "  - an ordinary source file and a classified artifact are not"
   echo "  - and the script itself STOPS, non-zero, before the manifest diff"
   echo "  - a classification matching nothing shipped stops it too (anti-rot)"
+  # The notice guard, four fixtures. The live corpus passes it, so nothing else here shows
+  # any of its four refusals actually fire — and the one that matters most, a hand-authored
+  # node shipping someone else's notice, is a shape the corpus has never contained.
+  n="$t/notices"; mkdir -p "$n"
+  # The notice is copied as a FILE, never round-tripped through a string: `$(cat …)` strips
+  # trailing newlines, which changes the hash and would have made the compliant fixture fail
+  # as `notice-altered` — a fixture bug that reads exactly like a real finding.
+  mknode() { # id provenance [licence-file]
+    mkdir -p "$n/$1/seed"
+    printf 'id: "%s"\nlanguage: "python"\nprovenance: "%s"\n' "$1" "$2" > "$n/$1/meta.yaml"
+    printf 'print(1)\n' > "$n/$1/seed/main.py"
+    [[ $# -ge 3 ]] && cp "$3" "$n/$1/seed/LICENSE"
+    return 0
+  }
+  real_notice=$(find "$CORPUS_ROOT" -path '*/seed/LICENSE' 2>/dev/null | head -1)
+  [[ -n "$real_notice" && -f "$real_notice" ]] || {
+    echo "SELF-TEST FAIL: no upstream notice to build fixtures from" >&2; exit 1; }
+
+  mknode ok-exercism      exercism      "$real_notice"
+  mknode ok-hand          hand-authored
+  mknode bad-missing      exercism
+  printf 'MIT License\nCopyright (c) 2021 Exercism\nPermission is hereby granted, plus a byte.\n' \
+    > "$t/altered-notice"
+  mknode bad-altered      exercism      "$t/altered-notice"
+  mknode bad-claims       hand-authored "$real_notice"
+
+  nv=$(notice_violations "$n")
+  for want in 'bad-missing	notice-missing' 'bad-altered	notice-altered' 'bad-claims	claims-exercism-but-declares-hand-authored'; do
+    grep -qF "$want" <<< "$nv" || {
+      echo "SELF-TEST FAIL: notice guard did not report '$want'" >&2; printf '%s\n' "$nv" >&2; exit 1; }
+  done
+  # The control: a guard that reported every node would satisfy all three above while being
+  # useless, and the live corpus passing is not proof — it is the input this was written against.
+  grep -qE '^(ok-exercism|ok-hand)\b' <<< "$nv" && {
+    echo "SELF-TEST FAIL: a compliant node was reported" >&2; printf '%s\n' "$nv" >&2; exit 1; }
+
+  # And the structural arm, which the hash cannot reach: a file that hashes wrong AND is not a
+  # licence must be caught for being not-a-licence once the hash is made to agree. Pin the
+  # hash to this fixture so only the four required phrases decide it.
+  printf 'totally not a licence\n' > "$t/not-a-licence"
+  mknode bad-not-a-licence exercism "$t/not-a-licence"
+  saved_sha="$NOTICE_SHA256"
+  NOTICE_SHA256=$(sha256_of "$n/bad-not-a-licence/seed/LICENSE")
+  nv2=$(notice_violations "$n")
+  NOTICE_SHA256="$saved_sha"
+  # `seed_license` must come from the declaration, not from which files happen to ship. Now
+  # that every Exercism node carries its notice, the two derivations agree on the live corpus
+  # — so the live sweep cannot tell them apart, and a revert to file-presence would pass it.
+  # This is the node where they disagree: hand-authored, shipping its own non-Exercism licence.
+  # File-presence calls that "MIT(Exercism)" and attributes the work to a party that did not
+  # do it; the declaration calls it "none".
+  printf 'MIT License\nCopyright (c) 2026 The corpus authors\nPermission is hereby granted.\n' \
+    > "$t/own-licence"
+  mknode own-licensed hand-authored "$t/own-licence"
+  lic_row=$(generate "$n" | awk -F'\t' '$1=="own-licensed"{print $4}')
+  if [[ "$lic_row" != "none" ]]; then
+    echo "SELF-TEST FAIL: a hand-authored node shipping its own licence was recorded as" \
+         "seed_license='$lic_row' — that is derived from file presence, not provenance (#1)" >&2
+    exit 1
+  fi
+  # The control: the field is not simply hard-wired to "none".
+  lic_row2=$(generate "$n" | awk -F'\t' '$1=="ok-exercism"{print $4}')
+  if [[ "$lic_row2" != "MIT(Exercism)" ]]; then
+    echo "SELF-TEST FAIL: an Exercism node recorded seed_license='$lic_row2'" >&2
+    exit 1
+  fi
+  rm -rf "$n/own-licensed"
+
+  grep -qF 'bad-not-a-licence	notice-not-a-licence' <<< "$nv2" || {
+    echo "SELF-TEST FAIL: a hash-matching non-licence passed — the notice is checked only by" \
+         "agreement with itself, which unanimous nonsense also satisfies" >&2
+    printf '%s\n' "$nv2" >&2; exit 1; }
+
   echo "  - anti-rot enumerates CLASSIFIED_NAMES, so one list governs the regex and the loop"
+  echo "  - the notice guard refuses missing, altered, and falsely-claimed notices"
+  echo "  - and refuses a hash-matching file that is not a licence, so the pin cannot be"
+  echo "    satisfied by every node agreeing on the same wrong bytes"
+  echo "  - seed_license comes from the declaration: a hand-authored node shipping its own"
+  echo "    licence records 'none', which file-presence derivation gets wrong"
   exit 0
 fi
 
@@ -315,6 +458,15 @@ dead=$(unmatched_classifications "$shipped")
 if [[ -n "$dead" ]]; then
   echo "classification(s) that match nothing shipped — delete them rather than leave dead coverage:" >&2
   printf '%s\n' "$dead" | sed 's/^/  /' >&2
+  exit 1
+fi
+
+notices=$(notice_violations "$CORPUS_ROOT")
+if [[ -n "$notices" ]]; then
+  echo "node(s) whose shipped notice does not match what they declare. MIT requires the" >&2
+  echo "copyright and permission notice to travel with the material, and a node is materialized" >&2
+  echo "from its own seed/ — a repo-root notice does not reach it:" >&2
+  printf '%s\n' "$notices" | sed 's/^/  /' >&2
   exit 1
 fi
 
