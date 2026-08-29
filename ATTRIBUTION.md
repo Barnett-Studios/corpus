@@ -18,8 +18,8 @@ that does **not** come from the two filename rules the manifest is built on: eve
 file is swept for a licence header or a bundled-artifact shape, and anything not explicitly
 classified is a **hard failure**. Detection is an allowlist with a refusal rather than a
 denylist, so an unrecognised bundled dependency stops the gate instead of being recorded as
-`-`. Today that sweep classifies 49 `LICENSE`, 47 `gradlew`/`gradlew.bat`, 47
-`gradle-wrapper.jar` and 26 `catch.hpp`, and finds nothing else across 1520 shipped files.
+`-`. Today that sweep classifies 225 `LICENSE`, 47 `gradlew`/`gradlew.bat`, 47
+`gradle-wrapper.jar` and 26 `catch.hpp`, and finds nothing else across 1696 shipped files.
 
 Its honest limit is narrower than "no licence header", and the axis is the **form of the
 copyright line**, not the licence family. The content signal is three literal forms —
@@ -36,7 +36,7 @@ their copyright lines stripped; and a file with no header at all.
 
 So a vendored *source* file with an ordinary extension escapes the sweep when it carries none
 of those three forms (#2). Nothing about the current corpus changes: the signal is exact on
-all 1520 shipped files today, and every binary in `red-baseline/` is caught by the shape
+all 1696 shipped files today, and every binary in `red-baseline/` is caught by the shape
 signal — 47 tracked files carry a NUL byte in their first 8KB and every one is a
 `gradle-wrapper.jar`, which `\.jar$` matches. That is a measurement of this corpus, not a
 general property: the shape signal is an extension and vendor-path list, so a headerless `.o`
@@ -46,13 +46,30 @@ or `.png` would pass through it.
 
 - **What** — the exercise *specifications*, canonical *test suites*, and starter/stub files, across
   the C++, Go, Java, JavaScript, Python, and Rust tracks.
-- **License** — MIT, `Copyright (c) Exercism and contributors`. 49 nodes ship the upstream `LICENSE`
-  verbatim under `seed/LICENSE`; the remaining nodes reproduce exercise material from the same
-  MIT-licensed tracks and are covered by the same terms (the upstream tracks are MIT at the
-  repository level).
+- **License** — MIT, `Copyright (c) 2021 Exercism`. **All 225 Exercism-derived nodes ship the
+  upstream `LICENSE` verbatim under `seed/LICENSE`**, byte-identical
+  (`sha256 e52f804e…44df`). Until #1 only 49 did, and this file argued the other 176 were
+  "covered by the same terms … at the repository level". That argument does not survive the way
+  a node is actually used: `seed/` is materialized into a work tree on its own, so a
+  repository-level notice never reaches the material it is supposed to travel with. The 176 now
+  carry it.
 - **Source** — https://github.com/exercism (per-language track repositories).
-- **Requirement honored** — the MIT permission notice is retained; this file plus the per-node
-  `seed/LICENSE` files carry the copyright + permission notice as MIT requires.
+- **Requirement honored** — the MIT copyright and permission notice travels with every node it
+  applies to, enforced rather than asserted: `verify-attribution.sh` fails if a node declaring
+  `provenance: exercism` is missing the notice, ships altered bytes, or ships a file that hashes
+  correctly but is not a licence, and if a node declaring `hand-authored` ships Exercism's notice.
+
+### What the manifest records, and what it does not
+
+`seed_license` is derived from the node's declared `provenance`, not from whether a `LICENSE`
+file happens to be present — 225 `MIT(Exercism)`, 25 `none`. The presence of the notice is an
+invariant the sweep enforces, not a value the manifest quietly reports; those are different
+claims and conflating them is what let 176 nodes read `none` on a public repository (#1).
+
+**Not covered here.** Whether this corpus may be publicly redistributed at all is a legal
+question, not a mechanical one. This file records what is shipped and under what asserted terms;
+it is not a legal review and no session can stand in for one. That review, and the HITL
+checkpoint that should gate public distribution, remain open on #1.
 
 ## Bundled third-party components (inside seed projects)
 
