@@ -90,7 +90,10 @@ toolchain_ok() {
 }
 
 # Run a node's accept against a pristine copy of its seed. Echoes the exit code; the
-# accept's combined output lands in $3, for env_failure_of to read.
+# accept's combined output lands in $3, for env_failure_of to read, and — if $4 is given —
+# what the work tree shows about how far the toolchain got lands there, for the main loop
+# to read. Both are arguments for the same reason (see below), and the second one has to be
+# collected HERE because the work tree is removed on the next line.
 #
 # The log path is an ARGUMENT rather than a variable this function sets. Callers invoke it
 # as `ec="$(run_accept ...)"`, so every assignment inside it happens in a subshell and is
@@ -111,8 +114,45 @@ run_accept() {
   else
     ( set +o pipefail; cd "$work" && bash -c "$acc" >"$log" 2>&1 ) || ec=$?
   fi
+  [[ -n "${4:-}" ]] && unreached_tests_of "$work" > "$4"
   rm -rf "$work"
   printf '%s' "$ec"
+}
+
+# POSITIVE evidence that the toolchain reached the tests, read off the work tree rather
+# than off the log. Echoes a reason the tests were never reached, or nothing.
+#
+# corpus#33. `env_failure_of` below is a denylist: it closes the signatures someone has
+# written down, and the header's residual — "a cmake configure that fails for a novel
+# reason still passes quietly" — is exactly what a denylist cannot close. This is the other
+# direction. It does not ask why the toolchain failed; it asks whether it produced the
+# artifact that only a complete run produces, so a cause nobody has seen still lands as
+# "the tests never ran" instead of `ok … RED`.
+#
+# For cmake that artifact is the generated build file, NOT `CMakeCache.txt`: cmake writes
+# the cache during configure, *before* a `find_package` can fail, so the cache exists for a
+# node that never configured and is worthless as evidence. The generate step writes the
+# build file and only runs on a complete configure. Measured on cpp-gigasecond and
+# cpp-meetup (Boost absent): cache YES, Makefile NO; control cpp-clock: both YES.
+#
+# A generator this does not know writes neither, so an unfamiliar one is reported as
+# unreached rather than passed. That direction is deliberate: this is a control, and a
+# control that cannot see must say so — the corpus nodes run cmake with no -G, so they get
+# the host default, and a run that quietly verified nothing is the failure mode the whole
+# file is written against.
+unreached_tests_of() {
+  local work="$1" cache dir gen
+  cache="$(find "$work" -maxdepth 3 -name CMakeCache.txt -print -quit 2>/dev/null)"
+  [[ -n "$cache" ]] || return 0
+  dir="$(dirname "$cache")"
+  for gen in Makefile build.ninja; do
+    [[ -f "$dir/$gen" ]] && return 0
+  done
+  # The IDE generators write a solution or a project directory instead of a build file.
+  if compgen -G "$dir/*.sln" >/dev/null || compgen -G "$dir/*.xcodeproj" >/dev/null; then
+    return 0
+  fi
+  printf 'cmake wrote %s but generated no build file beside it — the configure step failed, so nothing was compiled and no test was ever seen' "${cache#"$work"/}"
 }
 
 # A non-zero exit that came from the ENVIRONMENT, not from the unimplemented stub. Echoes
@@ -177,9 +217,21 @@ if [[ "${1:-}" == "--self-test" ]]; then
   mkdir -p "$tmp/env-node/seed"
   printf 'id: env-node\nlanguage: "python"\nfiles: ["s.py"]\naccept: "echo Could not install Gradle distribution from '"'"'https://services.gradle.org/x.zip'"'"'; exit 1"\nforbid: []\n' > "$tmp/env-node/meta.yaml"
   printf 'x = 1\n' > "$tmp/env-node/seed/s.py"
+  # corpus#33. The two halves of the positive-evidence rule, and they must be a PAIR: a rule
+  # that flagged every cmake node would satisfy the first assertion on its own while making
+  # the whole cpp shard unverifiable. Neither fixture runs cmake — they leave behind exactly
+  # the artifacts cmake leaves, which is what the rule reads.
+  #   unreached: the cache without a build file — cmake writes the cache BEFORE a
+  #              find_package can fail, so this is what a failed configure looks like.
+  #   reached:   both, i.e. configure completed and the build step is what failed. Honest RED.
+  mkdir -p "$tmp/cmake-unreached-node/seed" "$tmp/cmake-reached-node/seed"
+  printf 'id: cmake-unreached-node\nlanguage: "python"\nfiles: ["s.py"]\naccept: "mkdir -p build && touch build/CMakeCache.txt && exit 1"\nforbid: []\n' > "$tmp/cmake-unreached-node/meta.yaml"
+  printf 'x = 1\n' > "$tmp/cmake-unreached-node/seed/s.py"
+  printf 'id: cmake-reached-node\nlanguage: "python"\nfiles: ["s.py"]\naccept: "mkdir -p build && touch build/CMakeCache.txt build/Makefile && exit 1"\nforbid: []\n' > "$tmp/cmake-reached-node/meta.yaml"
+  printf 'x = 1\n' > "$tmp/cmake-reached-node/seed/s.py"
 
   out=""; rc=0
-  out="$(EXPECTED_NODES=4 CORPUS_ROOT="$tmp" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc=$?
+  out="$(EXPECTED_NODES=6 CORPUS_ROOT="$tmp" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc=$?
   if [[ $rc -eq 0 ]]; then
     echo "SELF-TEST FAIL: a GREEN node did not fail the sweep" >&2
     printf '%s\n' "$out" >&2; exit 1
@@ -201,17 +253,29 @@ if [[ "${1:-}" == "--self-test" ]]; then
     echo "SELF-TEST FAIL: an environmentally-RED node was not distinguished from an honest RED" >&2
     printf '%s\n' "$out" >&2; exit 1
   fi
-  # 4 fixtures considered, 3 checked: env-node must be excluded from the denominator, not
-  # merely failed. A guard that failed it while still counting it would leave the summary
-  # line claiming a node was verified that never ran its tests.
-  if ! printf '%s' "$out" | grep -q 'considered=4 checked=3'; then
-    echo "SELF-TEST FAIL: an environmentally-RED node was counted as checked" >&2
+  # corpus#33. Same shape as the env assertion above and for the same reason: the point is
+  # not that it failed, it is that it failed AS unreached and left the denominator.
+  if ! printf '%s' "$out" | grep -q 'skip cmake-unreached-node: the TESTS WERE NEVER REACHED'; then
+    echo "SELF-TEST FAIL: a cmake configure that never generated was not distinguished from an honest RED" >&2
+    printf '%s\n' "$out" >&2; exit 1
+  fi
+  # The control, and the load-bearing half: a rule that flagged any node cmake touched
+  # would pass the assertion above while making every cpp node permanently unverifiable.
+  if ! printf '%s' "$out" | grep -q 'ok cmake-reached-node: RED'; then
+    echo "SELF-TEST FAIL: a node whose configure COMPLETED was flagged as unreached" >&2
+    printf '%s\n' "$out" >&2; exit 1
+  fi
+  # 6 fixtures considered, 4 checked: env-node and cmake-unreached-node must be excluded
+  # from the denominator, not merely failed. A guard that failed one while still counting it
+  # would leave the summary line claiming a node was verified that never ran its tests.
+  if ! printf '%s' "$out" | grep -q 'considered=6 checked=4 skipped=1'; then
+    echo "SELF-TEST FAIL: a node that never reached its tests was counted as checked" >&2
     printf '%s\n' "$out" >&2; exit 1
   fi
   # The quarantine must not rot: a node listed as known-GREEN that is actually RED has
   # been fixed, and leaving it listed would silently shrink the gate's coverage forever.
   out2=""; rc2=0
-  out2="$(EXPECTED_NODES=4 CORPUS_ROOT="$tmp" KNOWN_GREEN_OVERRIDE="red-node green-node esc-node" \
+  out2="$(EXPECTED_NODES=6 CORPUS_ROOT="$tmp" KNOWN_GREEN_OVERRIDE="red-node green-node esc-node" \
           bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc2=$?
   if [[ $rc2 -eq 0 ]]; then
     echo "SELF-TEST FAIL: quarantining an honestly-RED node was accepted; the list can rot" >&2
@@ -267,11 +331,38 @@ if [[ "${1:-}" == "--self-test" ]]; then
     printf '%s\n' "$out3" >&2; exit 1
   fi
 
+  # corpus#33, property 1 — the one the quarantine list is defended by: "every entry is
+  # PRINTED on every run, so the gate's true coverage is never hidden". A skipped node that
+  # is only named when something else already failed hides exactly the coverage this
+  # closes, and both runs above FAIL, so neither can see the difference. This corpus is
+  # clean apart from one unreached node, so the sweep passes — and must still name it.
+  tmp3="$(mktemp -d)"
+  trap 'rm -rf "$tmp" "$tmp2" "$tmp3"' EXIT
+  mkdir -p "$tmp3/honest-red/seed" "$tmp3/quiet-unreached/seed"
+  printf 'id: honest-red\nlanguage: "python"\nfiles: ["s.py"]\naccept: "test -f solved.txt"\nforbid: []\n' > "$tmp3/honest-red/meta.yaml"
+  printf 'x = 1\n' > "$tmp3/honest-red/seed/s.py"
+  printf 'id: quiet-unreached\nlanguage: "python"\nfiles: ["s.py"]\naccept: "mkdir -p build && touch build/CMakeCache.txt && exit 1"\nforbid: []\n' > "$tmp3/quiet-unreached/meta.yaml"
+  printf 'x = 1\n' > "$tmp3/quiet-unreached/seed/s.py"
+  out4=""; rc4=0
+  out4="$(EXPECTED_NODES=2 CORPUS_ROOT="$tmp3" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc4=$?
+  if [[ $rc4 -ne 0 ]]; then
+    echo "SELF-TEST FAIL: a corpus whose only defect is an unreached node must still PASS — a" >&2
+    echo "host that cannot verify a node is not a broken corpus (rc=$rc4)" >&2
+    printf '%s\n' "$out4" >&2; exit 1
+  fi
+  if ! printf '%s' "$out4" | grep -q 'tests never reached.*quiet-unreached'; then
+    echo "SELF-TEST FAIL: a PASSING run did not name the node it could not verify — the gate's" >&2
+    echo "true coverage is hidden behind a green line" >&2
+    printf '%s\n' "$out4" >&2; exit 1
+  fi
+
   echo "RED-invariant self-test: PASS"
   echo "  - a GREEN node fails the sweep; an honestly-RED node does not"
   echo "  - a node that only reads GREEN once YAML escapes are resolved is still caught"
   echo "  - a stale quarantine entry (listed known-GREEN but actually RED) fails the sweep"
   echo "  - a node that is RED for an ENVIRONMENTAL reason fails, and is not counted as checked"
+  echo "  - a cmake configure that never generated is skipped as unreached, not counted, and"
+  echo "    named on a PASSING run; a node whose configure COMPLETED is still an honest RED"
   echo "  - the quarantine count and the names printed beside it describe the same set"
   exit 0
 fi
@@ -360,7 +451,7 @@ is_quarantined() {
 
 LANG_FILTER="${CORPUS_LANG:-}"
 fail=0; checked=0; skipped=0; considered=0; quarantined=0
-green_nodes=""; stale_quarantine=""; env_nodes=""; quarantined_nodes=""
+green_nodes=""; stale_quarantine=""; env_nodes=""; quarantined_nodes=""; unreached_nodes=""
 
 for node in "$CORPUS_ROOT"/*; do
   [[ -d "$node" ]] || continue
@@ -379,7 +470,8 @@ for node in "$CORPUS_ROOT"/*; do
   fi
 
   ACCEPT_LOG="$(mktemp)"
-  ec="$(run_accept "$node" "$acc" "$ACCEPT_LOG")"
+  ACCEPT_EVIDENCE="$(mktemp)"
+  ec="$(run_accept "$node" "$acc" "$ACCEPT_LOG" "$ACCEPT_EVIDENCE")"
   base="$(basename "$node")"
 
   # Before anything else: was this RED for an environmental reason? Checked ahead of the
@@ -389,10 +481,33 @@ for node in "$CORPUS_ROOT"/*; do
   env_reason=""
   if [[ "$ec" -ne 0 ]]; then env_reason="$(env_failure_of "$ACCEPT_LOG")"; fi
   rm -f "$ACCEPT_LOG"
+  # Only for a RED node: an accept that exited 0 reached its tests by definition, and a
+  # GREEN node is already a failure with its own message.
+  unreached_reason=""
+  if [[ "$ec" -ne 0 ]]; then unreached_reason="$(cat "$ACCEPT_EVIDENCE" 2>/dev/null)"; fi
+  rm -f "$ACCEPT_EVIDENCE"
   if [[ -n "$env_reason" ]]; then
     note "FAIL $base: accept exited $ec for an ENVIRONMENTAL reason, not an unimplemented stub — $env_reason"
     env_nodes="$env_nodes $base"
     fail=1
+    continue
+  fi
+  # SKIPPED, not FAILED — the issue offers "SKIPPED-or-BROKEN" and this is the half the
+  # CONTRACT already prescribes: a node whose dependency is absent is skipped, never failed.
+  # That is exactly what happened here; the only reason the toolchain gate did not fire is
+  # that `requires` carries executables on PATH and the missing dependency is a library.
+  # The defect this closes is the node being counted as VERIFIED, and it is closed either
+  # way: it leaves the denominator, its reason is printed on every run, and the vacuity
+  # guard below still fires if a whole shard lands here — which is what would answer,
+  # loudly, whether a runner carries the cpp dependencies at all.
+  #
+  # Flipping this to a hard failure is a one-line change (`fail=1` instead of the skip) and
+  # is the maintainer's call, not the checker's: it turns "this host cannot verify these
+  # nodes" into "the corpus is broken", and those are different claims.
+  if [[ -n "$unreached_reason" ]]; then
+    note "skip $base: the TESTS WERE NEVER REACHED — $unreached_reason"
+    unreached_nodes="$unreached_nodes $base"
+    skipped=$((skipped + 1))
     continue
   fi
 
@@ -426,6 +541,10 @@ if [[ $quarantined -gt 0 ]]; then
   # `quarantined=3` and then named six, and a count that disagrees with the list next to it
   # teaches the reader to trust neither.
   echo "  quarantined (known-GREEN, corpus#11/#16/#23 — the gate does NOT cover these):$quarantined_nodes"
+fi
+
+if [[ -n "$unreached_nodes" ]]; then
+  echo "  tests never reached (skipped, NOT verified — the toolchain stopped before compiling):$unreached_nodes"
 fi
 
 # Vacuity guard. Everything skipped is not a pass — it is a sweep that proved nothing, and
