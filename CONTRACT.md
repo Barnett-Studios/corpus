@@ -70,11 +70,17 @@ the first and an accept that *always* succeeds passes the second.
 
 Fail-open per node on toolchain (an absent `requires:` executable SKIPs, per the table above);
 fail-loud on vacuity (a sweep that checked nothing exits non-zero rather than reporting green over an
-empty set).
+empty set). A node whose toolchain **started and stopped before the tests** also SKIPs, for the same
+reason and by positive evidence rather than by a recognised error string: for cmake, a `build/`
+carrying `CMakeCache.txt` but no generated build file means the configure step failed, so nothing was
+compiled and no test was seen. `CMakeCache.txt` alone is not that evidence — cmake writes the cache
+before a `find_package` can fail. Such nodes are named on every run, passing or failing, and are
+excluded from `checked` (#33).
 
 **What a passing RED sweep does not establish.** It shows `accept` exits non-zero on the seed. It
 cannot distinguish "RED because the stub is unimplemented" from "RED because the toolchain never
-reached the tests". A broken-unsolvable node passes it. GREEN-reachability is `prove-solvable.sh`'s
+reached the tests" — except where the toolchain leaves positive evidence of how far it got, which
+today means cmake (#33). A broken-unsolvable node otherwise passes it. GREEN-reachability is `prove-solvable.sh`'s
 job and that covers only the 25-node clean subset, so the 225 Exercism nodes have their RED verified
 and their solvability unverified.
 
@@ -145,7 +151,8 @@ distribution digest that did not match, a missing wrapper jar — rather than pr
 RED`. An environmental RED is a runner problem being reported as a verified corpus invariant, and
 those nodes are excluded from `checked` as well as named. This narrows, but does not lift, the
 general limit stated at the top of `ci/verify-red-invariant.sh`: an accept that fails for a novel
-environmental reason still passes quietly (#14).
+environmental reason still passes quietly (#14) — unless it stops somewhere that leaves the positive
+evidence above, which does not depend on anyone having seen the failure before (#33).
 
 ## Consumption
 
