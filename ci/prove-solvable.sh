@@ -10,6 +10,10 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# One materializer, shared: the gates must build a work tree the way a LOADER does, or
+# they verify a shape no consumer ever sees (corpus#34).
+# shellcheck source-path=SCRIPTDIR source=lib/materialize.sh
+source "$HERE/lib/materialize.sh"
 SOL_ROOT="$HERE/solutions"
 CORPUS_ROOT="${CORPUS_ROOT:-}"
 [[ $# -ge 1 ]] && CORPUS_ROOT="$1"
@@ -25,6 +29,15 @@ have() { command -v "$1" >/dev/null 2>&1; }
 # the validity census (#14) then scored it BROKEN for exactly that reason — the only
 # hand-authored node whose GREEN-reachability nothing proved. `ci/solutions/py-add/calc.py`
 # closes it, so the clean subset is now proven end to end rather than 24/25 of it.
+#
+# corpus#34 amends that claim: the proof ran, but under a materialization no consumer
+# performs. py-add was the corpus's only legacy node, this script copied the whole node
+# directory for it — `probe.py` and all — and a contract-conforming loader writes only the
+# stub-plus-acceptance-test pair, so the reference solution failed for every consumer while
+# this line read `ok py-add: solution -> GREEN`. The clean subset was proven 24/25 plus one
+# node proven against the wrong loader. Both halves are fixed: the materialization is shared
+# and contract-conforming (`ci/lib/materialize.sh`), and py-add ships a `seed/` like the
+# other 249.
 CLEAN_GLOB=("$CORPUS_ROOT"/{go,java,python,rust}-0[1-6]-* "$CORPUS_ROOT"/py-add)
 
 accept_of() { sed -n 's/^accept: *"\(.*\)"$/\1/p' "$1/meta.yaml" | sed -n '1p'; }
@@ -62,9 +75,10 @@ for node in "${CLEAN_GLOB[@]}"; do
     note "skip $(basename "$node"): $lang toolchain absent"; continue
   fi
   acc="$(accept_of "$node")"
-  src="$node/seed"; [[ -d "$src" ]] || src="$node"
   work="$(mktemp -d)"
-  cp -R "$src/." "$work/"
+  if ! materialize_node "$node" "$work"; then
+    note "FAIL $(basename "$node"): cannot materialize"; fail=1; rm -rf "$work"; continue
+  fi
   # Overlay the language's reference solution over each editable file.
   read_files "$node"
   missing=0

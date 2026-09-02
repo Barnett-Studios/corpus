@@ -55,7 +55,14 @@ jobs:
           done
           [ "$missing" -eq 0 ] || { echo "a required toolchain is absent on the runner" >&2; exit 1; }
       - name: shellcheck the oracle scripts
-        run: shellcheck ci/verify-accept-oracle.sh ci/prove-solvable.sh ci/verify-oracle-sabotage.sh
+        # -x so the shared materializer is followed rather than reported unfollowable, and
+        # ci/verify-red-invariant.sh added: it was the one oracle script nothing linted, and
+        # it sources the same library (corpus#34).
+        run: >
+          shellcheck -x ci/verify-accept-oracle.sh ci/prove-solvable.sh
+          ci/verify-oracle-sabotage.sh ci/verify-red-invariant.sh ci/lib/materialize.sh
+      - name: materializer self-test (the gates build a work tree the way a loader does)
+        run: bash ci/lib/materialize.sh --self-test
       - name: accept-oracle invariant (exit-code oracle + no editable test)
         run: CORPUS_ROOT=red-baseline bash ci/verify-accept-oracle.sh
       - name: oracle-sabotage invariant (in-process sabotage cannot score GREEN)

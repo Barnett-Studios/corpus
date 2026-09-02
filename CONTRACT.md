@@ -40,7 +40,11 @@ Each node is a directory `red-baseline/<id>/`:
 ```
 
 Legacy nodes carry a flat `stub.<ext>` + `acceptance_test.<ext>` pair instead of `seed/`; loaders
-synthesize the seed from that pair.
+synthesize the seed from that pair — **exactly that pair**, so a legacy node whose accept needs a
+third file cannot be solved by any conforming loader. The corpus ships **no legacy node today**
+(`py-add`, the last one, moved to `seed/` in corpus#34 after acquiring a required `probe.py`), and
+the gates materialize the pair the way this paragraph describes rather than by copying the node
+directory, so the shape stays verified the day one arrives.
 
 `meta.yaml`:
 

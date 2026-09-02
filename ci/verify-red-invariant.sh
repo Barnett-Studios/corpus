@@ -42,6 +42,10 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# One materializer, shared: the gates must build a work tree the way a LOADER does, or
+# they verify a shape no consumer ever sees (corpus#34).
+# shellcheck source-path=SCRIPTDIR source=lib/materialize.sh
+source "$HERE/lib/materialize.sh"
 ACCEPT_TIMEOUT="${ACCEPT_TIMEOUT:-600}"
 
 note() { printf '  %s\n' "$1"; }
@@ -105,10 +109,9 @@ toolchain_ok() {
 # different oracle from the one abproof actually uses. This check must observe exactly
 # what the harness observes, warts included.
 run_accept() {
-  local node="$1" acc="$2" log="$3" src work ec=0
-  src="$node/seed"; [[ -d "$src" ]] || src="$node"
+  local node="$1" acc="$2" log="$3" work ec=0
   work="$(mktemp -d)"
-  cp -R "$src/." "$work/"
+  materialize_node "$node" "$work" || { rm -rf "$work"; printf '%s' 90; return 0; }
   if have timeout; then
     ( set +o pipefail; cd "$work" && timeout "$ACCEPT_TIMEOUT" bash -c "$acc" >"$log" 2>&1 ) || ec=$?
   else
