@@ -27,6 +27,8 @@ mkdir -p "$CENSUS_WORK"
 export PATH="$PATH:/opt/homebrew/bin"
 
 CORPUS="$CORPUS_ROOT"
+# shellcheck source-path=SCRIPTDIR source=../lib/materialize.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/materialize.sh"
 LANG_FILTER="${1:?usage: sweep.sh <language> [outdir]}"
 OUT="${2:-$CENSUS_WORK/census-runs}"
 TIMEOUT_S="${ACCEPT_TIMEOUT:-600}"
@@ -80,7 +82,12 @@ run_one() {
   local node="$1" acc="$2" tag="$3" repair="$4" ex="$5"
   local work rc start end
   work="$(mktemp -d)"
-  cp -R "$node/seed/." "$work/" 2>/dev/null || cp -R "$node/." "$work/"
+  # corpus#34: the `|| cp -R "$node/."` fallback materialized a LEGACY node by copying
+  # its whole directory, which is a shape no loader produces. The shared materializer
+  # builds what CONTRACT.md tells a loader to build.
+  if ! materialize_node "$node" "$work"; then
+    echo "cannot materialize $node" >&2; rm -rf "$work"; return 1
+  fi
   if [ "$repair" = yes ]; then
     perl -pi -e "s|^get_filename_component\(exercise .*\$|set(exercise \"$ex\")|" "$work/CMakeLists.txt" 2>/dev/null
   fi

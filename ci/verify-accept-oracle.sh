@@ -24,6 +24,10 @@
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# One materializer, shared: the gates must build a work tree the way a LOADER does, or
+# they verify a shape no consumer ever sees (corpus#34).
+# shellcheck source-path=SCRIPTDIR source=lib/materialize.sh
+source "$HERE/lib/materialize.sh"
 CORPUS_ROOT="${CORPUS_ROOT:-}"
 [[ $# -ge 1 ]] && CORPUS_ROOT="$1"
 if [[ -z "$CORPUS_ROOT" ]]; then
@@ -405,9 +409,10 @@ for node in "${CLEAN_GLOB[@]}"; do
     note "skip $(basename "$node"): $lang toolchain absent"; continue
   fi
   acc="$(accept_of "$node")"
-  src="$node/seed"; [[ -d "$src" ]] || src="$node"
   work="$(mktemp -d)"
-  cp -R "$src/." "$work/"
+  if ! materialize_node "$node" "$work"; then
+    note "FAIL $(basename "$node"): cannot materialize"; fail=1; rm -rf "$work"; continue
+  fi
   ec=0; ( set +o pipefail; cd "$work" && eval "$acc" >/dev/null 2>&1 ) || ec=$?
   if [[ $ec -eq 0 ]]; then
     note "FAIL $(basename "$node"): seed scored GREEN (exit 0) — not RED"; fail=1; c_fail=1

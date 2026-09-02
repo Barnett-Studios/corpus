@@ -11,6 +11,8 @@
 #
 # Usage: prove-green.sh <language>
 set -uo pipefail
+# shellcheck source-path=SCRIPTDIR source=../lib/materialize.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/lib/materialize.sh"
 # Paths: CENSUS_WORK holds the run artefacts (sweep logs, green-proof logs, upstream
 # track clones). It defaults to .census-work/ beside the repo, so nothing lands in the
 # repo tree. CORPUS_ROOT defaults to the repo's own red-baseline/.
@@ -143,7 +145,11 @@ for node in "$C"/*; do
   case "$slug" in 0[1-6]-*) printf '%s\t%s\t%s\t%s\n' "$base" "$lang" "KATA" "hand-authored: covered by ci/prove-solvable.sh" >> "$OUT/$LANG_F.tsv"; continue ;; esac
 
   w="$(mktemp -d)"
-  cp -R "$node/seed/." "$w/"
+  # corpus#34. No fallback here at all: for a legacy node this left `$w` EMPTY and the
+  # green proof scored whatever an empty tree scores. Materialize the way a loader does.
+  if ! materialize_node "$node" "$w"; then
+    echo "cannot materialize $node" >&2; return 1
+  fi
   NODE_FILES="$(sed -n 's/^files: *\[\(.*\)\].*/\1/p' "$node/meta.yaml" | sed -n '1p' | tr ',' ' ' | tr -d '"')"
   export NODE_FILES
   why="$(overlay "$w" "$lang" "$slug")"
