@@ -49,6 +49,31 @@ MUST_FIRE = [
     "red-baseline/cpp-allergies/seed/NOTICE",
 ]
 
+# The names this registry is allowed to declare — a hand-written specification, exactly like
+# MUST_FIRE, and for the same reason: it states what the file MUST say rather than reporting
+# what it happens to say.
+#
+# `detect_hitl::merge` keys the union by name, so a repo entry sharing a baseline entry's name
+# REPLACES it rather than adding to it. The baseline `license-or-ip-grant` carries nine patterns
+# and this one carries four, so a rename to that name would silently drop `COPYING`,
+# `THIRD-PARTY-LICENSES.md`, `about.toml`, `Cargo.toml`, `^attribution/`, `^agents/.*\.md$` and
+# `^skills/.*/SKILL\.md$` — 37 tracked files in this repo, every `red-baseline/rust-*/seed/
+# Cargo.toml` among them — while both CI steps still printed `checkpoints ok`. Measured, on the
+# tree, at the head this check was added to.
+#
+# A rename is a reasonable thing for a contributor to want; the point is that it must be a
+# deliberate two-line edit here rather than a one-line tidy-up in the YAML.
+ALLOWED_NAMES = {"corpus-redistribution"}
+
+# Names owned by the installed baseline registry. Colliding with one of these is the specific
+# failure above and gets its own message, because "unexpected name" would send the next reader
+# looking for a typo rather than for a silently narrowed gate.
+BASELINE_NAMES = {
+    "license-or-ip-grant",
+    "agent-instructions-self-mod",
+    "destructive-ops",
+}
+
 # The other half of a coverage claim. A registry matching everything would satisfy MUST_FIRE
 # completely and be worthless — a gate that fires on every commit is a gate nobody reads.
 MUST_NOT_FIRE = [
@@ -89,6 +114,19 @@ def check_shape(cps):
         name = cp.get("name")
         if not name:
             raise Failure("a checkpoint has no `name`; it cannot be acked, so it cannot be used")
+        if name in BASELINE_NAMES:
+            raise Failure(
+                f"{name}: this name belongs to the installed baseline registry, and "
+                f"detect_hitl::merge keys the union by name — declaring it here REPLACES the "
+                f"baseline entry instead of adding to it, narrowing the gate to this file's "
+                f"patterns alone. Use a name of this repo's own: {sorted(ALLOWED_NAMES)}."
+            )
+        if name not in ALLOWED_NAMES:
+            raise Failure(
+                f"{name}: not in ALLOWED_NAMES {sorted(ALLOWED_NAMES)}. The name is load-bearing "
+                f"(see the comment there), so renaming a checkpoint is a deliberate edit in both "
+                f"places, not a one-line tidy-up in the YAML."
+            )
         for field in ("summary", "standards_doc"):
             if not cp.get(field):
                 raise Failure(f"{name}: missing `{field}` — a fired gate must say what governs it")
@@ -195,6 +233,15 @@ def self_test():
         ("the checkpoint list is emptied",
          lambda t: t[: t.index("checkpoints:")] + "checkpoints: []\n"),
         ("the version is unrecognised", lambda t: t.replace('version: "1"', 'version: "99"')),
+        # The mutation that passed both CI steps before this head. `license-or-ip-grant` is the
+        # baseline entry whose nine patterns cover 263 files here; replacing it with this one's
+        # four drops 37 of them, with `checkpoints ok` on stdout either way.
+        ("the name collides with a baseline entry",
+         lambda t: t.replace("corpus-redistribution", "license-or-ip-grant")),
+        # And the general form: any rename, not only a colliding one. Without this, a check that
+        # only knew BASELINE_NAMES would wave through `corpus-redistributionn`.
+        ("the name is changed to one nobody owns",
+         lambda t: t.replace("corpus-redistribution", "corpus-redistribution-v2")),
     ]
 
     survived = []
