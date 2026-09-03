@@ -1,0 +1,49 @@
+version: "1"
+checkpoints:
+  # corpus#1 — the tripwire on what this repo redistributes.
+  #
+  # WHY NOT NAMED `license-or-ip-grant`. The founder decision asked for that name. The framework
+  # merges a repo-local registry over the installed baseline BY NAME (`detect_hitl::merge` — a
+  # repo entry whose name matches a global one REPLACES it), so a local `license-or-ip-grant`
+  # listing this repo's paths would have DELETED the baseline entry's coverage here. Measured on
+  # this tree with the installed gate, before writing anything:
+  #
+  #   red-baseline/py-add/seed/LICENSE  -> license-or-ip-grant   (already covered)
+  #   red-baseline/py-add/seed/NOTICE   -> license-or-ip-grant   (already covered)
+  #   LICENSE                           -> license-or-ip-grant   (already covered)
+  #   MANIFEST.tsv                      -> NOTHING               <- the real gap
+  #   ATTRIBUTION.md                    -> NOTHING               <- the real gap
+  #
+  # The baseline's `(^|/)LICENSE([-.].*)?$` is unanchored at the front, so it already matches at
+  # any depth — three of the four paths the decision names were covered. Taking its name would
+  # have traded that away to add two. A distinct name only ever ADDS, so the gate cannot be
+  # narrowed by this file and the baseline keeps applying and keeps evolving.
+  #
+  # The LICENSE/NOTICE patterns are repeated here anyway, deliberately. When the installed
+  # baseline is absent — a contributor without the framework at `$BASEPLATE_HOME`, where
+  # `detect-hitl` reports "global HITL baseline INACTIVE (only a repo-local
+  # .dotclaude/checkpoints.yaml applies)" — this file is the whole gate, and the highest-exposure
+  # paths in the repo should not depend on someone else's install. Where both are active a
+  # LICENSE change fires twice and needs two acks, which is the correct amount of friction for
+  # the least reversible change this repo can make.
+  - name: corpus-redistribution
+    summary: "Changing what this corpus redistributes, or the record of where it came from"
+    standards_doc: "ATTRIBUTION.md"
+    # Path-mode, never content-mode. CLAUDE.md is explicit that a content denylist is
+    # best-effort against an honest operator and not an adversarial control; a licence tripwire
+    # has no business claiming to be one. These are file identities, which is the robust half.
+    paths:
+      # The provenance record itself. `seed_license` moved from file-presence derivation to the
+      # declaration in PR #36, which means the manifest IS the assertion now — and an assertion
+      # nothing watches is how the first version of this defect happened. Neither of these is
+      # covered by the installed baseline; they are the whole reason this file exists.
+      - "(^|/)MANIFEST\\.tsv$"
+      - "(^|/)ATTRIBUTION\\.md$"
+      # The grant, the per-node notices (225 of 250 nodes ship one), and the notices for bundled
+      # third-party material (Catch2 BSL-1.0, the Gradle wrapper Apache-2.0) that LICENSE carves
+      # out. Unanchored at the front on purpose: this reaches `red-baseline/<node>/seed/LICENSE`
+      # at any depth, which is why there is no separate per-node pattern here. The first draft
+      # had one and `--self-test` caught it as dead weight — dropping it changed nothing, because
+      # this line already did the work.
+      - "(^|/)LICENSE([-.].*)?$"
+      - "(^|/)NOTICE$"
