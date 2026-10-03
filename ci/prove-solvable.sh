@@ -68,12 +68,15 @@ if [[ $found_katas -ne $EXPECTED_KATAS ]]; then
   exit 2
 fi
 
+ran=0
+skipped=0
 for node in "${CLEAN_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   lang="$(language_of "$node")"
   if [[ "$(toolchain_ok "$lang")" == no ]]; then
-    note "skip $(basename "$node"): $lang toolchain absent"; continue
+    note "skip $(basename "$node"): $lang toolchain absent"; skipped=$((skipped + 1)); continue
   fi
+  ran=$((ran + 1))
   acc="$(accept_of "$node")"
   work="$(mktemp -d)"
   if ! materialize_node "$node" "$work"; then
@@ -102,8 +105,19 @@ for node in "${CLEAN_GLOB[@]}"; do
   rm -rf "$work"
 done
 
+# Vacuity guard (corpus#35): every toolchain absent left $fail at its initial 0, and
+# "GREEN spot-check: PASS" reported a positive claim about 25 nodes none of which were
+# materialized or run — the same shape the sibling scripts already refuse (see
+# verify-oracle-sabotage.sh, verify-red-invariant.sh).
+if [[ $ran -eq 0 ]]; then
+  echo "no nodes ran (every toolchain absent?) — refusing to report PASS" >&2
+  exit 2
+fi
+
 if [[ $fail -ne 0 ]]; then
   echo "GREEN spot-check: FAIL" >&2
   exit 1
 fi
-echo "GREEN spot-check: PASS"
+# The count, not a bare PASS: a partial run (some toolchains absent) and a full run both
+# printed the identical line otherwise — 7 of 25 checked read exactly like 25 of 25.
+echo "GREEN spot-check: PASS ($ran of $((ran + skipped)) checked, $skipped skipped)"

@@ -402,12 +402,14 @@ fi
 
 echo "== check C: every clean-subset seed scores non-zero (RED) under its accept =="
 c_fail=0
+c_ran=0
 for node in "${CLEAN_GLOB[@]}"; do
   [[ -d "$node" ]] || continue
   lang="$(language_of "$node")"
   if [[ "$(toolchain_ok "$lang")" == no ]]; then
     note "skip $(basename "$node"): $lang toolchain absent"; continue
   fi
+  c_ran=$((c_ran + 1))
   acc="$(accept_of "$node")"
   work="$(mktemp -d)"
   if ! materialize_node "$node" "$work"; then
@@ -429,7 +431,14 @@ for node in "${CLEAN_GLOB[@]}"; do
   fi
   rm -rf "$work"
 done
-[[ $c_fail -eq 0 ]] && note "ok: all seeds RED (and rust survives an emptied editable file)"
+# Vacuity guard (corpus#35): every toolchain absent left c_fail at its initial 0, and
+# "ok: all seeds RED" reported a positive claim about seeds none of which were run — the
+# same shape checks E/F/G already guard against, on this one left unguarded.
+if [[ $c_ran -eq 0 ]]; then
+  note "FAIL: check C matched no clean-subset node with a toolchain present — refusing to report PASS"; fail=1; c_fail=1
+elif [[ $c_fail -eq 0 ]]; then
+  note "ok: all $c_ran seeds RED (and rust survives an emptied editable file)"
+fi
 
 if [[ $fail -ne 0 ]]; then
   echo "accept-oracle invariant: FAIL" >&2
