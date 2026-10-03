@@ -32,7 +32,10 @@ check_tag() {
     echo "release tag '$tag': no VERSION file at that commit (git show '$tag:VERSION' failed)" >&2
     return 1
   fi
-  actual="$(printf '%s' "$actual" | tr -d '[:space:]')"
+  # Trim surrounding whitespace only (CRLF, trailing newline); interior whitespace
+  # makes it a different, malformed version and must not match.
+  actual="${actual#"${actual%%[![:space:]]*}"}"
+  actual="${actual%"${actual##*[![:space:]]}"}"
   if [[ "$actual" != "$expected" ]]; then
     echo "release tag '$tag' does not match its own VERSION: tag implies '$expected', VERSION at that commit reads '$actual'" >&2
     return 1
@@ -81,6 +84,25 @@ if [[ "${1:-}" == "--self-test" ]]; then
     echo "SELF-TEST FAIL: wrong diagnostic for the mismatch: $out" >&2
     exit 1
   fi
+  # Surrounding whitespace (CRLF, trailing newline) is formatting, not version.
+  printf '0.5.0\r\n\n' > "$tmp/VERSION"
+  git -C "$tmp" add VERSION
+  git -C "$tmp" commit -q -m "0.5.0 with CRLF"
+  git -C "$tmp" tag -m "v0.5.0" v0.5.0
+  if ! check_tag v0.5.0 "$tmp" > /dev/null; then
+    echo "SELF-TEST FAIL: a VERSION with only surrounding whitespace was rejected" >&2
+    exit 1
+  fi
+  # ...but whitespace INSIDE the version is a different version, not formatting.
+  echo "0. 6.0" > "$tmp/VERSION"
+  git -C "$tmp" add VERSION
+  git -C "$tmp" commit -q -m "malformed 0. 6.0"
+  git -C "$tmp" tag -m "v0.6.0" v0.6.0
+  if check_tag v0.6.0 "$tmp" > /dev/null 2>&1; then
+    echo "SELF-TEST FAIL: VERSION '0. 6.0' was accepted as v0.6.0" >&2
+    exit 1
+  fi
+
   echo "release-tag self-test: PASS"
   exit 0
 fi

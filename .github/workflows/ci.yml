@@ -163,4 +163,6 @@ jobs:
         run: bash ci/verify-release-tag.sh --self-test
       - name: this tag matches its own VERSION
         if: startsWith(github.ref, 'refs/tags/v')
-        run: bash ci/verify-release-tag.sh "${{ github.ref_name }}" .
+        env:
+          TAG: ${{ github.ref_name }}
+        run: bash ci/verify-release-tag.sh "$TAG" .
