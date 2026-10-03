@@ -80,7 +80,12 @@ the first and an accept that *always* succeeds passes the second.
 
 Fail-open per node on toolchain (an absent `requires:` executable SKIPs, per the table above);
 fail-loud on vacuity (a sweep that checked nothing exits non-zero rather than reporting green over an
-empty set). A node whose toolchain **started and stopped before the tests** also SKIPs, for the same
+empty set). The same rule now holds for every behavioural check in `verify-accept-oracle.sh` and for
+`prove-solvable.sh`'s own sweep (corpus#35) — an environment with every language toolchain absent used
+to let check C's "all seeds RED" and `prove-solvable.sh`'s "GREEN spot-check: PASS" report
+affirmatively over zero seeds actually run; both now refuse, and `prove-solvable.sh`'s PASS line
+carries the checked/skipped count so a partial run cannot read as a full one. A node whose toolchain
+**started and stopped before the tests** also SKIPs, for the same
 reason and by positive evidence rather than by a recognised error string: for cmake, a `build/`
 carrying `CMakeCache.txt` but no generated build file means the configure step failed, so nothing was
 compiled and no test was seen. `CMakeCache.txt` alone is not that evidence — cmake writes the cache
