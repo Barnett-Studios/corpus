@@ -26,6 +26,12 @@ Composition changes are deliberately breaking: a battery whose membership shifte
 that must not be compared to the previous one, and a version that says so is the cheapest way to
 stop someone doing it by accident.
 
+Mechanically checked, not just promised: pushing a `v*` tag runs `ci/verify-release-tag.sh`
+against it, which fails the build if `VERSION` at that tag's commit does not equal the tag name
+(corpus#30 — `v0.2.0` was cut from a stale number and nothing compared the two until this landed).
+It cannot stop a bad tag from being pushed, only turn the mismatch into an immediate CI failure
+instead of a silent one.
+
 ## Per-node shape: `{meta, seed, RED}`
 
 Each node is a directory `red-baseline/<id>/`:

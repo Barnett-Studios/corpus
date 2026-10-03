@@ -138,3 +138,29 @@ jobs:
           command -v "$t" >/dev/null 2>&1 || { echo "$t missing on the runner" >&2; exit 1; }
       - name: every ${{ matrix.language }} node is RED at HEAD
         run: CORPUS_ROOT=red-baseline CORPUS_LANG=${{ matrix.language }} bash ci/verify-red-invariant.sh
+
+  # corpus#30 — CONTRACT.md's Versioning section promises "every release carries a
+  # matching v<version> tag." v0.2.0 broke that silently (tagged 0.2.0, VERSION already
+  # read 0.4.0) and nothing noticed because nothing compared the two. This cannot stop
+  # the tag from being pushed — it runs after the push, like every other job here — but
+  # it turns the mismatch into an immediate, loud CI failure on the tag event itself
+  # rather than a gap nothing can describe until a consumer pins it and gets the wrong
+  # tree.
+  release-tag:
+    name: release-tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      # Unconditional: a checker that only ever runs on the rare tag push is a checker
+      # nobody has watched execute on an ordinary PR. shellcheck + the self-test run on
+      # every push/PR; only the real tag comparison below is specific to a tag ref.
+      - name: shellcheck the checker
+        run: shellcheck ci/verify-release-tag.sh
+      - name: the checker bites (self-test)
+        run: bash ci/verify-release-tag.sh --self-test
+      - name: this tag matches its own VERSION
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: bash ci/verify-release-tag.sh "${{ github.ref_name }}" .
