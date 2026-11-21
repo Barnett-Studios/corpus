@@ -171,8 +171,13 @@ gradle_unreached_of() {
   local acc="$1" log="$2"
   case "$acc" in *gradlew*) ;; *) return 0 ;; esac
   [[ -f "$log" ]] || return 0
-  if grep -qE '^> Task :(test|compileJava|compileTestJava) FAILED' "$log" 2>/dev/null; then return 0; fi
-  printf 'gradle never reached the tests or compiled the sources (no failed :test/:compileJava/:compileTestJava task in the log) — a JDK or wrapper startup failure, not an unimplemented stub'
+  # Both lines, not either: the task line can be echoed by the code under test, but Gradle's own
+  # `BUILD FAILED` summary is what proves the build ran to a verdict. `([^ ]+:)?` admits a
+  # subproject path (`:app:test`). A node killed by its timeout prints neither and fails here
+  # as ENVIRONMENTAL on purpose: a hang is not evidence that the stub is unimplemented.
+  if grep -qE '^> Task :([^ ]+:)?(test|compileJava|compileTestJava) FAILED' "$log" 2>/dev/null \
+     && grep -qE '^BUILD FAILED' "$log" 2>/dev/null; then return 0; fi
+  printf 'gradle never reached the tests or compiled the sources (no failed :test/:compileJava/:compileTestJava task with a BUILD FAILED summary in the log) — a JDK or wrapper startup failure, not an unimplemented stub'
 }
 
 # A non-zero exit that came from the ENVIRONMENT, not from the unimplemented stub. Echoes
@@ -383,19 +388,22 @@ if [[ "${1:-}" == "--self-test" ]]; then
   # Under $tmp3, whose fixtures are finished by now, so the existing trap cleans it up.
   tmp4="$tmp3/gradle"; mkdir -p "$tmp4"
   for spec in "java-startup-node|echo 'Error occurred during initialization of VM'; exit 1" \
-              "java-test-red-node|echo '> Task :test FAILED'; exit 1" \
-              "java-compile-red-node|echo '> Task :compileJava FAILED'; exit 1"; do
+              "java-marker-only-node|echo '> Task :test FAILED'; exit 1" \
+              "java-test-red-node|echo '> Task :test FAILED'; echo 'BUILD FAILED in 3s'; exit 1" \
+              "java-subproject-red-node|echo '> Task :app:test FAILED'; echo 'BUILD FAILED in 3s'; exit 1" \
+              "java-compile-red-node|echo '> Task :compileJava FAILED'; echo 'BUILD FAILED in 2s'; exit 1"; do
     id="${spec%%|*}"; mkdir -p "$tmp4/$id/seed"
     printf 'id: %s\nlanguage: "python"\nfiles: ["s.py"]\naccept: "touch gradlew; %s"\nforbid: []\n' "$id" "${spec#*|}" > "$tmp4/$id/meta.yaml"
     printf 'x = 1\n' > "$tmp4/$id/seed/s.py"
   done
   out5=""; rc5=0
-  out5="$(EXPECTED_NODES=3 CORPUS_ROOT="$tmp4" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc5=$?
-  if [[ $rc5 -eq 0 ]] || ! printf '%s' "$out5" | grep -q 'FAIL java-startup-node: accept exited 1 for an ENVIRONMENTAL reason'; then
+  out5="$(EXPECTED_NODES=5 CORPUS_ROOT="$tmp4" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc5=$?
+  if [[ $rc5 -eq 0 ]] || ! printf '%s' "$out5" | grep -q 'FAIL java-startup-node: accept exited 1 for an ENVIRONMENTAL reason' \
+     || ! printf '%s' "$out5" | grep -q 'FAIL java-marker-only-node: accept exited 1 for an ENVIRONMENTAL reason'; then
     echo "SELF-TEST FAIL: a gradle node that failed before any test or compile task ran was not reported as environmental" >&2
     printf '%s\n' "$out5" >&2; exit 1
   fi
-  for ok in java-test-red-node java-compile-red-node; do
+  for ok in java-test-red-node java-subproject-red-node java-compile-red-node; do
     if ! printf '%s' "$out5" | grep -q "ok $ok: RED"; then
       echo "SELF-TEST FAIL: a gradle node that reached its tests or compile was not an honest RED ($ok)" >&2
       printf '%s\n' "$out5" >&2; exit 1
