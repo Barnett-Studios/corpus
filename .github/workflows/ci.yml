@@ -126,6 +126,13 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
+      # corpus#47: the runner's default JDK moved with ubuntu-latest and Gradle 8.7 died at
+      # startup on it. Pin the JDK the wrapper is verified against, for the java shard only.
+      - if: matrix.language == 'java'
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21'
       # The sweep fails LOUD rather than skipping: a shard whose toolchain is missing
       # would otherwise report a green sweep over nothing (the script's vacuity guard
       # exits 2, but requiring the tool here names the cause).
