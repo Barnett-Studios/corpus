@@ -158,6 +158,23 @@ unreached_tests_of() {
   printf 'cmake wrote %s but generated no build file beside it — the configure step failed, so nothing was compiled and no test was ever seen' "${cache#"$work"/}"
 }
 
+# POSITIVE evidence for the gradle-wrapper nodes (corpus#47), the java counterpart of
+# `unreached_tests_of`. `env_failure_of` is a denylist, and on ubuntu-26.04 Gradle 8.7 died
+# at startup with a signature on no list, so 51 java nodes read `ok … RED` untested. This asks
+# the other question: did Gradle reach the code under test? Gradle prints `> Task :<name>
+# FAILED` for the task that broke the build, so a RED counts only when that task is the test
+# run or a compile of the node's own sources. Measured on Gradle 8.7 / Temurin 21: a stub
+# prints `> Task :test FAILED`, a syntax error prints `> Task :compileJava FAILED`, and a
+# startup failure prints no task line at all. Echoes a reason, or nothing. Only accepts that
+# invoke the wrapper are judged; the six plain `javac` nodes have no such log shape.
+gradle_unreached_of() {
+  local acc="$1" log="$2"
+  case "$acc" in *gradlew*) ;; *) return 0 ;; esac
+  [[ -f "$log" ]] || return 0
+  if grep -qE '^> Task :(test|compileJava|compileTestJava) FAILED' "$log" 2>/dev/null; then return 0; fi
+  printf 'gradle never reached the tests or compiled the sources (no failed :test/:compileJava/:compileTestJava task in the log) — a JDK or wrapper startup failure, not an unimplemented stub'
+}
+
 # A non-zero exit that came from the ENVIRONMENT, not from the unimplemented stub. Echoes
 # a reason, or nothing.
 #
@@ -359,6 +376,32 @@ if [[ "${1:-}" == "--self-test" ]]; then
     printf '%s\n' "$out4" >&2; exit 1
   fi
 
+  # corpus#47. A gradle-wrapper node that dies before any test or compile task ran must
+  # FAIL as environmental — a denylist cannot name a startup error nobody has seen. The
+  # controls are the two shapes a genuine RED has; flagging them would make the whole java
+  # shard unverifiable.
+  # Under $tmp3, whose fixtures are finished by now, so the existing trap cleans it up.
+  tmp4="$tmp3/gradle"; mkdir -p "$tmp4"
+  for spec in "java-startup-node|echo 'Error occurred during initialization of VM'; exit 1" \
+              "java-test-red-node|echo '> Task :test FAILED'; exit 1" \
+              "java-compile-red-node|echo '> Task :compileJava FAILED'; exit 1"; do
+    id="${spec%%|*}"; mkdir -p "$tmp4/$id/seed"
+    printf 'id: %s\nlanguage: "python"\nfiles: ["s.py"]\naccept: "touch gradlew; %s"\nforbid: []\n' "$id" "${spec#*|}" > "$tmp4/$id/meta.yaml"
+    printf 'x = 1\n' > "$tmp4/$id/seed/s.py"
+  done
+  out5=""; rc5=0
+  out5="$(EXPECTED_NODES=3 CORPUS_ROOT="$tmp4" bash "$HERE/verify-red-invariant.sh" 2>&1)" || rc5=$?
+  if [[ $rc5 -eq 0 ]] || ! printf '%s' "$out5" | grep -q 'FAIL java-startup-node: accept exited 1 for an ENVIRONMENTAL reason'; then
+    echo "SELF-TEST FAIL: a gradle node that failed before any test or compile task ran was not reported as environmental" >&2
+    printf '%s\n' "$out5" >&2; exit 1
+  fi
+  for ok in java-test-red-node java-compile-red-node; do
+    if ! printf '%s' "$out5" | grep -q "ok $ok: RED"; then
+      echo "SELF-TEST FAIL: a gradle node that reached its tests or compile was not an honest RED ($ok)" >&2
+      printf '%s\n' "$out5" >&2; exit 1
+    fi
+  done
+
   echo "RED-invariant self-test: PASS"
   echo "  - a GREEN node fails the sweep; an honestly-RED node does not"
   echo "  - a node that only reads GREEN once YAML escapes are resolved is still caught"
@@ -366,6 +409,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
   echo "  - a node that is RED for an ENVIRONMENTAL reason fails, and is not counted as checked"
   echo "  - a cmake configure that never generated is skipped as unreached, not counted, and"
   echo "    named on a PASSING run; a node whose configure COMPLETED is still an honest RED"
+  echo "  - a gradle node that failed before any test/compile task ran fails as environmental"
   echo "  - the quarantine count and the names printed beside it describe the same set"
   exit 0
 fi
@@ -482,7 +526,10 @@ for node in "$CORPUS_ROOT"/*; do
   # known-GREEN but is RED", sending the reader to delete a quarantine entry over a
   # network outage.
   env_reason=""
-  if [[ "$ec" -ne 0 ]]; then env_reason="$(env_failure_of "$ACCEPT_LOG")"; fi
+  if [[ "$ec" -ne 0 ]]; then
+    env_reason="$(env_failure_of "$ACCEPT_LOG")"
+    [[ -n "$env_reason" ]] || env_reason="$(gradle_unreached_of "$acc" "$ACCEPT_LOG")"
+  fi
   rm -f "$ACCEPT_LOG"
   # Only for a RED node: an accept that exited 0 reached its tests by definition, and a
   # GREEN node is already a failure with its own message.
